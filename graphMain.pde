@@ -2,7 +2,7 @@ import java.lang.Math;
 import java.text.DecimalFormat;
 DecimalFormat df = new DecimalFormat("#.0");
 int maximum = -100;
-double scaleX = 300; //10 = 10x zoom OUT
+double scaleX = 1; //10 = 10x zoom OUT
 double scaleY = 1;
 int count = 0;
 float timescale = 0.12; // 0.2 ---> 5x slower
