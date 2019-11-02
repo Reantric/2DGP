@@ -14,35 +14,37 @@ import numpy as np
 # .
 # .
 
-numOfDataPoints = 20
+numOfDataPoints = 51
 
-def espace(lst):
-   # print(lst)
-    diff = 0
-    n = int(numOfDataPoints/(len(lst)-1)) #fix edge case! #if n is 20 and we got 4 items, div to 6.666666
+#len(lst) - 2 will give you the amount of duplicates!
+def espace(dataLst,n):
+    #fix edge case! #if n is 20 and we got 4 items, div to 6.666666
+    nMod = numOfDataPoints % (len(dataLst)-1)
     #print(f"New n is {n}")
+  #  print(n,nMod)
     dataPointY = np.zeros(0)
-    for coords in range(len(lst)-1):
-        diff += n/(len(lst)-1)
-        if diff > (n - len(lst) - 1):
-          #  print("alright. I have arrived !")
-          pass
-        y1,y2 = lst[coords][1],lst[coords+1][1]
+    for coords in range(len(dataLst)-1):
+
+        if coords == len(dataLst) - 1 - nMod:
+            n += 1
+            print(f"This should be printed approximately {nMod} times!")
+        y1,y2 = dataLst[coords][1],dataLst[coords+1][1]
        # print(y1,y2)
         #linspace [start,stop]
         firstWaveY = np.linspace(y1,y2,n)
         dataPointY = np.concatenate((dataPointY, firstWaveY))
 
-    for m in range(len(lst)-1):
-        if m == len(lst) - 2:
+    #only separate if this is run more than once!, how to add 1 more to list??
+    for m in range(len(dataLst)-1):
+        if m == len(dataLst) - 2:
             dataPointY = np.delete(dataPointY,n*m)
         else:
             np.delete(dataPointY, n * m)
 
 
-    print(len(dataPointY))  # quick check: 20 if 3 entries!
+   # print(len(dataPointY))  # quick check: 20 if 3 entries!
     return dataPointY
-    # dataPointY = [np.delete(dataPointY,10*m) for m in range(len(lst)-1)][-1] horribly inefficient fix!
+    # dataPointY = [np.delete(dataPointY,10*m) for m in range(len(dataLst)-1)][-1] horribly inefficient fix!
 
 
 
@@ -72,16 +74,21 @@ with open("C:\\Users\\arnav\\Desktop\\graphProj\\test.txt", mode='r+') as f:
 f.close()
 
 #print(numOfDataPoints)
-x = np.linspace(xMin,xMax,numOfDataPoints - (len(d[key[0]])-2))
+numOfDataPoints += (len(d[key[0]])-2)
+x = np.linspace(xMin,xMax,numOfDataPoints - (len(d[key[0]])-2)) #it does work!
+n = int(numOfDataPoints/(len(d[key[0]])-1)) #n defined here!
+
+print(f"Val of n: {n}")
 #print("AAAAAAAAAA")
-#print(len(x))
+print(f"Length of x: {len(x)}")
 # {john: [(x1,y1),(x2,y2)], shishir: [(x1,y1),()]
 
 with open("C:\\Users\\arnav\\Desktop\\graphProj\\datas.txt", mode='w+') as f:
     f.write(' '.join(key))
     for k in key:
         # print(d[k])
-        y = espace(d[k])
+        y = espace(d[k],n)
+        print(f"Length of y: {len(y)}")
         d[k].clear()
         d[k] += list(zip(x,y))
     #print(d)
@@ -89,7 +96,10 @@ with open("C:\\Users\\arnav\\Desktop\\graphProj\\datas.txt", mode='w+') as f:
         f.write(f"\n{str(round(x[ind],3))} ")
         for k in key:
             writeY = list(d[k])[ind][1]
-            f.write(f"{str(round(writeY,3))} ")
+            if k == key[-1]:
+                f.write(f"{str(round(writeY,3))}")
+            else:
+                f.write(f"{str(round(writeY, 3))} ")
         #print(f"({x[e]},{3})")
     # print("finishito")
 
