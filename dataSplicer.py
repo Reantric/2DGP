@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import make_interp_spline, BSpline
 
 # john bandy shishir
 # 1 1 4 7
@@ -17,35 +18,40 @@ import numpy as np
 numOfDataPoints = 51
 
 #len(lst) - 2 will give you the amount of duplicates!
-def espace(dataLst,n):
+def espace(dataLst):
+    #n param needed for non-splined version!
     #fix edge case! #if n is 20 and we got 4 items, div to 6.666666
-    nMod = numOfDataPoints % (len(dataLst)-1)
-    #print(f"New n is {n}")
-  #  print(n,nMod)
-    dataPointY = np.zeros(0)
-    for coords in range(len(dataLst)-1):
 
-        if coords == len(dataLst) - 1 - nMod:
-            n += 1
-            print(f"This should be printed approximately {nMod} times!")
-        y1,y2 = dataLst[coords][1],dataLst[coords+1][1]
+    # nMod = numOfDataPoints % (len(dataLst)-1)
+    # dataPointY = np.zeros(0)
+    # for coords in range(len(dataLst)-1):
+    #     if coords == len(dataLst) - 1 - nMod:
+     #        n += 1
+    #         print(f"This should be printed approximately {nMod} times!")
+    #     y1,y2 = dataLst[coords][1],dataLst[coords+1][1]
        # print(y1,y2)
         #linspace [start,stop]
-        firstWaveY = np.linspace(y1,y2,n)
-        dataPointY = np.concatenate((dataPointY, firstWaveY))
+      #   firstWaveY = np.linspace(y1,y2,n)
+      #   dataPointY = np.concatenate((dataPointY, firstWaveY))
 
     #only separate if this is run more than once!, how to add 1 more to list??
-    for m in range(len(dataLst)-1):
-        if m == len(dataLst) - 2:
-            dataPointY = np.delete(dataPointY,n*m)
-        else:
-            np.delete(dataPointY, n * m)
+   #  for m in range(len(dataLst)-1):
+      #   if m == len(dataLst) - 2:
+        #     dataPointY = np.delete(dataPointY,n*m)
+    #     else:
+     #       np.delete(dataPointY, n * m)
 
 
    # print(len(dataPointY))  # quick check: 20 if 3 entries!
+
+    xSpl = [a[0] for a in dataLst]
+    ySpl = [b[1] for b in dataLst]
+    k = len(xSpl)-1 if len(xSpl) < 4 else 3
+    spl = make_interp_spline(xSpl,ySpl,k=k)
+    dataPointY = spl(x)
+    #print(f"Spline object: {spl}: Splined list: {spl(x)}")
     return dataPointY
     # dataPointY = [np.delete(dataPointY,10*m) for m in range(len(dataLst)-1)][-1] horribly inefficient fix!
-
 
 
 
@@ -63,7 +69,6 @@ with open("C:\\Users\\arnav\\Desktop\\graphProj\\test.txt", mode='r+') as f:
     for v in data:
         v = v.split()
         x = int(v.pop(0))
-       # print(x)
         v = list(map(int,v))
        # print(v)
         for i in range(len(key)): ###HUGE CHANGE, REMOVING TUPLE ELEMENT INSIDE LIST! finished
@@ -76,6 +81,7 @@ f.close()
 #print(numOfDataPoints)
 numOfDataPoints += (len(d[key[0]])-2)
 x = np.linspace(xMin,xMax,numOfDataPoints - (len(d[key[0]])-2)) #it does work!
+
 n = int(numOfDataPoints/(len(d[key[0]])-1)) #n defined here!
 
 print(f"Val of n: {n}")
@@ -87,7 +93,7 @@ with open("C:\\Users\\arnav\\Desktop\\graphProj\\datas.txt", mode='w+') as f:
     f.write(' '.join(key))
     for k in key:
         # print(d[k])
-        y = espace(d[k],n)
+        y = espace(d[k])
         print(f"Length of y: {len(y)}")
         d[k].clear()
         d[k] += list(zip(x,y))
