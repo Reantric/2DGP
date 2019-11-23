@@ -1,6 +1,8 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
+PShader blur;
+
 float max = 0;
 float scale = 1;
 float e = 1;
@@ -36,11 +38,12 @@ void fetch(){
 
 void setup(){
   fetch();
-  size(1750,1000);
-  PFont myFont = createFont("Lato",16,true);
+  size(1750,1000,P2D);
+  PFont myFont = createFont("Lato",36,true);
   textFont(myFont,36);
   smooth(8);
 }
+
 int newWidth = 1200; // i guess i gotta hard code this in :(
 
 float f(double x){
@@ -52,10 +55,10 @@ void info(){
   //follow();
   fill(0);
   stroke(255);
-  rect(width/2 + sX*max,(float) -(height/2 + sY*yCoord.get(int(max))[0])  + 2,350,height-4);
+  rect((float) (width/2 + sX*xCoord.get(int(max))),(float) -(height/2 + sY*yCoord.get(int(max))[0])  + 2,350,height-4);
   fill(255);
   stroke(0);
-  text(xCoord.get(int(max))+","+ (-1*yCoord.get(int(max))[0]),(float) (width/2 + 70 + max),(float) - (yCoord.get(int(max))[0] + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
+  text(xCoord.get(int(max))+","+ (-1*yCoord.get(int(max))[0]),(float) (width/2 + 70 + xCoord.get(int(max))),(float) - (yCoord.get(int(max))[0] + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
 }
 
@@ -124,6 +127,7 @@ void graphData(){
     //println(yCoord.get(i)[0]);
     //println(max + " " + xCoord.get(i));
     line((float) (double) xCoord.get(i), -1* (float) yCoord.get(i)[0], (float) (double) xCoord.get(i+1), -1* (float) yCoord.get(i+1)[0]);
+    //filter(BLUR,0);
     }
     //line(xCoord.get(x),yCoord.get(x));
     info();
@@ -148,5 +152,5 @@ void draw(){
   //info();
   max += 1;
   //value += 0.01;
-  saveFrame("customData/line-######.png");
+  //saveFrame("customData/line-######.png");
 }
