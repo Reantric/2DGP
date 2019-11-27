@@ -2,6 +2,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 boolean valInc = false;
+boolean rescale = false;
 
 //PShader blur;
 
@@ -16,7 +17,8 @@ float e = 1;
 double value = 100;
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
 float sX = 1;
-float sY = 1;
+float sY = 2;
+float transp = 255;
 
 
 void fetch(){
@@ -82,10 +84,13 @@ void follow(){
   //circle((float) (newWidth/2 - midline),-70,300);
 }
 
-void graceful(){
-  if (value < 70){
-    tint(0);
-    value = 100;
+void fade(){
+  if (transp > 0){
+    for (float t = 25; t > 0; t--){
+      println(transp);
+      transp -= t/100;
+      stroke(255,255,255,transp);
+    }
   }
 }
 
@@ -94,7 +99,8 @@ void initGraph(){
   stroke(255);
   float xV = (float) xCoord[max];
   strokeWeight(3);
-  line(0,(float) -yCoords[max][0]-700,0,(float) -yCoords[max][0]+700);
+   line(0,(float) (sY*(-midline)-700),0,(float) -(sY*(-midline)-700));
+  //line(0,-50,0,50);
   line(xV-800,0,xV+1000,0);
   strokeWeight(1);
   
@@ -118,7 +124,7 @@ void initGraph(){
   }
   
    
-  for (float b = 0; b <  (float) yCoords[max][0] + 900; b += value){ //y
+  for (float b = 0; b < (float) yCoords[max][0] + 900; b += value){ //y
     if (b == 0) continue;
     line(-10000,(-b)*sY,10000,(-b)*sY); //y-axis
     if (xCoord[max] > newWidth/2){
@@ -165,7 +171,7 @@ double getTickY(double[] aver){
 
 void graphData(){
   initGraph();
-  for (int i = int(max-600); i < max; i++){ //change 0 to max-constant (keeps program a little efficient!)
+  for (int i = max-600; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!)
     if (i < 0) continue;
     //print(i);
     //sleep(1000);
@@ -175,15 +181,16 @@ void graphData(){
     line((float) xCoord[i], -sY* (float) yCoords[i][0], (float) xCoord[i+1], -sY* (float) yCoords[i+1][0]); //MESS WITH THIS !
     stroke(20,255,50);
     line((float) xCoord[i], -sY* (float) yCoords[i][1], (float) xCoord[i+1], -sY* (float) yCoords[i+1][1]);
-    
     //filter(BLUR,0);
     }
-    midline = (yCoords[max][0] + yCoords[max][1])/2;
-    double[] average = new double[2];
+    midline = sY * ((yCoords[max][0] + yCoords[max][1])/2);
+    /*double[] average = new double[2];
     for (int g = 0; g < average.length; g++){
       average[g] = yCoords[max][g] - midline;
     }
     getTickY(average);
+    */
+        //fade();
     line((float) (xCoord[max] - 500),(float) -midline,(float) (xCoord[max] + 500),(float) -midline);
     //line(xCoord.get(x),yCoord.get(x));
     info();
@@ -200,20 +207,26 @@ void mouseWheel(MouseEvent event) {
 void keyPressed(){
   switch (key){
     case 'y':
-      sY /= 1.1;
+      sY = 0.2;
       break;
     case 'x':
       sX++;
       break;
     case 'v':
       valInc = !valInc;
+      rescale = !rescale;
       break;
     case 'g':
       graceful();
+      break;
+     case 't':
+       tint(0);
+       break;
   }
 }
 
 void draw(){
+ // transp = 255;
   if (max > xCoord.length-2){
     println("audhshdiadshhasuidd");
     stop();
@@ -229,10 +242,21 @@ void draw(){
   max++;
   
   if (valInc) {
-    decreaseValue(50);
+    graceful();
+    //sY += 0.01;
     //increaseScale();
   }
   //saveFrame("customData2/line-######.png");
+}
+
+
+void graceful(){
+  if (sY > 0.2 && rescale){
+    for (float x = 0; x < 10; x++){
+      sY -= x/800;
+    }
+  }
+  
 }
 
 void increaseValue(double val){
@@ -259,5 +283,5 @@ void decreaseValue(double val){
 }
 
 void increaseScale(){
-  e += 0.001;
+  e += 0.01;
 }
