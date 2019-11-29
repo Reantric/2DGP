@@ -3,22 +3,30 @@ import java.util.stream.Collectors;
 
 boolean valInc = false;
 boolean rescale = false;
+boolean linesGone = false;
+boolean runOnce = false;
 
 //PShader blur;
 
 double midline;
-
+double doublingFactor;
 double xCoord[];
 double yCoords[][];
 
 int max = 0;
 float scale = 1;
 float e = 1;
-double value = 100;
+float xPush = 500;
+double value = 100; //DO NOT TOUCH!
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
 float sX = 1;
-float sY = 2;
-float transp = 255;
+float sY = 2; //default : 2
+float scaleMultiplier = 2;
+float transp1 = 255;
+float transp2 = 0;
+float boundary = 1;
+float fS = 1;
+double scalar = scaleMultiplier * value;
 
 
 void fetch(){
@@ -68,10 +76,10 @@ void info(){ //must multiply by reciprocal!
   //follow();
   fill(0);
   stroke(255);
-  rect((float) (width/2 + xCoord[max]),(float) -(height/2 + midline)  + 2,350,height-4);
+  rect((float) (width/2 + xCoord[max] -xPush - 25),(float) -(height/2 + midline) + 4,350,height-4);
   fill(255);
   stroke(0);
-  text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max]),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
+  text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max] - xPush),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
 }
 
@@ -79,19 +87,33 @@ void follow(){
  // print(newWidth);
   //translate(newWidth/2 - sX*max,height/2 - sY*f(max));
   //translate((float) (newWidth/2 - 1/sX*(xCoord[max])),(float) (height/2 + 1/sY*yCoords[max][0]));
-  translate((float) (newWidth/2 - (xCoord[max])),(float) (height/2 + midline));
+  translate((float) (newWidth/2 - (xCoord[max]) + xPush),(float) (height/2 + midline));
  // stroke(255);
   //circle((float) (newWidth/2 - midline),-70,300);
 }
 
-void fade(){
-  if (transp > 0){
-    for (float t = 25; t > 0; t--){
-      println(transp);
-      transp -= t/100;
-      stroke(255,255,255,transp);
+void fadeOut(){
+ // println(transp1 + " <<< transp1val ");
+    if (transp1 > 1.8){
+      for (float t = 25; t > 0; t--){
+       // println(transp1);
+        transp1 -= t/200;
+      }
+    } else {
+     // println("Ending sY: " + sY);
+      linesGone = true;
+      //transp1 = 255;// <---troublesome!
     }
-  }
+}
+
+void fadeIn(){
+ // println(transp1 + " <<< transp1val ");
+    if (transp2 < 258){
+      for (float t = 0; t > 25; t++){
+       // println(transp1);
+        transp2 += t/200;
+      }
+    }
 }
 
 void initGraph(){
@@ -101,7 +123,7 @@ void initGraph(){
   strokeWeight(3);
    line(0,(float) (sY*(-midline)-700),0,(float) -(sY*(-midline)-700));
   //line(0,-50,0,50);
-  line(xV-800,0,xV+1000,0);
+  line(xV-xPush*2.5,0,xV+1000,0);
   strokeWeight(1);
   
   //if value
@@ -116,7 +138,7 @@ void initGraph(){
       textSize(25);
       
       
-      if (midline > height/2){
+      if (midline > (height/2)){
         text(Math.round(a/sX),a,height/2 -(float) (midline + 6));
       } else {
       text(Math.round(a/sX),a,-8); // x-axis
@@ -124,18 +146,100 @@ void initGraph(){
   }
   
    
-  for (float b = 0; b < (float) yCoords[max][0] + 900; b += value){ //y
+  for (float b = 0; b < (float) 1/sY*(yCoords[max][0] + 900); b += value){ //y
     if (b == 0) continue;
-    line(-10000,(-b)*sY,10000,(-b)*sY); //y-axis
-    if (xCoord[max] > newWidth/2){
-      text(Math.round(b),(float) (xCoord[max] - newWidth/2),(-b-8)*sY);
-    } else {
-    text(Math.round(b),5,(-b-8)*sY); // y-axis
+    
+   // println(b);
+   if (sY > 4*boundary){ //add new ticks!
+     println("dsjidsijsdijsdjisd");
+     value /= 2;
+     boundary *= 4;
+     sY = boundary;
+   }
+   
+    if (sY < boundary){ // shrinkinGraph code!
+      if (linesGone){
+     // println("SY : " + sY + " val: " + value + " bound: " + boundary);
+     // println("Ran This!");
+    // println("Totally ");
+    // stop();
+      //sY = boundary;
+      slowIncreaseSY(boundary);
+      value = 200/boundary;
+      scalar *= 2;
+      boundary /= 2;
+      linesGone = false;
+      transp1 = 255;
+      //println("SY : " + sY + " val: " + value + " bound: " + boundary); //Fade takes time to complete, and by the time it does complete, the scale is a little less than what it should be because Fade starts when its less than boundary.
+      } else {
+        //debug
+       // println("B: " + boundary + " sY: " + sY);
+      }
+      
+      
+      if (b % scalar != 0){
+       // println("Carykh");
+        fadeOut();
+        fill(255,255,255,transp1);
+        stroke(122,122,122,transp1);
+      } else {
+        fill(255,255,255);
+        stroke(122,122,122);
+      }
     }
+      //rescale = false;
+
+    //println("transp1 VAL: " + transp1);
+    
+    essentialsY(b);
+    
   }
     
+    
+      
     strokeWeight(4);
     stroke(255,120,120);
+}
+
+void slowIncreaseSY(float v){
+  println("sY: " + sY + " v: " + v);
+  if (sY < v){
+    if (sY + v/100 > v && sY < v){
+      sY = v;
+    } else {
+  sY += v/100;
+    }
+  }
+}
+
+void gracefulU(){
+  //println("SY : " + sY + " val: " + value + " bound: " + boundary);
+  if (sY > 0.2 && rescale){
+    for (float x = 0; x < 10; x++){
+      sY /= 1 + x/8000;
+    }
+  }
+  
+}
+
+void gracefulD(){
+  //println("SY : " + sY + " val: " + value + " bound: " + boundary);
+  if (sY < 5 && rescale){
+    for (float x = 0; x < 10; x++){
+      sY *= 1 + x/8000;
+    }
+  }
+  
+}
+
+
+void essentialsY(float n){
+  line(-10000,(-n)*sY,10000,(-n)*sY);
+  if (xCoord[max] > newWidth/2 + xPush){
+      text(Math.round(n),(float) (xCoord[max] - newWidth/2 - xPush),(-n-8)*sY);
+    } else {
+    text(Math.round(n),5,(-n-8)*sY); // y-axis
+    }
 }
 
 void graph(){
@@ -197,7 +301,7 @@ void graphData(){
     noStroke();
     circle((float) xCoord[max],(float) (-sY*yCoords[max][0]),12);
     circle((float) xCoord[max],(float) (-sY*yCoords[max][1]),12);
-    circle(sX*200,sY*  300,40);
+    //circle(sX*200,sY*  300,40); i^ and j^? (unit vectors)..? lol linear alg
 }
 
 void mouseWheel(MouseEvent event) {
@@ -207,30 +311,37 @@ void mouseWheel(MouseEvent event) {
 void keyPressed(){
   switch (key){
     case 'y':
-      sY = 0.2;
+      value /= 2;
       break;
+    case 'f':
+     fS *= 2;
+     break;
     case 'x':
       sX++;
       break;
     case 'v':
       valInc = !valInc;
-      rescale = !rescale;
+      rescale = true;
       break;
     case 'g':
-      graceful();
+      gracefulD();
       break;
      case 't':
-       tint(0);
+       sY /= 2;
+       value *= 2;
        break;
   }
 }
 
 void draw(){
- // transp = 255;
+  //println(sY);
+ // frameRate(200);
+ // transp1 = 255;
   if (max > xCoord.length-2){
     println("audhshdiadshhasuidd");
     stop();
   }
+  
   //println("MAX: " + max);
  // println("XSIZE " + xCoord.size());
   scale(scale*e);
@@ -242,22 +353,13 @@ void draw(){
   max++;
   
   if (valInc) {
-    graceful();
+    gracefulD();
     //sY += 0.01;
     //increaseScale();
   }
   //saveFrame("customData2/line-######.png");
 }
 
-
-void graceful(){
-  if (sY > 0.2 && rescale){
-    for (float x = 0; x < 10; x++){
-      sY -= x/800;
-    }
-  }
-  
-}
 
 void increaseValue(double val){
   println(val);
