@@ -41,19 +41,18 @@ double scalar = scaleMultiplier * value;
 
 public class Scaling {
   boolean linesGone;
-  float transparency, multiplier;
+  float transparency;
   
-  public Scaling(float transp, float mx){ //constructor overload later!
+  public Scaling(float transp){ //constructor overload later!
     this.linesGone = false;
     this.transparency = transp;
-    this.multiplier = mx;
   }
   
-  public float fadeOut(){
+  public float fadeOut(float multiplier){
  // println(Ttransp1 + " <<< transp1val ");
     if (transparency > 1.8){
       for (float t = 16; t > 0; t--){
-        println(transparency + " JohnJoe" + this);
+        //println(transparency + " JohnJoe" + this);
         transparency -= multiplier*t/200;
       }
       return transparency;
@@ -67,15 +66,19 @@ public class Scaling {
     transparency = 255;
     linesGone = false;
   }
+  
+  public boolean isFinished(){
+    return linesGone;
+  }
 
 }
 
 
-
+Scaling yAxis = new Scaling(255);
+Scaling xAxis = new Scaling(255);
+  
 void fetch(){
-  Scaling y1 = new Scaling(255,1);
-  y1.fadeOut();
-  sleep(5000);
+  
   String[] lines = loadStrings("datas.txt");
   String[] text = lines[0].split(" ");
   xCoord = new double[lines.length-1];
@@ -209,6 +212,7 @@ void initGraph(){
   strokeWeight(1);
   
   //if value
+  //println(starting);
   for (float a = starting; a < xV; a+=200){ //initialize lines and grid lines (x)
       if (a <= 0) {
         starting = floor200(xCoord[max] - width/2 - 15);
@@ -217,8 +221,21 @@ void initGraph(){
         continue;
       }
       
-      stroke(122,122,122);
+     
+      if (a < xCoord[max] - width/2 - 15){
+        //begin fading!
+        stroke(122,122,122, xAxis.fadeOut(5));
+        fill(255, xAxis.fadeOut(5));
+      } else {
+        stroke(122,122,122);
+        fill(255);
+      }
       
+      if (xAxis.isFinished()) {
+        starting = floor200(xCoord[max] - width/2 - 15) + 200;
+        xAxis.reset();
+      }
+     
       //fadeOut();
       line(a,-10000,a,0); //x-axis
       textSize(25);
@@ -245,13 +262,14 @@ void initGraph(){
    }
    
     if (sY < boundary){ // shrinkinGraph code!
-      if (linesGone){
+      if (yAxis.isFinished()){
 
       value = 200/boundary;
       scalar *= 2;
       boundary /= 2;
       linesGone = false;
-      transpYScale = 255;
+      yAxis.reset();
+      //transpYScale = 255;
       //println("SY : " + sY + " val: " + value + " bound: " + boundary); //Fade takes time to complete, and by the time it does complete, the scale is a little less than what it should be because Fade starts when its less than boundary.
       } else {
         //debug
@@ -262,10 +280,11 @@ void initGraph(){
       if (b % scalar != 0){
        // println("Carykh");
        // fadeOut(1);
-        println(transpYScale);
-        transpYScale = fadeOutT(1,transpYScale);
-        fill(255,255,255,fadeOutT(1,transpYScale));
-        stroke(122,122,122,fadeOutT(1,transpYScale));
+        //println(transpYScale);
+        //transpYScale = fadeOutT(1,transpYScale);
+        //yAxis.fadeOut();
+        fill(255,255,255,yAxis.fadeOut(1));
+        stroke(122,122,122,yAxis.fadeOut(1));
       } else {
         fill(255,255,255);
         stroke(122,122,122);
@@ -423,9 +442,9 @@ void graphData(){
   // getScaleY(yCoords[max]);
     stroke(255);
     strokeWeight(10);
-    line(-700,-(float) (midline + 320),700,-(float) (midline + 320));
+   // line(-700,-(float) (midline + 320),700,-(float) (midline + 320));
    // text("Line of God", -600, -(float) (midline + 340));
-    line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
+   // line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
     
     if (!scalingDone){
       dx = (sY*yCoords[max][0] - sY*yCoords[max-1][0])/(xCoord[max] - xCoord[max-1]);
@@ -518,7 +537,7 @@ void draw(){
     //sY += 0.01;
     //increaseScale();
 //  }
- // saveFrame("funnyFail/line-######.png");
+  saveFrame("firstWorkingModel/line-######.png");
 }
 
 
