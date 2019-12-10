@@ -140,11 +140,12 @@ void follow(){
   //translate(newWidth/2 - sX*max,height/2 - sY*f(max));
   //translate((float) (newWidth/2 - 1/sX*(xCoord[max])),(float) (height/2 + 1/sY*yCoords[max][0]))
   // FOLLOW X AND Y : 
-  if (1/sY*midline > 200){
+  if (xCoord[max] > 300){
   moving = true;
   translate((float) (newWidth/2 - (xCoord[max]) + xPush),(float) (height/2 + midline));
   } else {
-    translate((float) (newWidth/2 - (xCoord[max]) + xPush),height - 50);
+    translate((float) (200),height - 50);
+    margin = 320;
   }
    /* if (xCoord[max] > 1010){
    translate((float) (newWidth/2 - (xCoord[max]) + xPush),height-50);
@@ -170,21 +171,6 @@ void follow(){
       //transp1 = 255;// <---troublesome!
     }
 } */
-
-float fadeOutT(float multiplier,float transparency){
- // println(Ttransp1 + " <<< transp1val ");
-    if (transparency > 1.8){
-      for (float t = 16; t > 0; t--){
-       // println(transp1);
-        transparency -= multiplier*t/200;
-      }
-      return transparency;
-    } else {
-      linesGone = true;
-      return 0;
-      //transp1 = 255;// <---troublesome!
-    }
-}
 
 void fadeIn(){
  // println(transp1 + " <<< transp1val ");
@@ -330,16 +316,19 @@ void gracefulU(double val){
 }
 
 
-void linDec(double val,double dx){ //make quadratic :?
+void linDec(double val){ //make quadratic :?
+  float distance = sY - (float) val;
+  println("dist: " + distance);
   if (sY > val){
-    if (sY - dx*val/600 < val){
+    if (sY - distance/50 < val){
       sY = (float) val;
-    } else 
-    sY -= dx*val/600;
+    } else {
+    sY -= distance/50;
+    }
     
   } else {
     scalingDone = true;
-    println("hiFinished!");
+    //println("hiFinished!");
   }
   
 }
@@ -355,17 +344,20 @@ void gracefulD(){
 }
 
 void instaChange(double val){
-  if (relMax / 1.15 < boundary){
-    relMax = boundary*0.99;
-    gracefulU(relMax);
-  }
-  else {
-    if (!scalingDone){
-      sY = (float) val;
+  //  println("sY: " + sY + " val " + val + " relMax " + relMax);
+    if (sY/val <= 1.0002 && relMax / 1.15 < boundary){ //ideally sY and val turn out to be equal. val and relMax are the same right?
+   //   println("Well Hello There ");
+      //stop();
+     // relMax = boundary*0.99;
+      linDec(boundary*0.99);
     } else {
-      scalingDone = true;
+    
+      if (!scalingDone && !(val > boundary*2)){
+          sY = (float) val;
+        } else {
+          scalingDone = true;
+        }
     }
-  }
 }
 
 void essentialsY(float n){
@@ -459,6 +451,7 @@ void graphData(){
     //relMax = (midline + margin)/yCoords[max][0];
    
   //put all this into a function!
+    //println(relMax);
     instaChange(relMax);
      
      
@@ -537,7 +530,7 @@ void draw(){
     //sY += 0.01;
     //increaseScale();
 //  }
-  saveFrame("firstWorkingModel/line-######.png");
+  //saveFrame("firstWorkingModel/line-######.png");
 }
 
 
