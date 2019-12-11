@@ -27,6 +27,7 @@ int starting = 0;
 float scale = 1;
 float e = 1;
 float xPush = 500;
+float marking = 125;
 double relMax = 2;
 double value = 100; //DO NOT TOUCH!
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
@@ -136,40 +137,20 @@ void info(){ //must multiply by reciprocal!
 }
 
 void follow(){
- // print(newWidth);
-  //translate(newWidth/2 - sX*max,height/2 - sY*f(max));
-  //translate((float) (newWidth/2 - 1/sX*(xCoord[max])),(float) (height/2 + 1/sY*yCoords[max][0]))
-  // FOLLOW X AND Y : 
-  if (xCoord[max] > 300){
-  moving = true;
-  translate((float) (newWidth/2 - (xCoord[max]) + xPush),(float) (height/2 + midline));
-  } else {
-    translate((float) (200),height - 50);
-    margin = 320;
-  }
-   /* if (xCoord[max] > 1010){
-   translate((float) (newWidth/2 - (xCoord[max]) + xPush),height-50);
-   moving = true;
+  if (xCoord[max] > newWidth-(marking+100)){ //thats perfect!
+      moving = true;
+      margin = 320;
+      translate((float) (newWidth/2 - (xCoord[max]) + xPush),height - 50); //y = (float) (height/2 + midline)
    } else {
-     translate(90,height - 50);
-  } */
-  
- // stroke(255);
-  //circle((float) (newWidth/2 - midline),-70,300);
+    translate((float) (marking),height - 50); //200, 300!
+    margin = 275;
+  }
 }
 
-/* void fadeOut(float multiplier){
- // println(transp1 + " <<< transp1val ");
-    if (transp1 > 1.8){
-      for (float t = 25; t > 0; t--){
-       // println(transp1);
-        transp1 -= multiplier*t/200;
-      }
-    } else {
-     // println("Ending sY: " + sY);
-      linesGone = true;
-      //transp1 = 255;// <---troublesome!
-    }
+/* boolean slowStart(){
+  float tickPerFrame = (float) xCoord[0]; //assume starting xCoord is from 0?
+  println("TPF: " + tickPerFrame);
+  return false;
 } */
 
 void fadeIn(){
@@ -189,7 +170,7 @@ int floor200(double jjfanman){
 void initGraph(){
   background(0);
   stroke(255);
-  float xV = moving ? (float) xCoord[max] + 1000 : (float) xCoord[max] + 1400;
+  float xV = moving ? (float) xCoord[max] + 1000 : (float) xCoord[max] + 1800;
   strokeWeight(3);
  // line(0,(float) (sY*(-midline)-700),0,(float) -(sY*(-midline)-700));
   line(0,(float) -(sY*midline + 1000),0,0);
@@ -227,7 +208,7 @@ void initGraph(){
       textSize(25);
       
       
-      if (midline > (height/2)){
+      if (midline > (height/2) && moving){
         text(Math.round(a/sX),a,height/2 - (float) (midline + 6));
       } else {
       text(Math.round(a/sX),a-16,30); // x-axis
