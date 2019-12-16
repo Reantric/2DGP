@@ -19,15 +19,19 @@ double yCoords[][];
 double dx;
 
 int max = 0;
+int count = 0;
 int newWidth = 1200; // i guess i gotta hard code this in :(
 int tailLength = 2000;
 int margin = 320;
-int starting = 0;
+int startingX = 0;
+int startingY = 0;
 
 float scale = 1;
 float e = 1;
 float xPush = 500;
 float marking = 125;
+float slowPushY = 0;
+float maxVal, minVal;
 double relMax = 2;
 double value = 100; //DO NOT TOUCH!
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
@@ -38,7 +42,6 @@ float transpYScale = 255, transp2 = 0;
 float boundary = 1;
 float fS = 1;
 double scalar = scaleMultiplier * value;
-
 
 public class Scaling {
   boolean linesGone;
@@ -121,7 +124,7 @@ void setup(){
 
 float f(double x){
   //stroke(255,15,15);
-  return (float) -Math.pow(x,1.4);
+  return (float) -Math.pow(x,1.4); //x^1.4
 }
 
 void info(){ //must multiply by reciprocal!
@@ -137,21 +140,36 @@ void info(){ //must multiply by reciprocal!
 }
 
 void follow(){
+  if (height/2 + midline < height - 50){
+    slowPushY = height - 50;
+    moving = false;
+  }
+  else {
+    slowPushY = (float) (height/2 + midline);
+    moving = true;
+  }
   if (xCoord[max] > newWidth-(marking+100)){ //thats perfect!
-      moving = true;
-      margin = 320;
-      translate((float) (newWidth/2 - (xCoord[max]) + xPush),height - 50); //y = (float) (height/2 + midline)
+     // margin = 320;
+     //if (slowAdjustY() && !moving) moving = true;
+  //    println(midline);
+      translate((float) (newWidth/2 - (xCoord[max]) + xPush),slowPushY); //y = (float) (height/2 + midline)
    } else {
-    translate((float) (marking),height - 50); //200, 300!
-    margin = 275;
+    translate((float) (marking),slowPushY); //200, 300! //y = height - 50
+    margin = 400;
   }
 }
 
-/* boolean slowStart(){
-  float tickPerFrame = (float) xCoord[0]; //assume starting xCoord is from 0?
-  println("TPF: " + tickPerFrame);
+boolean slowAdjustY(){
+  if (slowPushY < midline - height/2 + 50){
+  println("spY: " + slowPushY);
+  slowPushY += ((float) (midline - height/2 + 50))/100;
   return false;
-} */
+  }
+ // stop();
+  return true;
+ 
+ 
+}
 
 void fadeIn(){
  // println(transp1 + " <<< transp1val ");
@@ -170,7 +188,7 @@ int floor200(double jjfanman){
 void initGraph(){
   background(0);
   stroke(255);
-  float xV = moving ? (float) xCoord[max] + 1000 : (float) xCoord[max] + 1800;
+  float xV = (float) xCoord[max] + 1800;
   strokeWeight(3);
  // line(0,(float) (sY*(-midline)-700),0,(float) -(sY*(-midline)-700));
   line(0,(float) -(sY*midline + 1000),0,0);
@@ -180,9 +198,9 @@ void initGraph(){
   
   //if value
   //println(starting);
-  for (float a = starting; a < xV; a+=200){ //initialize lines and grid lines (x)
+  for (float a = startingX; a < xV; a+=200){ //initialize lines and grid lines (x)
       if (a <= 0) {
-        starting = floor200(xCoord[max] - width/2 - 15);
+        startingX = floor200(xCoord[max] - width/2 - 15);
         textSize(25);
         //text(a,8,a-6);
         continue;
@@ -199,19 +217,18 @@ void initGraph(){
       }
       
       if (xAxis.isFinished()) {
-        starting = floor200(xCoord[max] - width/2 - 15) + 200;
         xAxis.reset();
       }
      
       //fadeOut();
-      line(a,-10000,a,0); //x-axis
       textSize(25);
       
-      
       if (midline > (height/2) && moving){
-        text(Math.round(a/sX),a,height/2 - (float) (midline + 6));
+        text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-24,height/2 - (float) (midline + 6));
+        line(a,-10000,a,(float) (height/2 -midline) - 30);
       } else {
-      text(Math.round(a/sX),a-16,30); // x-axis
+      text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-27,30); // x-axis
+      line(a,-10000,a,0);
     }
     
   }
@@ -219,7 +236,6 @@ void initGraph(){
    
   for (float b = 0; b < (float) 2/sY*(yCoords[max][0] + 900); b += value){ //y
     if (b == 0) continue;
-    
    // println(b);
    if (sY > 4*boundary){ //add new ticks!
      println("dsjidsijsdijsdjisd");
@@ -271,6 +287,14 @@ void initGraph(){
     stroke(255,120,120);
 }
 
+String showText(float a){
+  if (Math.round(a/sX) >= 1000){
+    String s = Float.toString((a/sX)/1000);
+    return s.indexOf(".") < 0 ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "") + "K";
+  } 
+  String s = Integer.toString(Math.round(a/sX));
+  return s.indexOf(".") < 0 ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
+}
 void slowIncreaseSY(float v){
   println("sY: " + sY + " v: " + v);
   if (sY < v){
@@ -299,7 +323,7 @@ void gracefulU(double val){
 
 void linDec(double val){ //make quadratic :?
   float distance = sY - (float) val;
-  println("dist: " + distance);
+ // println("dist: " + distance);
   if (sY > val){
     if (sY - distance/50 < val){
       sY = (float) val;
@@ -324,16 +348,13 @@ void gracefulD(){
   
 }
 
-void instaChange(double val){
+void instaChange(double val, boolean downwards){
   //  println("sY: " + sY + " val " + val + " relMax " + relMax);
-    if (sY/val <= 1.0002 && relMax / 1.15 < boundary){ //ideally sY and val turn out to be equal. val and relMax are the same right?
-   //   println("Well Hello There ");
-      //stop();
-     // relMax = boundary*0.99;
-      linDec(boundary*0.99);
+    if ((sY/val <= 1.0002 && val / 1.15 < boundary) && !downwards){ //ideally sY and val turn out to be equal. db rounding error
+      linDec(boundary*0.96);
     } else {
     
-      if (!scalingDone && !(val > boundary*2)){
+      if (!scalingDone && (downwards || val < boundary*2)){
           sY = (float) val;
         } else {
           scalingDone = true;
@@ -344,10 +365,11 @@ void instaChange(double val){
 void essentialsY(float n){
   //line(0,(-n)*sY,10000,(-n)*sY);
   if (xCoord[max] > newWidth/2 + xPush - 60){
-      text(Math.round(n),(float) (xCoord[max] - newWidth/2 - xPush),(-n+5)*sY);
+      println("testor123");
+      text(showText(n),(float) (xCoord[max] - newWidth/2 - xPush),(-n+5)*sY);
       line((float) xCoord[max]-width+900,(-n)*sY,10000,(-n)*sY); // < ---- adjusts the 1280 - value!
     } else {
-    text(Math.round(n),-60,(-n + 5)*sY); // y-axis
+    text(showText(n),-60,(-n + 5)*sY); // y-axis
     line(-10,(-n)*sY,10000,(-n)*sY);
     }
 }
@@ -398,7 +420,9 @@ void graphData(){
     line((float) xCoord[i], -sY* (float) yCoords[i][1], (float) xCoord[i+1], -sY* (float) yCoords[i+1][1]);
     //filter(BLUR,0);
     }
-    midline = sY * ((yCoords[max][0] + yCoords[max][1])/2);
+    midline = sY * ((yCoords[max][0] + yCoords[max][1])/2); //intrinsic!
+   ///IMPORTANTE!
+  /// */
     /*double[] average = new double[2];
     for (int g = 0; g < average.length; g++){
       average[g] = yCoords[max][g] - midline;
@@ -415,8 +439,9 @@ void graphData(){
   // getScaleY(yCoords[max]);
     stroke(255);
     strokeWeight(10);
-   // line(-700,-(float) (midline + 320),700,-(float) (midline + 320));
-   // text("Line of God", -600, -(float) (midline + 340));
+    line(-700,-(float) (midline - margin),700,-(float) (midline - margin));
+    line(-700,-(float) (midline+margin), 700, -(float) (midline+margin));
+    text("MaxVal : " + maxVal + " minVal: " + minVal, 200, -(float) (midline + 340));
    // line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
     
     if (!scalingDone){
@@ -424,16 +449,37 @@ void graphData(){
       //println(dx);
     } 
     
-    float maxVal = (float) getMaxValue(yCoords[max]); //localVar
+    if (getMaxValue(yCoords[max]) > maxVal || count > 100)
+      maxVal = (float) getMaxValue(yCoords[max]); //getMax!
+      count++;
     
-    if ((midline + margin)/maxVal < relMax){
+    if (getMinValue(yCoords[max]) < minVal || count > 100)
+      minVal = (float) getMinValue(yCoords[max]); //getMin!
+      count++;
+     
+    if (count > 100) count = 0; //to give it memory!
+    
+    
+    if ((midline + margin)/maxVal < relMax && moving){
+     // println("ML : " + ((midline + 100)/maxVal) + " rM: " + relMax + "sY: " + sY + "xCoord : " + xCoord[max]);
       relMax = (midline + margin)/maxVal;
+      instaChange(relMax,false);
    } //else println("relMax: " + relMax + " b: " + boundary + " dx " + dx);
     //relMax = (midline + margin)/yCoords[max][0];
    
+   else if ((midline + 100)/maxVal > relMax){
+    // println("halleloyaaa");
+    // stop();
+     //relMax = (midline + 100)/maxVal;
+    // instaChange(relMax,false);
+   } else if (sY / 1.15 < boundary){
+     linDec(boundary*0.96);
+   }
+   
+     //println("ML : " + ((midline + 100)/maxVal) + " rM: " + relMax + "sY: " + sY + "xCoord : " + xCoord[max]);
   //put all this into a function!
     //println(relMax);
-    instaChange(relMax);
+  //  instaChange(relMax);
      
      
     if (sY*maxVal > midline + margin){
@@ -460,6 +506,16 @@ double getMaxValue(double[] array) {
         }
     }
     return maxValue;
+}
+
+double getMinValue(double[] array) {
+    double minValue = array[0];
+    for (int i = 1; i < array.length; i++) {
+        if (array[i] < minValue) {
+            minValue = array[i];
+        }
+    }
+    return minValue;
 }
 
 void keyPressed(){
