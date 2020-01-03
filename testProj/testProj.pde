@@ -10,6 +10,7 @@ boolean linesGone = false;
 boolean runOnce = false;
 boolean moving = false;
 boolean fading = false;
+boolean debug = false;
 
 //PShader blur;
 
@@ -183,8 +184,8 @@ boolean slowAdjustY(){
  
 }
 
-int floor200(double jjfanman){
-  return (int) (200*Math.floor(jjfanman/200));
+int floorAny(double jjfanman, double val){
+  return (int) (val*Math.floor(jjfanman/val));
 }
 
 void initGraph(){
@@ -202,7 +203,7 @@ void initGraph(){
   //println(starting);
   for (float a = startingX; a < xV; a+=200){ //initialize lines and grid lines (x)
       if (a <= 0) {
-        startingX = floor200(xCoord[max] - newWidth + marking);
+        startingX = floorAny(xCoord[max] - newWidth + marking,200);
         textSize(25);
         //text(a,8,a-6);
         continue;
@@ -250,20 +251,27 @@ void initGraph(){
    line(-700,-(float) midline,700,-(float) midline);
    stroke(122,122,122);
    
-    println(midline/sY + height/(2*sY));
+  //  println(midline/sY + height/(2*sY));
     if (sY < boundary){ // shrinkinGraph code!
+      fading = true;
       if (yAxis.isFinished()){
-      println("FADE FINISHED!");
+      println("startY: " + startingY + " newScal: " + scalar + " b: " + b + " value: " + value); //hmmmmm!!!
       value = 200/boundary;
+    //  if (scalar == 400){
+      //  scalar = 1000;
+     //   println("Aight");
+    //  } else {
       scalar *= 2;
+   //   }
       boundary /= 2;
       yAxis.reset();
       //transpYScale = 255;
+      fading = false;
       //println("SY : " + sY + " val: " + value + " bound: " + boundary); //Fade takes time to complete, and by the time it does complete, the scale is a little less than what it should be because Fade starts when its less than boundary.
       }
       
-      if (b % scalar != 0){
-       // println("Carykh");
+      if (b % scalar != 0){ //b is 200, stay!, 400, s
+       // println("scaler: " + scalar);
        // fadeOut(1);
         //println(transpYScale);
         //transpYScale = fadeOutT(1,transpYScale);
@@ -276,6 +284,8 @@ void initGraph(){
           stroke(122,122,122);
       }
     }
+    
+    //println("VALUE: " + value + " POS: " + ((float) midline/sY + height/(2*sY)-b));
       //rescale = false;
 
     //println("transp1 VAL: " + transp1);
@@ -439,6 +449,7 @@ float sumMid(){
 
 void graphData(){
   initGraph();
+  autoScale();
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!)
     if (i < 0) continue;
     //print(i);s
@@ -446,6 +457,7 @@ void graphData(){
     //println(yCoord.get(i)[0]);
     //println(max + " " + xCoord.get(i));
     stroke(255,20,20);
+    strokeWeight(5);
     line((float) xCoord[i], -sY* (float) yCoords[i][0], (float) xCoord[i+1], -sY* (float) yCoords[i+1][0]); //MESS WITH THIS !
     stroke(20,255,50);
     line((float) xCoord[i], -sY* (float) yCoords[i][1], (float) xCoord[i+1], -sY* (float) yCoords[i+1][1]);
@@ -474,7 +486,6 @@ void graphData(){
   // getScaleY(yCoords[max]);
     
     blackBox();
-    autoScale();
     //circle(sX*200,sY*  300,40); i^ and j^? (unit vectors)..? lol linear alg
 }
 
@@ -490,7 +501,7 @@ void autoScale(){
     if (maxVal > (midline + margin)/sY){ //very important! not changing the coordinate plane, just the values that objects take up in that coordinate plane!
      // println("Diff: " + (maxVal - (midline - margin)/sY)); 
       sY = (float) ((midline+margin)/maxVal);
-      println("BOUNDARY: " + boundary + " SY: " + sY + " FREQ: " + (2));
+     // println("BOUNDARY: " + boundary + " SY: " + sY + " FREQ: " + (2));
     }
    // if ((midline + margin)/maxVal < relMax && moving){
      // println("ML : " + ((midline + 100)/maxVal) + " rM: " + relMax + "sY: " + sY + "xCoord : " + xCoord[max]);
@@ -536,7 +547,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
 
   for (float a = startingX; a < xCoord[max] + 1800; a+=200){ //initialize lines and grid lines (x)
       if (a <= 0) {
-        startingX = floor200(xCoord[max] - width/2 - 50);
+        startingX = floorAny(xCoord[max] - width/2 - 50,200);
         textSize(25);
         //text(a,8,a-6);
         continue;
@@ -558,23 +569,25 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
       }
     }
   
-  for (float b = startingY; b < (float) 2/sY*(yCoords[max][0] + 900); b += value){
-    if (b*sY < midline - height/2 + 60){//erase y-axis ticks before they hit the rect!
-      startingY = (int) (b + value);
-      println("STARTING Y: " + startingY);
+  for (float b = startingY; b < (float) midline/sY + height/(2*sY); b += value){
+    if (b == 0 || b*sY < midline - height/2 + 60){//erase y-axis ticks before they hit the rect!
       continue;
     }
+    
+    //startingY = 0;
+   // println(startingY);
     
    // if () 
     //println("XD: " + ((-b+5)*sY) + " ZAV: " + (height/2 - midline + 50));
       //continue;
     
     if (b % scalar != 0){
-       // println("Carykh");
        // fadeOut(1);
         //println(transpYScale);
         //transpYScale = fadeOutT(1,transpYScale);
         //yAxis.fadeOut();
+        if (debug) println("Start: " + startingY);
+        
         fill(255,255,255,yAxis.getTransp());
         stroke(122,122,122,yAxis.getTransp());
        
@@ -592,6 +605,10 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     } else {
     text(showText(b),-50,-b*sY); // y-axis
     }
+    
+   // if (!fading) 
+      startingY = (int) (floorAny((midline - height/2 + 60)/sY,scalar)) > 0 ? (int) (floorAny((midline - height/2 + 60)/sY,scalar)) : 0;
+    
   }
 }
 
@@ -628,6 +645,7 @@ void keyPressed(){
     // fS *= 2;
      break;
     case 'x':
+      debug = true;
       frameRate(2);
       break;
     case 'v':
