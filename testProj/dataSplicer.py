@@ -15,7 +15,7 @@ from scipy.interpolate import make_interp_spline, BSpline
 # .
 # .
 
-numOfDataPoints = 3000
+numOfDataPoints = 3500
 
 
 # len(lst) - 2 will give you the amount of duplicates!
