@@ -2,7 +2,7 @@ import processing.sound.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.text.DecimalFormat;
-
+//just imports it automatically lets goooooooo!
 SoundFile file;
 DecimalFormat df = new DecimalFormat("#.00");
   
@@ -45,7 +45,8 @@ double maxVal;
 double minVal; 
 
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
-Map<Integer,String> responses = new HashMap<Integer,String>();
+//Map<Integer[],String> responses = new HashMap<Integer[],String>();
+
 int[] hexValues = {#ff0000,#00ff00};
 float sX = 1;
 float sY = 2.3; //default : 2
@@ -54,57 +55,12 @@ float boundary = sY * (2.0/3);
 float textChange = 100; //thank god for this!
 double scalar = 200;
 
-public class Scaling {
-  boolean linesGone;
-  float transparency;
-  
-  public Scaling(float transp){ //constructor overload later!
-    this.linesGone = false;
-    this.transparency = transp;
-  }
-  
-  public float fadeOut(float multiplier){ //to fade in, 255 - fadeOut!!!!!!!!! DAMN YOUG ENIUS
- // println(Ttransp1 + " <<< transp1val ");
-    if (transparency > 1.8){
-      for (float t = 16; t > 0; t--){
-        //println(transparency + " JohnJoe" + this);
-        transparency -= multiplier*t/200;
-      }
-      return transparency;
-    } else {
-      linesGone = true;
-      return 0;
-    }
-  }
-  
-  public float fadeIn(){
-    return 255 - getTransp();
-  }
-  
-  public float getTransp(){
-    return transparency;
-  }
-  
-  public void reset(){
-    transparency = 255;
-    linesGone = false;
-  }
-  
-  public boolean isFinished(){
-    return linesGone;
-  }
-  
-  
-
-}
-
-
 Scaling yAxis = new Scaling(255);
 Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
   
 void fetch(){
-  println(testorFan);
+  //println(testorFan);
   String[] lines = loadStrings("datas.txt");
   String[] text = lines[0].split(" ");
   xCoord = new double[lines.length-1];
@@ -131,6 +87,9 @@ void fetch(){
    
    //0 - 150 >--- maximus of that goes to maxArr
    
+   
+   //responses.add(new int[],"Ailun is a great man \n, He created air!");
+  // responses.add(new {800,1050},"Did you know, that \n ailunMan ");
 }
 
 //final float minY = min(IT );
@@ -150,8 +109,16 @@ float f(double x){
 }
 
 void funAilun(float x, float y){
-  if (xCoord[max] > 
-  if (xCoord[max] > 800 && xCoord[max] < 1000)
+  if (xCoord[max] < 240){
+    text("Hello and welcome \n to this..?",x,y);
+  }
+  else if (xCoord[max] > 275 && xCoord[max] < 550){
+    text("Simply put, this \n project is about \n graphing data!",x,y);
+  }
+  else if (xCoord[max] > 600 && xCoord[max] < 1000){
+    text("It's not done yet \n but in this video \n I hope to provide \n a basis for this project",x,y);
+  }
+  else if (xCoord[max] > 1050 && xCoord[max] < 1400)
     text("Did you know \n ailunMan got \n into Harvard!",x,y);
 }
 
@@ -175,12 +142,12 @@ void info(){ //must multiply by reciprocal!
   
    for (int c = 0; c < yCoords[max].length;c++){
       fill(hexValues[c]);
-      text(Math.round(sX*xCoord[max])+","+ Math.round(yCoords[max][c]),width - 200 - marking,-(float) (midline+height/2 - 150 - c*100));
+      text(Math.round(sX*xCoord[max])+","+ Math.round(yCoords[max][c]),width - 200 - marking,-(float) (midline+height/2 - 100 - c*100));
     }
     fill(255);
     textSize(34);
     text("        Compression Factor:",width-200-marking + compensateX,-(float) (midline-height/2 + 180));
-    funAilun(width-200-marking + compensateX,-(float) (midline-height/2 + 480));
+   // funAilun(width-170-marking + compensateX,-(float) (midline-height/2 + 540));
     textSize(38 + 0.4/sY);
     fill(255,255 - 16/sY,255 - 16/sY);
     text(df.format(1/sY),width-170-marking + compensateX,-(float) (midline-height/2 + 130));
@@ -202,7 +169,7 @@ void info(){ //must multiply by reciprocal!
     fill(255);
     textSize(34);
     text("        Compression Factor:",width-200-marking + compensateX,-130);
-    funAilun(width-200-marking + compensateX,-440);
+  //  funAilun(width-170-marking + compensateX,-480);
     textSize(38 + 0.4/sY);
     fill(255,255 - 16/sY,255 - 16/sY);
     text(df.format(1/sY),width-170-marking + compensateX,-80);
@@ -238,7 +205,7 @@ void follow(){
 
 boolean slowAdjustY(){
   if (slowPushY < midline - height/2 + 50){
-  println("spY: " + slowPushY);
+  //println("spY: " + slowPushY);
   slowPushY += ((float) (midline - height/2 + 50))/100;
   return false;
   }
@@ -270,7 +237,7 @@ void initGraph(){
   line(0,0,xV,0);
   strokeWeight(3); //xLines stroke!
   strokeCap(SQUARE);
-  
+
   //if value
   //println(starting);
   for (float a = startingX; a < xV; a+=200){ //initialize lines and grid lines (x)
@@ -318,18 +285,16 @@ void initGraph(){
    }
    stroke(250,22,120);
    strokeWeight(3); //yAxis strokes
-//  line(-700,-(float) midline,700,-(float) midline); midlineTestLine
+//  line(-700,-(float) midline,700,-(float) midline); midlineTestLine //hmmm maybe this isnt needed!
    stroke(122,122,122);
    
   //  println(midline/sY + height/(2*sY));
     if (sY < boundary){ // shrinkinGraph code!
-      if (b % scalar != 0){ //to make compatible with 500 goIn!
-       // println("scaler: " + scalar);
-       // fadeOut(1);
-        //println(transpYScale);
-        //transpYScale = fadeOutT(1,transpYScale);
-        fill(255,255,255,yAxis.fadeOut(1.6));
-        stroke(122,122,122,yAxis.fadeOut(1.6));
+      
+      if (b % scalar != 0){ 
+        
+          fill(255,255,255,yAxis.fadeOut(1.6));
+          stroke(122,122,122,yAxis.fadeOut(1.6));
        
       } 
       else {
@@ -362,7 +327,18 @@ void initGraph(){
     
   }
     
-    
+    if (Integer.parseInt(Double.toString(scalar).substring(0,1)) == 5){
+    fill(255,255,255,yAxis.fadeIn());
+    stroke(255,255,255,yAxis.fadeIn());
+    for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
+       if (c == 0) continue;
+       if (xCoord[max] > newWidth - textChange){
+          line((float) xCoord[max] - (newWidth - textChange),(-c)*sY,10000,(-c)*sY); // < ---- adjusts the 1280 - value!
+      } else {
+        line(-10,(-c)*sY,10000,(-c)*sY);
+      }
+    }
+}
       
     strokeWeight(4);
     stroke(255,120,120);
@@ -455,6 +431,7 @@ void essentialsY(float n){
    // text(showText(n),-60,(-n + 5)*sY); // y-axis
     line(-10,(-n)*sY,10000,(-n)*sY);
     }
+  
 }
 
 void graph(){
@@ -481,12 +458,6 @@ void sleep(int n){
   }
 }
 
-//turn 0.2649584985 ----> 0.25 well, 
-boolean isPowerOfTwo(int x)
-{
-    return (x & (x - 1)) == 0;
-   // isPowerOfTwo(1.0f/x)
-}
 
 float sumMid(){
   //assuming no jagged arrays
@@ -643,13 +614,8 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     //println("XD: " + ((-b+5)*sY) + " ZAV: " + (height/2 - midline + 50));
       //continue;
     
-    if (b % scalar != 0){
-       // fadeOut(1);
-        //println(transpYScale);
-        //transpYScale = fadeOutT(1,transpYScale);
-        //yAxis.fadeOut();
-       // if (debug) println("Start: " + startingY);
-        
+    if (b % scalar != 0){ //weeding stage!
+       // fadeOut(1)
         fill(255,255,255,yAxis.getTransp());
         stroke(122,122,122,yAxis.getTransp());
        
@@ -668,26 +634,51 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     text(showText(b),-50,-b*sY); // y-axis
     }
     
-   // if (!fading) 
-      
-      startingY = (int) (floorAny((midline - height/2 + 60)/sY,scalar)) > 0 ? (int) (floorAny((midline - height/2 + 60)/sY,scalar)) : 0; 
+   //   startingY = (int) (floorAny((midline - height/2 + 60)/sY,scalar)) > 0 ? (int) (floorAny((midline - height/2 + 60)/sY,scalar)) : 0; 
+      startingY = floorAny((midline - height/2 + 60)/sY,value) + (int) value;
   }
   
+  if (Integer.parseInt(Double.toString(scalar).substring(0,1)) == 5){
+          fill(255,255,255,yAxis.fadeIn() * (255.0f/122));
+          //println(yAxis.fadeIn() * (255.0f/122));
+          for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
+              if (c == 0) continue;
+              if (xCoord[max] > newWidth - textChange){
+              // println("testor123");
+                text(showText(c),(float) (xCoord[max] - (newWidth - textChange) - 50),-c*sY);
+                //-50 + something
+              } else {
+                text(showText(c),-50,-c*sY); // y-axis
+            }
+          }
+      }
+      
   if (yAxis.isFinished()){
     //  println("startY: " + startingY + " newScal: " + scalar + " b: " + b + " value: " + value); //hmmmmm!!!
       value = scalar;
-    //  if (scalar == 400){
-      //  scalar = 1000;
-     //   println("Aight");
-    //  } else {
+      //println("current value: " + value + " current start: " + startingY + " work: " + (startingY % value == 0));
+      if (Integer.parseInt(Double.toString(value).substring(0,1)) == 2){
+        println("fanman1: " + scalar);
+        scalar *= 2.5; //integer division again lol
+        boundary /= 2;
+      }
+      
+      else if (Integer.parseInt(Double.toString(value).substring(0,1)) == 5){ 
+        scalar *= 2;
+        boundary /= 2.5;
+      } 
+      
+      else {
+      
       scalar *= 2;
-   //   }
       boundary /= 2;
+      
+      }
       yAxis.reset();
       //transpYScale = 255;
       //println("SY : " + sY + " val: " + value + " bound: " + boundary); //Fade takes time to complete, and by the time it does complete, the scale is a little less than what it should be because Fade starts when its less than boundary.
-      }
-      
+      }  
+      startingY = floorAny((midline - height/2 + 60)/sY,value) + (int) value;
       
 }
 
