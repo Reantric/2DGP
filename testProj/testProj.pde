@@ -7,7 +7,7 @@ SoundFile file;
 DecimalFormat df = new DecimalFormat("#.00");
   
 boolean scalingDone = true;
-boolean rescale = false;
+boolean doNotMove = false;
 boolean linesGone = false;
 boolean runOnce = false;
 boolean movingY = false;
@@ -20,25 +20,28 @@ double midline;
 double doublingFactor;
 double xCoord[];
 double yCoords[][];
+String[] names;
 double dx;
 
 int max = 0;
 int count = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
-int tailLength = 2000;
+int tailLength = 3000;
 int margin = 320;
 int startingX = 0;
 int startingY = 100;
+int startMovingX = 150;
 
 float scale = 1;
 float e = 1;
 float xPush = 800;
-float marking = 100;
+float marking = 100; //how much the y-axis is moved at origin!!!!! 
 float slowPushY = 0;
 float compensateX = 0;
 float transpY = 255;
 float transpX = 255;
 float endingY;
+float textY;
 double relMax = 2;
 double value = 100; //DO NOT TOUCH!
 double maxVal;
@@ -47,7 +50,7 @@ double minVal;
 Map<Double,double[]> coords = new HashMap<Double,double[]>();
 //Map<Integer[],String> responses = new HashMap<Integer[],String>();
 
-int[] hexValues = {#ff0000,#00ff00};
+int[] hexValues = {#ff0000,#00ff00,#00FFFF};
 float sX = 1;
 float sY = 2.3; //default : 2
 float testorFan = sY*(1/2); //INTEGER DIVISION!
@@ -62,12 +65,12 @@ Scaling xAxis = new Scaling(255);
 void fetch(){
   //println(testorFan);
   String[] lines = loadStrings("datas.txt");
-  String[] text = lines[0].split(" ");
+  names = lines[0].split(" ");
   xCoord = new double[lines.length-1];
-  yCoords = new double[lines.length - 1][text.length]; //yCoords[n][0]
+  yCoords = new double[lines.length - 1][names.length]; //yCoords[n][0]
   //println("there are " + lines.length + " lines");
   for (int i = 1 ; i < lines.length; i++) {
-    double[] yVals = new double[text.length];
+    double[] yVals = new double[names.length];
     String[] strHold = lines[i].split(" ");
     xCoord[i-1] = Double.parseDouble(strHold[0]);
     for (int x = 0; x < strHold.length-1; x++){
@@ -97,8 +100,8 @@ void fetch(){
 void setup(){
   fetch();
   size(1920,1080,P2D);
-  PFont myFont = createFont("Lato",48,true);
-  textFont(myFont,36);
+  PFont myFont = createFont("Lato",150,true);
+  textFont(myFont);
   smooth(8);
 }
 
@@ -125,62 +128,93 @@ void funAilun(float x, float y){
 void info(){ //must multiply by reciprocal!
   //follow();
   fill(0);
-  stroke(255);
+  stroke(255); 
   strokeCap(ROUND);
   rectMode(CORNER);
   textSize(36);
+  
+  double[] currentValues = Arrays.copyOf(yCoords[max],yCoords[max].length);
+ 
+  Arrays.sort(currentValues);
+ // println(currentValues); //i need to get how the indices moved.
+   
    
   if (movingY) {
+  strokeCap(SQUARE);
   beginShape();
-    vertex(width - 350 - marking + compensateX, -(float) (midline - height/2 + 50));
-    vertex(width - 350 - marking + compensateX, -(float) (midline + height/2));
-    vertex(width - marking + compensateX, -(float) (midline + height/2));
-    vertex(width - marking + compensateX, -(float) (midline - height/2 + 50));
+    vertex(width - 350 - marking + compensateX, -(float) (midline + height/2 + 50));
+    vertex(width - 350 - marking + compensateX, -(float) (midline + height/2 - 190));
+    vertex(width - marking + compensateX, -(float) (midline + height/2 - 190));
+    vertex(width - marking + compensateX, -(float) (midline + height/2 + 50));
   endShape();
+  strokeCap(ROUND);
   //rect(width - 350 - marking,(float) -(midline + height/2),350,height-4);
- 
-  
-   for (int c = 0; c < yCoords[max].length;c++){
-      fill(hexValues[c]);
-      text(Math.round(sX*xCoord[max])+","+ Math.round(yCoords[max][c]),width - 200 - marking,-(float) (midline+height/2 - 100 - c*100));
-    }
+    
     fill(255);
     textSize(34);
-    text("        Compression Factor:",width-200-marking + compensateX,-(float) (midline-height/2 + 180));
+    text("        Compression Factor:",width-200-marking + compensateX,-(float) (-50 + midline+height/2 + 0.13/sY));
    // funAilun(width-170-marking + compensateX,-(float) (midline-height/2 + 540));
     textSize(38 + 0.4/sY);
     fill(255,255 - 16/sY,255 - 16/sY);
-    text(df.format(1/sY),width-170-marking + compensateX,-(float) (midline-height/2 + 130));
+    text(df.format(1/sY),width-170-marking + compensateX,-(float) (midline+height/2 - 105));
   
   } else {
-    strokeCap(SQUARE);
+  strokeCap(SQUARE);
   beginShape();
-    vertex(width - 350 - marking + compensateX, -1);
-    vertex(width - 350 - marking + compensateX, -height + 50);
-    vertex(width - marking + compensateX, -height + 50);
-    vertex(width - marking + compensateX, -1);
+    vertex(width - 350 - marking + compensateX, -height+1);
+    vertex(width - 350 - marking + compensateX, -height+240);
+    vertex(width - marking + compensateX, -height+240);
+    vertex(width - marking + compensateX, -height+1);
   endShape();
   strokeCap(ROUND);
-    //rect(width - 350 - marking, -height + 50, 350, height-50);
-    for (int c = 0; c < yCoords[max].length;c++){
-      fill(hexValues[c]);
-      text(Math.round(sX*xCoord[max])+","+ Math.round(yCoords[max][c]),width - 200 - marking + compensateX, -height + 150 + c*100);
-    }
+    //rect(width - 350 - marking, -height + 50, 350, height-50)
+    
     fill(255);
     textSize(34);
-    text("        Compression Factor:",width-200-marking + compensateX,-130);
+    text("        Compression Factor:",width-200-marking + compensateX,-(height - 100 + 0.13/sY));
   //  funAilun(width-170-marking + compensateX,-480);
     textSize(38 + 0.4/sY);
     fill(255,255 - 16/sY,255 - 16/sY);
-    text(df.format(1/sY),width-170-marking + compensateX,-80);
+    text(df.format(1/sY),width-170-marking + compensateX,-height + 155);
   }
   
-  fill(255);
+  //fill(255);
  // text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max] - xPush),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
- 
+  textSize(30);
+ for (int c = 0; c < yCoords[max].length;c++){
+      fill(hexValues[c]);
+      //check();
+      textAlign(LEFT);
+      for (int m = 0; m < yCoords[max].length;m++){ //hmmm interessant!
+        //println(textY);
+        if (m == c) continue;
+
+        if (Math.abs(yCoords[max][m] - yCoords[max][c]) < 30/sY){
+         // println(names[c] + " vs " + names[m]);
+          if (yCoords[max][c] > yCoords[max][m]){
+          //  println(names[c] + " > " + names[m]);
+            textY = (float) yCoords[max][c] + 5/sY;
+          } else {
+          //println("I concur!");
+          textY = (float) yCoords[max][m] - 25/sY; //25 less!
+         // text("hey this is nawt kewl m9?",50, textY);
+          }
+          break;
+        } else {
+          textY = (float) yCoords[max][c] + 5;
+        }
+      }
+       if (textY < 10/sY){
+         textY  = 10/sY;
+       }
+       text(names[c] + ": (" + Math.round(yCoords[max][c]) + ")",(float) xCoord[max] + 40,-sY*textY);
+    }
+    textAlign(CENTER);
   
   fill(255);
+  
+  
 
 }
 
@@ -194,12 +228,13 @@ void follow(){
     movingY = true;
   }
   
-  if (xCoord[max] > newWidth - marking){ //thats perfect! <--- Ok, now what?
-      translate((float) (newWidth - xCoord[max]),slowPushY); //y = (float) (height/2 + midline)
-      compensateX = (float) (xCoord[max] - newWidth + marking);
+  if (xCoord[max] > newWidth - marking + startMovingX){ //thats perfect! <--- Ok, now what?
+      translate((float) (newWidth - xCoord[max] + startMovingX),slowPushY); //y = (float) (height/2 + midline)
+      compensateX = (float) (xCoord[max] - newWidth + marking - startMovingX);
+      margin = 320 + 50;
    } else {
     translate((float) (marking),slowPushY); //200, 300! //y = height - 50 //(---> 125)
-    margin = 400;
+    margin = 320; //might be a bit low...?
   }
 }
 
@@ -248,7 +283,7 @@ void initGraph(){
         continue;
       }
       
-      if (a < xCoord[max] - newWidth + textChange + 10){ //id: fading
+      if (a < xCoord[max] - newWidth + textChange - startMovingX + 10){ //id: fading
         //begin fading!
         stroke(122,122,122, xAxis.fadeOut(11));
         fill(255, xAxis.fadeOut(11));
@@ -332,8 +367,8 @@ void initGraph(){
     stroke(255,255,255,yAxis.fadeIn());
     for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
        if (c == 0) continue;
-       if (xCoord[max] > newWidth - textChange){
-          line((float) xCoord[max] - (newWidth - textChange),(-c)*sY,10000,(-c)*sY); // < ---- adjusts the 1280 - value!
+       if (xCoord[max] > newWidth - textChange + startMovingX){
+          line((float) xCoord[max] - (newWidth - textChange + startMovingX),(-c)*sY,10000,(-c)*sY); // < ---- adjusts the 1280 - value!
       } else {
         line(-10,(-c)*sY,10000,(-c)*sY);
       }
@@ -396,15 +431,7 @@ void linDec(double val){ //make quadratic :?
   
 }
 
-void gracefulD(){
-  //println("SY : " + sY + " val: " + value + " bound: " + boundary);
-  if (sY < 5 && rescale){
-    for (float x = 0; x < 10; x++){
-      sY *= 1 + x/8000;
-    }
-  }
-  
-}
+
 
 void instaChange(double val, boolean downwards){
   //  println("sY: " + sY + " val " + val + " relMax " + relMax);
@@ -423,10 +450,10 @@ void instaChange(double val, boolean downwards){
 void essentialsY(float n){
   //line(0,(-n)*sY,10000,(-n)*sY);
 //  if (midline < 50) return;
-  if (xCoord[max] > newWidth - textChange){
+  if (xCoord[max] > newWidth - textChange + startMovingX){
      //println("testor123");
     //  text(showText(n),(float) (xCoord[max] - newWidth/2 - xPush),(-n+5)*sY);
-      line((float) xCoord[max] - (newWidth - textChange),(-n)*sY,10000,(-n)*sY); // < ---- adjusts the 1280 - value!
+      line((float) xCoord[max] - (newWidth - textChange + startMovingX),(-n)*sY,10000,(-n)*sY); // < ---- adjusts the 1280 - value!
     } else {
    // text(showText(n),-60,(-n + 5)*sY); // y-axis
     line(-10,(-n)*sY,10000,(-n)*sY);
@@ -462,8 +489,8 @@ void sleep(int n){
 float sumMid(){
   //assuming no jagged arrays
   float s = 0;
-  //int n = yCoords[max].length;
-  int n = 2;
+  int n = yCoords[max].length;
+  n = 2;
   for (int i = 0; i < n; i++){
     if (yCoords[max][i] < 0) continue;
     s += yCoords[max][i];
@@ -475,6 +502,7 @@ float sumMid(){
 void graphData(){ //max++ is intrinsic!
   autoScale(); //decor! 
   //initGraph();
+   //Arrays.sort(yCoords[max]);
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!) //advances 1 every time it is redrawn 
     if (i < 0) continue;
     //print(i);s
@@ -487,6 +515,9 @@ void graphData(){ //max++ is intrinsic!
     //or who knows might change my mind for efficiency reasons!
       stroke(hexValues[c]);
       line((float) xCoord[i], -sY* (float) yCoords[i][c], (float) xCoord[i+1], -sY* (float) yCoords[i+1][c]);
+      noStroke();
+      fill(255);
+      circle((float) xCoord[max],(float) (-sY*yCoords[max][c]),12);
     }
    // stroke(255,20,20);
 
@@ -508,10 +539,9 @@ void graphData(){ //max++ is intrinsic!
     */
         //fade();
     //line(xCoord.get(x),yCoord.get(x));
-    noStroke();
-    line((float) (xCoord[max] - 500),(float) -midline,(float) (xCoord[max] + 500),(float) -midline);
-    circle((float) xCoord[max],(float) (-sY*yCoords[max][0]),12);
-    circle((float) xCoord[max],(float) (-sY*yCoords[max][1]),12);
+   // noStroke();
+   // line((float) (xCoord[max] - 500),(float) -midline,(float) (xCoord[max] + 500),(float) -midline);
+    
    // circle((float) xCoord[max],(float) (-sY*yCoords[max][2]),12);
   // getScaleY(yCoords[max]);
     
@@ -572,8 +602,8 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   rect((float) -80,-56 + (float) (height/2 - midline),(float) xCoord[max] + 1800,70); //horizontalRect
   }
   
-  if (xCoord[max] > newWidth - textChange){
-    rect((float) (xCoord[max] - newWidth),-(float) (midline + height - 50),90,(float) (midline + height - 48.5)); //verticalRect
+  if (xCoord[max] > newWidth - textChange + startMovingX){
+    rect((float) (xCoord[max] - newWidth - startMovingX),-(float) (midline + height - 50),90,(float) (midline + height)); //verticalRect
   }
   fill(255);
 
@@ -626,9 +656,9 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
       }
       
      textAlign(CENTER,CENTER);
-    if (xCoord[max] > newWidth - textChange){
+    if (xCoord[max] > newWidth - textChange + startMovingX){
     // println("testor123");
-      text(showText(b),(float) (xCoord[max] - (newWidth - textChange) - 50),-b*sY);
+      text(showText(b),(float) (xCoord[max] - (newWidth - textChange + startMovingX) - 50),-b*sY);
       //-50 + something
     } else {
     text(showText(b),-50,-b*sY); // y-axis
@@ -643,9 +673,9 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
           //println(yAxis.fadeIn() * (255.0f/122));
           for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
               if (c == 0) continue;
-              if (xCoord[max] > newWidth - textChange){
+              if (xCoord[max] > newWidth - textChange + startMovingX){
               // println("testor123");
-                text(showText(c),(float) (xCoord[max] - (newWidth - textChange) - 50),-c*sY);
+                text(showText(c),(float) (xCoord[max] - (newWidth - textChange + startMovingX) - 50),-c*sY);
                 //-50 + something
               } else {
                 text(showText(c),-50,-c*sY); // y-axis
@@ -722,7 +752,7 @@ void keyPressed(){
       linesGone = !linesGone;
       break;
     case 'g':
-      gracefulD();
+      //gracefulD();
       break;
      case 't':
        sY /= 2;
@@ -756,7 +786,7 @@ void draw(){
     //sY += 0.01;
     //increaseScale();
 //  }
-  //saveFrame("firstWorkingModel/line-######.png");
+  saveFrame("firstWorkingModel/line-######.png");
 }
 
 
