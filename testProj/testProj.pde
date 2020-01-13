@@ -1,9 +1,10 @@
-import processing.sound.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.text.DecimalFormat;
 //just imports it automatically lets goooooooo!
-SoundFile file;
+
+PFont myFont;
+PFont nameFont;
 DecimalFormat df = new DecimalFormat("#.00");
   
 boolean scalingDone = true;
@@ -15,7 +16,7 @@ boolean fading = false;
 boolean debug = false;
 
 //PShader blur;
-
+//FIX 100 multiple when 5'ving!
 double midline;
 double doublingFactor;
 double xCoord[];
@@ -42,6 +43,10 @@ float transpY = 255;
 float transpX = 255;
 float endingY;
 float textY;
+float overtakeM;
+float overtakeC;
+
+
 double relMax = 2;
 double value = 100; //DO NOT TOUCH!
 double maxVal;
@@ -51,8 +56,10 @@ Map<Double,double[]> coords = new HashMap<Double,double[]>();
 //Map<Integer[],String> responses = new HashMap<Integer[],String>();
 
 int[] hexValues = {#ff0000,#00ff00,#00FFFF};
+int[] countY;
 float sX = 1;
 float sY = 2.3; //default : 2
+float xValue = 400;
 float testorFan = sY*(1/2); //INTEGER DIVISION!
 float boundary = sY * (2.0/3); 
 float textChange = 100; //thank god for this!
@@ -81,6 +88,8 @@ void fetch(){
     coords.put(Double.parseDouble(strHold[0]),yVals);
     //yCoord.add(Arrays.asList().stream().map(n -> n * 3));
   }
+  
+  countY = new int[yCoords[max].length];
   //println(yCoords[6][0]);
   //println("text: " + Arrays.toString(text), "xCoords: " + xCoord, "yCoords: " + yCoord.toString());
   //print("hashMap coords: " + coords);
@@ -100,7 +109,8 @@ void fetch(){
 void setup(){
   fetch();
   size(1920,1080,P2D);
-  PFont myFont = createFont("Lato",150,true);
+  myFont = createFont("Lato",150,true);
+  nameFont = createFont("Lato Bold",150,true);
   textFont(myFont);
   smooth(8);
 }
@@ -181,7 +191,8 @@ void info(){ //must multiply by reciprocal!
   //fill(255);
  // text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max] - xPush),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
-  textSize(30);
+  textFont(nameFont);
+  textSize(32);
  for (int c = 0; c < yCoords[max].length;c++){
       fill(hexValues[c]);
       //check();
@@ -189,27 +200,65 @@ void info(){ //must multiply by reciprocal!
       for (int m = 0; m < yCoords[max].length;m++){ //hmmm interessant!
         //println(textY);
         if (m == c) continue;
-
+        
+        
         if (Math.abs(yCoords[max][m] - yCoords[max][c]) < 30/sY){
-         // println(names[c] + " vs " + names[m]);
+
           if (yCoords[max][c] > yCoords[max][m]){
-          //  println(names[c] + " > " + names[m]);
-            textY = (float) yCoords[max][c] + 5/sY;
-          } else {
-          //println("I concur!");
-          textY = (float) yCoords[max][m] - 25/sY; //25 less!
-         // text("hey this is nawt kewl m9?",50, textY);
+            
+         
+
+           textY = (float) yCoords[max][c] + 2/sY;
+
+           if (yCoords[max+15][m] > yCoords[max+15][c]){
+               countY[c]++;
+               println(Arrays.toString(countY));
+              //slowly move my man C DOWN!!!! just switch with m lmao
+              
+              if (textY - 3/sY * countY[c] < yCoords[max+15][c] + 2/sY){
+                textY = (float) (yCoords[max+15][c] + 2/sY);
+              } else {
+              textY -= 3/sY * countY[c]; 
+              }//keeps getting reset after every loop
+              
+              
+            }
+            
+            
+          } else { // m > c
+             
+              
+              textY = (float) yCoords[max][m] - 28/sY; //25 less!
+
+              if (yCoords[max+15][c] > yCoords[max+15][m]){
+              //slowly move my man C UP! to where it b e l o n g s !
+          // ////   
+          //   if (textY + 3/sY * countY[m] > yCoords[max+15][m] - 28/sY){
+               //textY = (float) (yCoords[max+15][m] - 28/sY);
+           //  } else {
+             println("I EXIST!");
+             textY += 3/sY * countY[m];
+             //}
+             
+            }
+
           }
-          break;
+        
+        break;
+          
         } else {
-          textY = (float) yCoords[max][c] + 5;
+         // if (countY[c] != 0) countY[c] = 0;
+          textY = (float) yCoords[max][c] + 2/sY;
         }
       }
        if (textY < 10/sY){
          textY  = 10/sY;
        }
-       text(names[c] + ": (" + Math.round(yCoords[max][c]) + ")",(float) xCoord[max] + 40,-sY*textY);
+       text(names[c] + " (" + Math.round(yCoords[max][c]) + ")",(float) xCoord[max] + 40,-sY*textY);
+       
     }
+    //countY = new int[yCoords[max].length];
+    textFont(myFont);
     textAlign(CENTER);
   
   fill(255);
@@ -275,9 +324,9 @@ void initGraph(){
 
   //if value
   //println(starting);
-  for (float a = startingX; a < xV; a+=200){ //initialize lines and grid lines (x)
+  for (float a = startingX; a < xV; a+=xValue){ //initialize lines and grid lines (x)
       if (a <= 0) {
-        startingX = floorAny(xCoord[max] - newWidth + marking,200);
+        startingX = floorAny(xCoord[max] - newWidth + marking,xValue);
         textSize(25);
         //text(a,8,a-6);
         continue;
@@ -286,10 +335,10 @@ void initGraph(){
       if (a < xCoord[max] - newWidth + textChange - startMovingX + 10){ //id: fading
         //begin fading!
         stroke(122,122,122, xAxis.fadeOut(11));
-        fill(255, xAxis.fadeOut(11));
+       // fill(255, xAxis.fadeOut(11));
       } else {
         stroke(122,122,122);
-        fill(255);
+       // fill(255);
       }
       
       if (xAxis.isFinished()) {
@@ -328,12 +377,12 @@ void initGraph(){
       
       if (b % scalar != 0){ 
         
-          fill(255,255,255,yAxis.fadeOut(1.6));
+        //  fill(255,255,255,yAxis.fadeOut(1.6));
           stroke(122,122,122,yAxis.fadeOut(1.6));
        
       } 
       else {
-          fill(255,255,255);
+        //  fill(255,255,255);
           stroke(122,122,122);
       }
     }
@@ -363,8 +412,8 @@ void initGraph(){
   }
     
     if (Integer.parseInt(Double.toString(scalar).substring(0,1)) == 5){
-    fill(255,255,255,yAxis.fadeIn());
-    stroke(255,255,255,yAxis.fadeIn());
+    //fill(255,255,255,yAxis.fadeIn());
+    stroke(122,122,122,yAxis.fadeIn());
     for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
        if (c == 0) continue;
        if (xCoord[max] > newWidth - textChange + startMovingX){
@@ -375,9 +424,9 @@ void initGraph(){
     }
 }
       
-    strokeWeight(4);
-    stroke(255,120,120);
-    strokeCap(ROUND);
+    //strokeWeight(4);
+   // stroke(255,120,120);
+    //strokeCap(ROUND);
 }
 
 String showText(float a){
@@ -607,16 +656,16 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   }
   fill(255);
 
-  for (float a = startingX; a < xCoord[max] + 1800; a+=200){ //initialize lines and grid lines (x)
+  for (float a = startingX; a < xCoord[max] + 1800; a+=xValue){ //initialize lines and grid lines (x)
       if (a <= 0) {
-        startingX = floorAny(xCoord[max] - width/2 - 50,200);
+        startingX = floorAny(xCoord[max] - width/2 - 50,xValue);
        // textSize(25); //oh this thing stops getting run lol
         //text(a,8,a-6);
         continue;
       }
      
      if (a < xCoord[max] - newWidth + textChange + 10){
-     stroke(122,122,122,xAxis.getTransp());
+     //stroke(122,122,122,xAxis.getTransp());
      fill(255, xAxis.getTransp());
      } else {
         stroke(122,122,122);
@@ -647,7 +696,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     if (b % scalar != 0){ //weeding stage!
        // fadeOut(1)
         fill(255,255,255,yAxis.getTransp());
-        stroke(122,122,122,yAxis.getTransp());
+       // stroke(122,122,122,yAxis.getTransp());
        
       } 
       else {
@@ -669,7 +718,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   }
   
   if (Integer.parseInt(Double.toString(scalar).substring(0,1)) == 5){
-          fill(255,255,255,yAxis.fadeIn() * (255.0f/122));
+          fill(255,255,255,yAxis.fadeIn());
           //println(yAxis.fadeIn() * (255.0f/122));
           for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
               if (c == 0) continue;
@@ -780,13 +829,13 @@ void draw(){
  //translate(width - 800 +max,200+f(max));
   //info();
   max++;
-  
+
  // if (valInc) {
     //gracefulU();
     //sY += 0.01;
     //increaseScale();
 //  }
-  saveFrame("firstWorkingModel/line-######.png");
+  //saveFrame("testAilun/line-######.png");
 }
 
 
