@@ -45,7 +45,8 @@ float endingY;
 float textY;
 float overtakeM;
 float overtakeC;
-
+float xV;
+float origin;
 
 double relMax = 2;
 double value = 100; //DO NOT TOUCH!
@@ -57,9 +58,9 @@ Map<Double,double[]> coords = new HashMap<Double,double[]>();
 
 int[] hexValues = {#ff0000,#00ff00,#00FFFF};
 int[] countY;
-float sX = 1;
+float sX = 1 / (2.0/2);
 float sY = 2.3; //default : 2
-float xValue = 400;
+float xValue = 400 * (2.0/2);
 float testorFan = sY*(1/2); //INTEGER DIVISION!
 float boundary = sY * (2.0/3); 
 float textChange = 100; //thank god for this!
@@ -89,7 +90,7 @@ void fetch(){
     //yCoord.add(Arrays.asList().stream().map(n -> n * 3));
   }
   
-  countY = new int[yCoords[max].length];
+  countY = new int[yCoords[max].length * yCoords[max].length];
   //println(yCoords[6][0]);
   //println("text: " + Arrays.toString(text), "xCoords: " + xCoord, "yCoords: " + yCoord.toString());
   //print("hashMap coords: " + coords);
@@ -98,7 +99,7 @@ void fetch(){
    // }
    
    //0 - 150 >--- maximus of that goes to maxArr
-   
+   origin = (float) xCoord[0]; //O(1)
    
    //responses.add(new int[],"Ailun is a great man \n, He created air!");
   // responses.add(new {800,1050},"Did you know, that \n ailunMan ");
@@ -197,10 +198,14 @@ void info(){ //must multiply by reciprocal!
       fill(hexValues[c]);
       //check();
       textAlign(LEFT);
+      
       for (int m = 0; m < yCoords[max].length;m++){ //hmmm interessant!
         //println(textY);
-        if (m == c) continue;
+        long k = 3;
+       // println(k);
         
+        if (m == c) continue;
+
         
         if (Math.abs(yCoords[max][m] - yCoords[max][c]) < 30/sY){
 
@@ -210,18 +215,20 @@ void info(){ //must multiply by reciprocal!
 
            textY = (float) yCoords[max][c] + 2/sY;
 
-           if (yCoords[max+15][m] > yCoords[max+15][c]){
-               countY[c]++;
-               println(Arrays.toString(countY));
+           if (yCoords[max+8][m] > yCoords[max+8][c]){
+               countY[c*m]++;
+            //   println(Arrays.toString(countY));
               //slowly move my man C DOWN!!!! just switch with m lmao
               
-              if (textY - 3/sY * countY[c] < yCoords[max+15][c] + 2/sY){
-                textY = (float) (yCoords[max+15][c] + 2/sY);
-              } else {
-              textY -= 3/sY * countY[c]; 
-              }//keeps getting reset after every loop
+              //if (textY - 3/sY * countY[c*m] < yCoords[max+8][c] + 2/sY){
+               //  textY = (float) (yCoords[max+8][c] + 2/sY);
+              //} else {
+                textY -= k/sY * countY[c*m]; 
+              //}//keeps getting reset after every loop
               
-              
+            ///  println("RESULT: " + textY + " EXPECTED: " + ((float) (yCoords[max+8][m] - 28/sY)));
+            } else {
+              if (countY[c*m] != 0) countY[c*m] = 0;
             }
             
             
@@ -230,15 +237,16 @@ void info(){ //must multiply by reciprocal!
               
               textY = (float) yCoords[max][m] - 28/sY; //25 less!
 
-              if (yCoords[max+15][c] > yCoords[max+15][m]){
+              if (yCoords[max+8][c] > yCoords[max+8][m]){ //seems legit!
               //slowly move my man C UP! to where it b e l o n g s !
           // ////   
-          //   if (textY + 3/sY * countY[m] > yCoords[max+15][m] - 28/sY){
-               //textY = (float) (yCoords[max+15][m] - 28/sY);
-           //  } else {
-             println("I EXIST!");
-             textY += 3/sY * countY[m];
-             //}
+             if (textY + (k/sY * countY[c*m]) > yCoords[max+8][m] + 2/sY){
+               //stop();
+               textY = (float) (yCoords[max+8][c] + 2/sY);
+             } else {
+            // println("I EXIST!");
+             textY += k/sY * countY[c*m];
+             }
              
             }
 
@@ -254,7 +262,7 @@ void info(){ //must multiply by reciprocal!
        if (textY < 10/sY){
          textY  = 10/sY;
        }
-       text(names[c] + " (" + Math.round(yCoords[max][c]) + ")",(float) xCoord[max] + 40,-sY*textY);
+       text(names[c] + " (" + Math.round(yCoords[max][c]) + ")",sX* (float) (xCoord[max] - origin) + 40,-sY*textY);
        
     }
     //countY = new int[yCoords[max].length];
@@ -306,7 +314,7 @@ int floorAny(double jjfanman, double val){
 void initGraph(){
   background(0);
   stroke(255);
-  float xV = (float) xCoord[max] + 2000;
+  xV = (float) (width + xCoord[max])/sX;
   strokeWeight(3);
  // line(0,(float) (sY*(-midline)-700),0,(float) -(sY*(-midline)-700));
  if (movingY){
@@ -350,10 +358,10 @@ void initGraph(){
       
       if (midline > height/2 - 50 && movingY){
           //text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,height/2 - (float) (midline + 6));
-        line(a,-10000,a,(float) (height/2 - midline) - 50);
+        line(a*sX,-10000,a*sX,(float) (height/2 - midline) - 50);
       } else {
       //text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,30); // x-axis
-      line(a,-10000,a,-2);
+      line(a*sX,-10000,a*sX,-2);
     }
     
   }
@@ -430,11 +438,11 @@ void initGraph(){
 }
 
 String showText(float a){
-  if (Math.round(a/sX) >= 1000){
-    String s = Float.toString((a/sX)/1000);
+  if (Math.round(a) >= 1000){
+    String s = Float.toString(a/1000);
     return s.indexOf(".") < 0 ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "") + "K";
   } 
-  String s = Integer.toString(Math.round(a/sX));
+  String s = Integer.toString(Math.round(a));
   return s.indexOf(".") < 0 ? s : s.replaceAll("0*$", "").replaceAll("\\.$", "");
 }
 void slowIncreaseSY(float v){
@@ -563,10 +571,10 @@ void graphData(){ //max++ is intrinsic!
     for (int c = 0; c < yCoords[i].length; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
     //or who knows might change my mind for efficiency reasons!
       stroke(hexValues[c]);
-      line((float) xCoord[i], -sY* (float) yCoords[i][c], (float) xCoord[i+1], -sY* (float) yCoords[i+1][c]);
+      line(sX* (float) (xCoord[i] - origin), -sY* (float) yCoords[i][c], sX *(float) (xCoord[i+1] - origin), -sY* (float) yCoords[i+1][c]);
       noStroke();
       fill(255);
-      circle((float) xCoord[max],(float) (-sY*yCoords[max][c]),12);
+      circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][c]),12);
     }
    // stroke(255,20,20);
 
@@ -656,7 +664,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   }
   fill(255);
 
-  for (float a = startingX; a < xCoord[max] + 1800; a+=xValue){ //initialize lines and grid lines (x)
+  for (float a = startingX; a < xV; a+=xValue){ //initialize lines and grid lines (x)
       if (a <= 0) {
         startingX = floorAny(xCoord[max] - width/2 - 50,xValue);
        // textSize(25); //oh this thing stops getting run lol
@@ -675,9 +683,9 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     textAlign(CENTER);
     
     if (midline > height/2 - 50 && movingY){
-            text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,height/2 - (float) (midline + 15)); //removes all .0s!
+            text(showText((a+origin)/sX).indexOf(".") < 0 ? showText((a+origin)/sX) : showText((a+origin)/sX).replaceAll("0*$", "").replaceAll("\\.$", ""),a * sX -16,height/2 - (float) (midline + 15)); //removes all .0s!
         } else {
-        text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,30); // x-axis
+        text(showText((a+origin)/sX).indexOf(".") < 0 ? showText((a+origin)/sX) : showText((a+origin)/sX).replaceAll("0*$", "").replaceAll("\\.$", ""),a * sX -16,30); // x-axis
       }
     }
   
@@ -795,7 +803,7 @@ void keyPressed(){
      break;
     case 'x':
       debug = true;
-      frameRate(2);
+      frameRate(1);
       break;
     case 'v':
       linesGone = !linesGone;
