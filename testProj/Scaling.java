@@ -26,7 +26,7 @@ public class Scaling {
     }
 
     public float fadeIn(){
-        return (255 - getTransp())*(122.0f/255);
+        return 255 - getTransp();
     }
 
     public float getTransp(){

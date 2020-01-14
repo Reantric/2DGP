@@ -15,7 +15,7 @@ from scipy.interpolate import make_interp_spline, BSpline
 # .
 # .
 
-numOfDataPoints = 3500
+numOfDataPoints = 5000
 
 
 # len(lst) - 2 will give you the amount of duplicates!
@@ -46,7 +46,7 @@ def espace(dataLst):
 
     xSpl = [a[0] for a in dataLst]
     ySpl = [b[1] for b in dataLst]
-    k = 2
+    k = 3
     spl = make_interp_spline(xSpl, ySpl, k=k)
     dataPointY = spl(x)
     # print(f"Spline object: {spl}: Splined list: {spl(x)}")
@@ -81,7 +81,7 @@ f.close()
 
 # print(numOfDataPoints)
 # numOfDataPoints += (len(d[key[0]])-2)
-x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing)
+x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing) nice! - 2020
 
 n = int((numOfDataPoints + (len(d[key[0]]) - 2)) / (len(d[key[0]]) - 1))  # n defined here!
 
