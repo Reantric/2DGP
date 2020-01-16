@@ -15,7 +15,9 @@ from scipy.interpolate import make_interp_spline, BSpline
 # .
 # .
 
-numOfDataPoints = 5000
+
+
+#(400-200)/0.1
 
 
 # len(lst) - 2 will give you the amount of duplicates!
@@ -77,8 +79,10 @@ with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\test.txt", mode='r
     print(d)
     xMax = list(d.values())[0][-1][0]
     xMin = list(d.values())[0][0][0]
+
 f.close()
 
+numOfDataPoints = (xMax-xMin) #make this (max-min)/n where n is spacing
 # print(numOfDataPoints)
 # numOfDataPoints += (len(d[key[0]])-2)
 x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing) nice! - 2020
@@ -111,5 +115,6 @@ with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\datas.txt", mode='
     # print("finishito")
 
 f.close()
+print("Now complete!")
 
 # program works! <100 lines !!!!!
