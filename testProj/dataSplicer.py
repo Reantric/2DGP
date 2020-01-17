@@ -1,5 +1,9 @@
 import numpy as np
 from scipy.interpolate import make_interp_spline, BSpline
+from time import sleep
+from timeit import default_timer as timer
+
+
 
 # john bandy shishir
 # 1 1 4 7
@@ -16,12 +20,14 @@ from scipy.interpolate import make_interp_spline, BSpline
 # .
 
 
-
-#(400-200)/0.1
+# (400-200)/0.1
 
 
 # len(lst) - 2 will give you the amount of duplicates!
-def espace(dataLst):
+def espace(data):
+    xSpl = [a[0] for a in data[key[0]]]
+    xLength = len(x)
+    coords = {x[a]: [] for a in range(xLength)}  # gets X values!
     # n param needed for non-splined version!
     # fix edge case! #if n is 20 and we got 4 items, div to 6.666666
 
@@ -45,14 +51,16 @@ def espace(dataLst):
     #       np.delete(dataPointY, n * m)
 
     # print(len(dataPointY))  # quick check: 20 if 3 entries!
+    for o in data:
+        ySpl = [b[1] for b in data[o]]
+        m = 3
+        spl = make_interp_spline(xSpl, ySpl, k=m)
+        dataPointY = spl(x)
+        for u in range(xLength):
+            coords[x[u]] += [round(dataPointY[u],5)]
 
-    xSpl = [a[0] for a in dataLst]
-    ySpl = [b[1] for b in dataLst]
-    k = 3
-    spl = make_interp_spline(xSpl, ySpl, k=k)
-    dataPointY = spl(x)
     # print(f"Spline object: {spl}: Splined list: {spl(x)}")
-    return dataPointY
+    return coords
     # dataPointY = [np.delete(dataPointY,10*m) for m in range(len(dataLst)-1)][-1] horribly inefficient fix!
 
 
@@ -60,9 +68,6 @@ def espace(dataLst):
 with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\test.txt", mode='r+') as f:
     f.seek(0)
     key = f.readline()
-    s = []
-    x = []
-    y = []
     data = f.readlines()
     # print(key)
     # print(file[0])
@@ -76,13 +81,13 @@ with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\test.txt", mode='r
         # print(v)
         for i in range(len(key)):  ###HUGE CHANGE, REMOVING TUPLE ELEMENT INSIDE LIST! finished
             d[key[i]] += [(x, v[i])]
-    print(d)
+    # print(d)
     xMax = list(d.values())[0][-1][0]
-    xMin = list(d.values())[0][0][0]
+    xMin = list(d.values())[0][0][0]  # disgusting!
 
 f.close()
 
-numOfDataPoints = (xMax-xMin) #make this (max-min)/n where n is spacing
+numOfDataPoints = int((xMax - xMin) / 0.9)  # make this (max-min)/n where n is spacing
 # print(numOfDataPoints)
 # numOfDataPoints += (len(d[key[0]])-2)
 x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing) nice! - 2020
@@ -95,23 +100,42 @@ print(f"Length of x: {len(x)}")
 # {john: [(x1,y1),(x2,y2)], shishir: [(x1,y1),()]
 
 with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\datas.txt", mode='w+') as f:
-    f.write(' '.join(key))
-    for k in key:
-        # print(d[k])
-        y = espace(d[k])
-        print(f"Length of y: {len(y)}")
-        d[k].clear()
-        d[k] += list(zip(x, y))
+    #  f.write(' '.join(key))
+    #  for k in key:
+    # print(d[k])
+    #     y = espace(d[k])
+    #      print(f"Length of y: {len(y)}")
+    #      d[k].clear()
+    #      d[k] += list(zip(x, y))
     # print(d)
+    start = timer()
+    print("Calculating")
+    coords = espace(d)
+    # print(y)
+    print("Beginning!")
+    # print(" ".join(map(str,coords[x[2]])))
+    statement = ""
+
     for ind in range(numOfDataPoints - 1):
-        f.write(f"\n{str(round(x[ind], 3))} ")
-        for k in key:
-            writeY = list(d[k])[ind][1]
-            if k == key[-1]:
-                f.write(f"{str(round(writeY, 3))}")
-            else:
-                f.write(f"{str(round(writeY, 3))} ")
-        # print(f"({x[e]},{3})")
+      #  if ind % 400 == 0: tester
+       #     print(f"{100 * ind / (numOfDataPoints - 1)}% done!")
+        # f.write(f"\n{str(round(x[ind], 3))} ")
+        statement += f"{str(round(x[ind], 5))} " + " ".join(map(str, coords[x[ind]])) + "\n"
+        # heres the genius! ^^
+    f.write(statement)
+    end = timer()
+
+    print(f"Finished in {(end-start)} sec")
+    #there is no way this will be faster! danggg
+
+    #   for k in key:
+    #       writeY = list(d[k])[ind][1]
+    ##      statement += str(round(writeY, 3))
+    #      if k == key[-1]:
+    #          f.write(f"{str(round(writeY, 3))}")
+    #       else:
+    #         f.write(f"{str(round(writeY, 3))} ")
+    # print(f"({x[e]},{3})")
     # print("finishito")
 
 f.close()
