@@ -87,7 +87,7 @@ with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\test.txt", mode='r
 
 f.close()
 
-numOfDataPoints = int((xMax - xMin) / 0.9)  # make this (max-min)/n where n is spacing
+numOfDataPoints = int((xMax - xMin) /4)  # make this (max-min)/n where n is spacing
 # print(numOfDataPoints)
 # numOfDataPoints += (len(d[key[0]])-2)
 x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing) nice! - 2020
@@ -100,7 +100,7 @@ print(f"Length of x: {len(x)}")
 # {john: [(x1,y1),(x2,y2)], shishir: [(x1,y1),()]
 
 with open("C:\\Users\\arnav\\Desktop\\whyArrayList\\testProj\\datas.txt", mode='w+') as f:
-    #  f.write(' '.join(key))
+    f.write(' '.join(key) + "\n")
     #  for k in key:
     # print(d[k])
     #     y = espace(d[k])
