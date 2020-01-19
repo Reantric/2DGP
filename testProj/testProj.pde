@@ -266,6 +266,7 @@ void info(){ //must multiply by reciprocal!
   textFont(nameFont);
   textSize(32);
  for (int c = 0; c < yCoords[max].length;c++){
+   if (yCoords[max][c] < 0) continue;
       fill(hexValues[c]);
       //check();
       textAlign(LEFT);
@@ -663,6 +664,7 @@ void graphData(){ //max++ is intrinsic!
     
     for (int c = 0; c < yCoords[i].length; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
     //or who knows might change my mind for efficiency reasons!
+      if (yCoords[i][c] < 0) continue;
       stroke(hexValues[c]);
       line(sX* (float) (xCoord[i] - origin), -sY* (float) yCoords[i][c], sX *(float) (xCoord[i+1] - origin), -sY* (float) yCoords[i+1][c]);
       noStroke();
@@ -677,6 +679,7 @@ void graphData(){ //max++ is intrinsic!
     //filter(BLUR,0);
     }
     for (int d = 0; d < yCoords[max].length; d++){
+      if (yCoords[max][d] < 0) continue;
       fill(255);
       circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][d]),12);
     }

@@ -26,8 +26,8 @@ from timeit import default_timer as timer
 # len(lst) - 2 will give you the amount of duplicates!
 def espace(data):
     xSpl = [a[0] for a in data[key[0]]]
-    xLength = len(x)
-    coords = {x[a]: [] for a in range(xLength)}  # gets X values!
+    dataPointSum = sum(xSpl)
+    coords = {x[a]: [] for a in range(numOfDataPoints)}  # gets X values!
     # n param needed for non-splined version!
     # fix edge case! #if n is 20 and we got 4 items, div to 6.666666
 
@@ -53,10 +53,15 @@ def espace(data):
     # print(len(dataPointY))  # quick check: 20 if 3 entries!
     for o in data:
         ySpl = [b[1] for b in data[o]]
+        negCount = ySpl.count(-1)
+      #  sleep(5)
         m = 3
-        spl = make_interp_spline(xSpl, ySpl, k=m)
-        dataPointY = spl(x)
-        for u in range(xLength):
+        spl = make_interp_spline(xSpl[negCount:], ySpl[negCount:], k=m)
+
+        limitAmt = int((xSpl[negCount] - xSpl[0])/4)
+        zeroList = [-1] * limitAmt
+        dataPointY = np.concatenate([zeroList,spl(x[limitAmt:])])
+        for u in range(numOfDataPoints):
             coords[x[u]] += [round(dataPointY[u],5)]
 
     # print(f"Spline object: {spl}: Splined list: {spl(x)}")
