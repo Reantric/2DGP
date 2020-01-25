@@ -3,6 +3,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.*;
 import java.sql.Timestamp;
+import java.util.Collections;
 //just imports it automatically lets goooooooo!
 
 //works at 20k
@@ -23,6 +24,7 @@ boolean runOnce = false;
 boolean movingY = false;
 boolean fading = false;
 boolean debug = false;
+boolean topDog = true;
 
 //PShader blur;
 //FIX 100 multiple when 5'ving!
@@ -30,9 +32,12 @@ double midline;
 double doublingFactor;
 double xCoord[];
 double yCoords[][];
+double textCoords[];
 String[] names;
-double dx;
+Coord[] coordObj;
 
+
+int rowLength;
 int max = 0;
 int count = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
@@ -69,8 +74,8 @@ double invariant = 760;
 Map<Double,double[]> coords = new HashMap<Double,double[]>(); //04:17:02
 //Map<Integer[],String> responses = new HashMap<Integer[],String>();
 
-int[] hexValues = {#00FFFF,#00ff00,#ff0000,#966FD6,#ffff00,#ffc0cb,#008080};
-int[] countY;
+int[] hexValues = {#00FFFF,#ff0000,#00ff00,#966FD6,#ffff00,#ffc0cb,#008080,#006400};
+int[][] countY;
 PImage[] images;
 float sX = 1 / (40000.0/2); //default 20.0k
 float xValue = 400 * (40000.0/2);
@@ -87,7 +92,7 @@ Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
   
 void fetch(){
-  sY = 0.36;
+  sY = 0.43;
   value = 500;
   scalar = 1000;
   boundary = 0.32;
@@ -100,6 +105,8 @@ void fetch(){
   
   xCoord = new double[lines.length-1];
   yCoords = new double[lines.length - 1][names.length]; //yCoords[n][0]
+  textCoords = new double[names.length];
+  coordObj = new Coord[names.length];
   //println("there are " + lines.length + " lines");
   for (int i = 1 ; i < lines.length; i++) {
     double[] yVals = new double[names.length];
@@ -114,7 +121,7 @@ void fetch(){
     //yCoord.add(Arrays.asList().stream().map(n -> n * 3));
   }
   
-  countY = new int[yCoords[max].length * yCoords[max].length];
+  countY = new int[yCoords[max].length][yCoords[max].length];
   images = new PImage[yCoords[max].length];
   for (int i = 0; i < images.length; i++){
     images[i] = loadImage(names[i].toLowerCase()+".png"); //all files must be saved in lowercase! remember this !!!!!!!
@@ -127,6 +134,12 @@ void fetch(){
    // }
    
    //0 - 150 >--- maximus of that goes to maxArr
+   for (int f = 0; f < textCoords.length; f++){
+    textCoords[f] = yCoords[0][f] + 1/sY;
+    coordObj[f] = new Coord(yCoords[0][f], hexValues[f], names[f], images[f]);
+  //  useComplement[f] = true;
+  }
+   Arrays.sort(coordObj);
    origin = xCoord[0]; //O(1)
    cut = origin;
    println("Origin: " + origin);
@@ -167,11 +180,13 @@ void funAilun(float x, float y){
 }
 
 void leaderboard(){
+ // println(Arrays.toString(textCoords));
   fill(255);
   textSize(42);
-  int maxInd = getIndexOfMax(yCoords[max]);
-  
-  if (maxInd != getIndexOfMax(yCoords[max+1])){
+  int maxInd = rowLength - 1;
+  Coord maxObj = coordObj[rowLength-1]; //check if.. names change:?:?:?:?:?:?:?:?:?:?:?
+  if (maxObj.name != names[getIndexOfMax(yCoords[max+1])]){
+    //ahhh this one might be a little...tough..? better way im sure.>>!
     //stop();
     cut = xCoord[max];
   }
@@ -188,7 +203,7 @@ void leaderboard(){
    // println((long) xCoord[max]);
   
     
-    image(images[maxInd],260+compensateX,-height+130 + yChange,160,160); //acount for x--> ALSO MAYBE TRY CATCH THIS?
+    image(maxObj.img,260+compensateX,-height+130 + yChange,160,160); //acount for x--> ALSO MAYBE TRY CATCH THIS?
     text("Leader: ",100+compensateX,-height + 120 + yChange);
     
     textAlign(LEFT);
@@ -199,7 +214,7 @@ void leaderboard(){
     
 
     textSize(50);
-    text(""+names[maxInd].replace("_"," ") + " (" + Math.round(yCoords[max][maxInd]) + ")",360 + compensateX,-height + 135 + yChange);
+    text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",360 + compensateX,-height + 135 + yChange);
 
 
     textAlign(CENTER);
@@ -219,6 +234,19 @@ int getIndexOfMax(double[] john){
   
 }
 
+int getClosestPair(int a){
+  double c = getMaxValue(yCoords[max]) + 5; //thats a feelsbad LOL
+  int r = -1;
+  for (int i = 0; i < yCoords[max].length; i++){
+    if (i == a) continue;
+    if (yCoords[max][i] > yCoords[max][a] && yCoords[max][i] < c){ //where 2 !< -2 ;D
+      c = yCoords[max][i];
+      r = i;
+    }
+  }
+  return r;
+}
+
 void info(){ //must multiply by reciprocal!
   //follow();
   leaderboard();
@@ -228,9 +256,6 @@ void info(){ //must multiply by reciprocal!
   rectMode(CORNER);
   textSize(36);
   
-  double[] currentValues = Arrays.copyOf(yCoords[max],yCoords[max].length);
- 
-  Arrays.sort(currentValues);
  // println(currentValues); //i need to get how the indices moved.
 
   strokeCap(SQUARE);
@@ -256,85 +281,49 @@ void info(){ //must multiply by reciprocal!
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
   textFont(nameFont);
   textSize(32);
- for (int c = 0; c < yCoords[max].length;c++){
-   if (yCoords[max][c] < 0) continue;
-      fill(hexValues[c]);
-      //check();
-      textAlign(LEFT);
+  
+  
+  //textCoords[rowLength-1] = coordObj[rowLength - 1].yValue + 1/sY; //aka maximum of the list!
+  
+  for (int c = 0; c < rowLength; c++){ //first init..:?
+    if (coordObj[c].yValue < 0) continue;
+    
+    textCoords[c] = coordObj[c].yValue + 1/sY; //initialize TC properly!
+  }
+
+  for (int c = rowLength - 2; c >= 0; c--){
+   int k = 3;
+   if (coordObj[c].yValue < 0) continue;
+   
+   if (textCoords[c+1] - textCoords[c] < 34/sY){ ///oh shit L O L o_O
+  //   println(coordObj[c].name);
+     textCoords[c] = textCoords[c+1] - 33/sY;
+   }
+  // textCoords[c] = coordObj[c].yValue + 1/sY; //works!
+ //  textCoords[c] = yCoords[max][c] + 1/sY; //doesn't work!
+
       
-      for (int m = 0; m < yCoords[max].length;m++){ //hmmm interessant!
-        //println(textY);
-        long k = 3;
-       // println(k);
-        
-        if (m == c){
-          if (yCoords[max].length == 1){
-            textY = (float) yCoords[max][c] + 1/sY;
-            break;
-          }
-          continue;
-        }
+  }
+   
+ for (int c = 0; c < rowLength; c++){ //doesnt work because richard comes before andy! a change from andy does not affect richard!
+   if (coordObj[c].getYCoord() < 0) continue;
+      fill(coordObj[c].hexCode);
+      //check();
+    //  int k = 3;
+      textAlign(LEFT);
+     // int m = getClosestPair(c); // <---THIS! IS PROBLEMgets closest neighbor thats ABOVE IT! (if -1, yer top dawggg)
 
-        
-        if (Math.abs(yCoords[max][m] - yCoords[max][c]) < 30/sY){
 
-          if (yCoords[max][c] > yCoords[max][m]){
-            
-         
-
-           textY = (float) yCoords[max][c] + 1/sY;
-
-           if (yCoords[max+8][m] > yCoords[max+8][c]){
-               countY[c*m]++;
-            //   println(Arrays.toString(countY));
-              //slowly move my man C DOWN!!!! just switch with m lmao
-              
-              //if (textY - 3/sY * countY[c*m] < yCoords[max+8][c] + 2/sY){
-               //  textY = (float) (yCoords[max+8][c] + 2/sY);
-              //} else {
-                textY -= k/sY * countY[c*m]; 
-              //}//keeps getting reset after every loop
-              
-            ///  println("RESULT: " + textY + " EXPECTED: " + ((float) (yCoords[max+8][m] - 28/sY)));
-            } else {
-              if (countY[c*m] != 0) countY[c*m] = 0;
-            }
-            
-            
-          } else { // m > c
-             
-              
-              textY = (float) yCoords[max][m] - 29/sY; //25 less!
-
-              if (yCoords[max+8][c] > yCoords[max+8][m]){ //seems legit!
-              //slowly move my man C UP! to where it b e l o n g s !
-          // ////   
-             if (textY + (k/sY * countY[c*m]) > yCoords[max+8][m] + 1/sY){
-               //stop();
-               textY = (float) (yCoords[max+8][c] + 1/sY);
-             } else {
-            // println("I EXIST!");
-             textY += k/sY * countY[c*m];
-             }
-             
-            }
-
-          }
-        
-        break;
-          
-        } else {
-         // if (countY[c] != 0) countY[c] = 0;
-          textY = (float) yCoords[max][c] + 1/sY;
-        }
-      }
+      textY = (float) textCoords[c];
+  
+      //}
        if (textY < 10/sY){
          textY = 10/sY;
        }
        imageMode(CENTER);
-       image(images[c],sX* (float) (xCoord[max] - origin) + 35,-sY*textY - 10,30,30); //hmm..?
+       image(coordObj[c].img,sX* (float) (xCoord[max] - origin) + 35,-sY*textY - 10,30,30); //hmm..?
        //println("SY: " + sY);
-       text(names[c].replace("_"," ") + " (" + Math.round(yCoords[max][c]) + ")",sX* (float) (xCoord[max] - origin) + 60,-sY*textY);
+       text(coordObj[c].name.replace("_"," ") + " (" + Math.round(coordObj[c].yValue) + ")",sX* (float) (xCoord[max] - origin) + 60,-sY*textY); //shit made it SO CONFUSING
        
     }
     //countY = new int[yCoords[max].length];
@@ -347,7 +336,24 @@ void info(){ //must multiply by reciprocal!
 
 }
 
+
+
+void initObjArr(){ //ok i think i know da issue!
+   rowLength = yCoords[max].length;
+   for (int c = 0; c < rowLength; c++){
+    // if (yCoords[max][c] < 0) continue; //maybe:? this is really nice :'( whatever IDGAF
+       coordObj[c] = new Coord(yCoords[max][c],hexValues[c],names[c], images[c]);
+   }
+   
+   Arrays.sort(coordObj); //Collections.reverseOrder()
+  // for (int j = 0; j < rowLength; j++){
+    // println(coordObj[j].toString());
+   //}
+   
+}
+
 void follow(){
+
   //pushPop = 220/sY;
   if (midline < height/2 - marginY){
     slowPushY = height - marginY;
@@ -536,7 +542,7 @@ String showTextEpoch(double a){
   cal.setTime(new Timestamp((long) a));
   LocalDate date2 = Instant.ofEpochMilli((long) a * 1000).atZone(ZoneId.systemDefault()).toLocalDate();
   String strMonth2 = date2.getMonth().toString().substring(0,3);
-  return "" + strMonth2.substring(0,1) + strMonth2.substring(1,3).toLowerCase() + " " + date2.getDayOfMonth() + " " + date2.getYear();
+  return "" + strMonth2.substring(0,1) + strMonth2.substring(1,3).toLowerCase() + " " + date2.getDayOfMonth() + ", " + date2.getYear();
 }
 
 
@@ -688,13 +694,14 @@ void graphData(){ //max++ is intrinsic!
     //println(max + " " + xCoord.get(i));
     strokeWeight(5);
     
-    for (int c = 0; c < yCoords[i].length; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
+    for (int c = 0; c < rowLength; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
     //or who knows might change my mind for efficiency reasons!
       if (yCoords[i][c] < 0) continue;
       stroke(hexValues[c]);
       line(sX* (float) (xCoord[i] - origin), -sY* (float) yCoords[i][c], sX *(float) (xCoord[i+1] - origin), -sY* (float) yCoords[i+1][c]);
       noStroke();
-    }
+    } //should be fine............!
+    
    // stroke(255,20,20);
 
     //line((float) xCoord[i], -sY* (float) yCoords[i][0], (float) xCoord[i+1], -sY* (float) yCoords[i+1][0]); //MESS WITH THIS !
@@ -733,7 +740,7 @@ void graphData(){ //max++ is intrinsic!
 
 void autoScale(){
    // line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
-    maxVal = getMaxValue(yCoords[max]); // pushPop  is 220/sY + yChange
+    maxVal = coordObj[rowLength - 1].yValue; // pushPop  is 220/sY + yChange
     if (maxVal * sY > invariant){ //very important! not changing the coordinate plane, just the values that objects take up in that coordinate plane!
      println("CALLED");
   //   sY = (float) ((pushPop*sY)/(maxVal - yChange));
@@ -935,7 +942,7 @@ void keyPressed(){
      break;
     case 'x':
       debug = true;
-    //  upwardsConstant = 1;
+      frameRate(1);
       break;
     case 'v':
       linesGone = !linesGone;
@@ -964,6 +971,7 @@ void draw(){
  // println("XSIZE " + xCoord.size());
   scale(scale*e);
   // translate(width/2,height/2);
+  initObjArr();
   follow();
   graphData();
  //translate(width - 800 +max,200+f(max));

@@ -5,7 +5,9 @@ from timeit import default_timer as timer
 import time, datetime
 
 spacing = 24100  # 1 second --> 1/4 day --->  umm..?
-#24100 default
+
+
+# 24100 default
 
 # john bandy shishir
 # 1 1 4 7
@@ -63,7 +65,7 @@ def espace(data):
             else:
                 break
 
-        for h in range(len(ySpl)-1,0,-1):
+        for h in range(len(ySpl) - 1, 0, -1):
             if ySpl[h] == "-":
                 endingDash += 1
             else:
@@ -79,25 +81,25 @@ def espace(data):
         #   print(len(ySpl))
         print(endingDash)
         print(initialDash)
-        #time.sleep(3000)
+        # time.sleep(3000)
         #  m = 3
         #  spl = make_interp_spline(tempX[negCount:], ySpl[negCount:], k=m)
-        spl = interpolate.interp1d(tempX, ySpl, kind='quadratic', fill_value="extrapolate", assume_sorted=True)
+        spl = interpolate.PchipInterpolator(np.asarray(tempX), np.asarray(ySpl), extrapolate=True)
 
         limitAmtS = int((xSpl[initialDash] - xSpl[0]) / spacing)
-        limitAmtE = int((xSpl[-1] - xSpl[-endingDash-1]) / spacing)
-      #  print(limitAmtS)
-       # print(limitAmtE)
-      #  print(xSpl)
-      #  time.sleep(3000)
+        limitAmtE = int((xSpl[-1] - xSpl[-endingDash - 1]) / spacing)
+        #  print(limitAmtS)
+        # print(limitAmtE)
+        #  print(xSpl)
+        #  time.sleep(3000)
         zeroList = [-1] * limitAmtS
         infList = [ySpl[-1]] * limitAmtE
-        dataPointY = np.concatenate([zeroList, spl(x[limitAmtS:xLength-limitAmtE]), infList])
+        dataPointY = np.concatenate([zeroList, spl(x[limitAmtS:xLength - limitAmtE]), infList])
 
-      #  print(len(dataPointY))
-       # print(len(x))
-       # time.sleep(3000)
-     #   time.sleep(5)
+        #  print(len(dataPointY))
+        # print(len(x))
+        # time.sleep(3000)
+        #   time.sleep(5)
         for u in range(numOfDataPoints):
             coords[x[u]] += [round(dataPointY[u], 5)]
 
@@ -129,9 +131,9 @@ with open("one.txt", mode='r+') as f:
         v = v.split()
         date = v.pop(0)
         # time.sleep(500)
-        #x = int(v.pop(0)) #convert to unix timestamp
+        # x = int(v.pop(0)) #convert to unix timestamp
         x = time.mktime(datetime.datetime.strptime(f'{date[6:]}-{date[:2]}-{date[3:5]}', '%Y-%m-%d').timetuple())
-        #v = list(map(int, v)) #turns every thing in v to an integer... maybe not the best idea
+        # v = list(map(int, v)) #turns every thing in v to an integer... maybe not the best idea
         v = [float(e) if isNum(e) else "-" for e in v]
         for i in range(len(key)):  ###HUGE CHANGE, REMOVING TUPLE ELEMENT INSIDE LIST! finished
             d[key[i]] += [(x, v[i])]
