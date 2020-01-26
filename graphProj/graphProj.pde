@@ -38,7 +38,7 @@ Coord[] coordObj;
 
 
 int rowLength;
-int max = 0;
+int max = 825;
 int count = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
 int tailLength = 3000;
@@ -74,11 +74,11 @@ double invariant = 760;
 Map<Double,double[]> coords = new HashMap<Double,double[]>(); //04:17:02
 //Map<Integer[],String> responses = new HashMap<Integer[],String>();
 
-int[] hexValues = {#00FFFF,#ff0000,#00ff00,#966FD6,#ffff00,#ffc0cb,#008080,#006400};
+int[] hexValues = {#00FFFF,#ff0000,#00ff00,#966FD6,#ffff00,#ffc0cb,#008080,#d4560d};
 int[][] countY;
 PImage[] images;
-float sX = 1 / (40000.0/2); //default 20.0k
-float xValue = 400 * (40000.0/2);
+float sX = 1 / (19723.0); //default 20.0k
+float xValue = 400 * (19723.0); //seconds!
 int startingX = (int) xValue;
 float sY = 2.3; //default : 2.3
 float testorFan = sY*(1/2); //INTEGER DIVISION!
@@ -136,7 +136,7 @@ void fetch(){
    //0 - 150 >--- maximus of that goes to maxArr
    for (int f = 0; f < textCoords.length; f++){
     textCoords[f] = yCoords[0][f] + 1/sY;
-    coordObj[f] = new Coord(yCoords[0][f], hexValues[f], names[f], images[f]);
+    coordObj[f] = new Coord(yCoords[0][f], hexValues[f], names[f], images[f], yCoords[10][f]);
   //  useComplement[f] = true;
   }
    Arrays.sort(coordObj);
@@ -157,6 +157,7 @@ void setup(){
   nameFont = createFont("Lato Bold",150,true);
   textFont(myFont);
   smooth(8);
+//  hint(ENABLE_STROKE_PURE);
 }
 
 
@@ -181,6 +182,7 @@ void funAilun(float x, float y){
 
 void leaderboard(){
  // println(Arrays.toString(textCoords));
+// stroke(255);
   fill(255);
   textSize(42);
   int maxInd = rowLength - 1;
@@ -292,12 +294,24 @@ void info(){ //must multiply by reciprocal!
   }
 
   for (int c = rowLength - 2; c >= 0; c--){
+   
    int k = 3;
    if (coordObj[c].yValue < 0) continue;
    
    if (textCoords[c+1] - textCoords[c] < 34/sY){ ///oh shit L O L o_O
-  //   println(coordObj[c].name);
-     textCoords[c] = textCoords[c+1] - 33/sY;
+     if (c == rowLength - 2)
+       textCoords[c] = textCoords[c+1] - 33/sY;
+     else
+       textCoords[c] = textCoords[c+1] - 33/sY - k/sY*countY[c+1][c+2]; //if only there was a way to keep tc[c+1] - 33/sY frozen for long enough so that the transition has finished...
+     
+     if (coordObj[c].futureY > coordObj[c+1].futureY){
+       countY[c][c+1]++;
+       double changeAmt = k/sY * countY[c][c+1];
+       textCoords[c] += changeAmt;
+       textCoords[c+1] -= changeAmt;
+     } else {
+       if (countY[c][c+1] > 9) countY[c][c+1] = 0;
+     }
    }
   // textCoords[c] = coordObj[c].yValue + 1/sY; //works!
  //  textCoords[c] = yCoords[max][c] + 1/sY; //doesn't work!
@@ -342,7 +356,7 @@ void initObjArr(){ //ok i think i know da issue!
    rowLength = yCoords[max].length;
    for (int c = 0; c < rowLength; c++){
     // if (yCoords[max][c] < 0) continue; //maybe:? this is really nice :'( whatever IDGAF
-       coordObj[c] = new Coord(yCoords[max][c],hexValues[c],names[c], images[c]);
+       coordObj[c] = new Coord(yCoords[max][c],hexValues[c],names[c], images[c], yCoords[max+10][c]);
    }
    
    Arrays.sort(coordObj); //Collections.reverseOrder()
@@ -395,12 +409,13 @@ int floorAny(double jjfanman, double val){
 }
 
 void initGraph(){
-  background(0);
-  
-    strokeWeight(8);
+  background(0); //<--- prob this idk
+  //if (debug)
+    //println("" + xCoord[max] + " " + date.getMonth());
+  strokeWeight(8);
   stroke(255);
   //line(0,-(float) (220)/sY + yChange,xV,-(float) (220)/sY + yChange);
-  line(0,-(float) (760) + yChange,xV,-(float) (760) + yChange); //midline! maxVal * sY < 760 :DD::D:D:D:D if maxVal*sY > 760, 760/maxVal
+ // line(0,-(float) (760) + yChange,xV,-(float) (760) + yChange); //midline! maxVal * sY < 760 :DD::D:D:D:D if maxVal*sY > 760, 760/maxVal
   
   stroke(255);
   xV = (compensateX + width)/sX;
@@ -684,6 +699,8 @@ float sumMid(){
 
 void graphData(){ //max++ is intrinsic!
   autoScale(); //decor! 
+  //background 0 is happening here.... no clue why :??
+  //text("gamingFan120",500,-500);
   //initGraph();
    //Arrays.sort(yCoords[max]);
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!) //advances 1 every time it is redrawn 
@@ -711,12 +728,15 @@ void graphData(){ //max++ is intrinsic!
    // line((float) xCoord[i], -sY* (float) yCoords[i][2], (float) xCoord[i+1], -sY* (float) yCoords[i+1][2]);
     //filter(BLUR,0);
     }
+   // text("gamingFan120",500,-500);
     for (int d = 0; d < yCoords[max].length; d++){
       if (yCoords[max][d] < 0) continue;
       fill(255);
       circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][d]),12);
     }
-    info();
+    // text("gamingFan120",500,-500); DOESNT WORK!
+    info(); //<--- only works info?!
+    //text("gamingFan120",500,-500);
    // midline = sY * ((yCoords[max][0] + yCoords[max][1])/2); //intrinsic!
   /// */
     /*double[] average = new double[2];
@@ -754,6 +774,7 @@ void autoScale(){
   //    instaChange(relMax,false);
  //  } //else println("relMax: " + relMax + " b: " + boundary + " dx " + dx);
    initGraph();
+  // text("gamingFan120",500,-500);// does not work!
     //relMax = (midline + margin)/yCoords[max][0];
   /* stroke(255);
     strokeWeight(10);
@@ -786,6 +807,7 @@ void autoScale(){
 
 void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   textSize(36);
+  //text("gamingFan120",500,-500); works!
   fill(0);
   noStroke();
   if (movingY){
@@ -958,6 +980,7 @@ void keyPressed(){
 }
 
 void draw(){
+ // surface.setVisible(false);
  // frameRate(0.12);
   //println(sY);
  // frameRate(200);
@@ -983,7 +1006,7 @@ void draw(){
     //sY += 0.01;
     //increaseScale();
 //  }
- // saveFrame("testAilun/line-######.png");
+  saveFrame("frameReplace/line-######.png");
 }
 
 
