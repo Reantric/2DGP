@@ -8,7 +8,6 @@ import java.util.Collections;
 
 //works at 20k
 
-NumberFormat dollar = NumberFormat.getCurrencyInstance(Locale.FRANCE);
 LocalDate date;
 
 PFont myFont;
@@ -38,7 +37,7 @@ Coord[] coordObj;
 
 
 int rowLength;
-int max = 825;
+int max = 3500;
 int count = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
 int tailLength = 3000;
@@ -68,6 +67,7 @@ double relMax = 2;
 double value = 100 * (1.0); //DO NOT TOUCH! nah //value is 200, sY is 1 if value is 500, sY has to be 0.4 but can be anything less???
 double maxVal;
 double minVal; 
+double balance = 0;
 double cut;
 double invariant = 760;
 
@@ -90,8 +90,12 @@ double scalar = value*2; //lol
 Scaling yAxis = new Scaling(255);
 Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
-  
-void fetch(){
+
+/**
+ *
+ *
+ */
+        void fetch(){
   sY = 0.43;
   value = 500;
   scalar = 1000;
@@ -99,10 +103,6 @@ void fetch(){
   //println(testorFan);
   String[] lines = loadStrings("datas.txt");
   names = lines[0].split(" ");
-  /*for (int n = 0; n < names.length; n++){
-    names[n] = names[n].replace("_"," ");
-  }*/
-  
   xCoord = new double[lines.length-1];
   yCoords = new double[lines.length - 1][names.length]; //yCoords[n][0]
   textCoords = new double[names.length];
@@ -144,66 +144,38 @@ void fetch(){
    cut = origin;
    println("Origin: " + origin);
    println(xCoord.length);
-   //responses.add(new int[],"Ailun is a great man \n, He created air!");
-  // responses.add(new {800,1050},"Did you know, that \n ailunMan ");
 }
 
 //final float minY = min(IT );
 
-void setup(){
+/**
+ * Creates canvas and two additional fonts. (Both at 150 to avoid downsampling)
+ */
+    void setup(){
   fetch();
   size(1920,1080,P2D);
   myFont = createFont("Lato",150,true);
   nameFont = createFont("Lato Bold",150,true);
   textFont(myFont);
   smooth(8);
-//  hint(ENABLE_STROKE_PURE);
 }
 
-
-float f(double x){
-  //stroke(255,15,15);
-  return (float) -Math.pow(x,1.4); //x^1.4
-}
-
-void funAilun(float x, float y){
-  if (xCoord[max] < 240){
-    text("Hello and welcome \n to this..?",x,y);
-  }
-  else if (xCoord[max] > 275 && xCoord[max] < 550){
-    text("Simply put, this \n project is about \n graphing data!",x,y);
-  }
-  else if (xCoord[max] > 600 && xCoord[max] < 1000){
-    text("It's not done yet \n but in this video \n I hope to provide \n a basis for this project",x,y);
-  }
-  else if (xCoord[max] > 1050 && xCoord[max] < 1400)
-    text("Did you know \n ailunMan got \n into Harvard!",x,y);
-}
-
-void leaderboard(){
- // println(Arrays.toString(textCoords));
-// stroke(255);
+/**
+ * Sets up the main text in the top half of the canvas.
+ * Leader is in the top left along with the amount of days that they have been leader.
+ * Date is in the top right, in Mon. Day, Year
+ */
+    void leaderboard(){
   fill(255);
   textSize(42);
   int maxInd = rowLength - 1;
-  Coord maxObj = coordObj[rowLength-1]; //check if.. names change:?:?:?:?:?:?:?:?:?:?:?
-  if (maxObj.name != names[getIndexOfMax(yCoords[max+1])]){
-    //ahhh this one might be a little...tough..? better way im sure.>>!
-    //stop();
-    cut = xCoord[max];
+  Coord maxObj = coordObj[rowLength-1]; // Get maximum object
+  if (maxObj.name != names[getIndexOfMax(yCoords[max+1])]){ // Check if the maxObj will be different in the next tick
+    cut = xCoord[max]; // Reset cut to the point where the maximum object was 'overthrown'
   }
-  
     //UNIX TS:
-    date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate();
+    date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
 
-    //cal.setTimeInMillis((long) xCoord[max] * 1000);
-  //  println(date);
-   
-    //date = LocalDateTime.ofEpochSecond((long) xCoord[max],0,ZoneOffset.UTC);
-  //  println((long) xCoord[max] * 1000);
-   // println(cal.get(Calendar.YEAR));
-   // println((long) xCoord[max]);
-  
     
     image(maxObj.img,260+compensateX,-height+130 + yChange,160,160); //acount for x--> ALSO MAYBE TRY CATCH THIS?
     text("Leader: ",100+compensateX,-height + 120 + yChange);
@@ -217,7 +189,6 @@ void leaderboard(){
 
     textSize(50);
     text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",360 + compensateX,-height + 135 + yChange);
-
 
     textAlign(CENTER);
 
@@ -294,15 +265,14 @@ void info(){ //must multiply by reciprocal!
   }
 
   for (int c = rowLength - 2; c >= 0; c--){
-   
    int k = 3;
    if (coordObj[c].yValue < 0) continue;
    
-   if (textCoords[c+1] - textCoords[c] < 34/sY){ ///oh shit L O L o_O
+   if (textCoords[c+1] - textCoords[c] < 34/sY || (c != rowLength - 2 && textCoords[c+1] - k/sY*countY[c+1][c+2] - textCoords[c] < 34/sY)){ ///oh shit L O L o_O Kevin IS NO LONGER AFFECTED BY THIS!!!!!!!!!!!!!!!
      if (c == rowLength - 2)
        textCoords[c] = textCoords[c+1] - 33/sY;
      else
-       textCoords[c] = textCoords[c+1] - 33/sY - k/sY*countY[c+1][c+2]; //if only there was a way to keep tc[c+1] - 33/sY frozen for long enough so that the transition has finished...
+       textCoords[c] = textCoords[c+1] - 33/sY - k/sY*countY[c+1][c+2]; // k/sY*countY[c+1][c+2] if only there was a way to keep tc[c+1] - 33/sY frozen for long enough so that the transition has finished...
      
      if (coordObj[c].futureY > coordObj[c+1].futureY){
        countY[c][c+1]++;
@@ -310,7 +280,12 @@ void info(){ //must multiply by reciprocal!
        textCoords[c] += changeAmt;
        textCoords[c+1] -= changeAmt;
      } else {
-       if (countY[c][c+1] > 9) countY[c][c+1] = 0;
+     //  balance = 0;
+    // println("gamers");
+       if (countY[c][c+1] > 9){
+         countY[c][c+1] = 0;
+         if (debug) stop();
+       }
      }
    }
   // textCoords[c] = coordObj[c].yValue + 1/sY; //works!
@@ -654,19 +629,6 @@ void essentialsY(float n){
   
 }
 
-void graph(){
-  initGraph();
-  for (double x = max-200; x < max; x+= 0.05){ //actual Graph!
-     double xU = x * sX;
-
-     line((float) xU,sY*f(x),(float) (xU+0.002),sY*f(x+0.002)); 
-     //circle((float) x,30,10); CANT HAVE THIS BECAUSE ITS BEING DRAWN 300 TIMES! 
-    }
-    noStroke();
-    circle((float) (max*sX), sY*f(max), 10);
-  
-}
-
 void sleep(int n){
   try
   {
@@ -678,9 +640,12 @@ void sleep(int n){
   }
 }
 
-
+/**
+  * 
+  *
+  *
+*/
 float sumMid(){
-  //assuming no jagged arrays
   float s = 0;
   int n = yCoords[max].length;
   //n = 2;
@@ -1006,7 +971,7 @@ void draw(){
     //sY += 0.01;
     //increaseScale();
 //  }
-  saveFrame("frameReplace/line-######.png");
+//  saveFrame("frameReplace/line-######.png");
 }
 
 
