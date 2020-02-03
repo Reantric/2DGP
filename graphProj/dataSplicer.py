@@ -4,15 +4,9 @@ import scipy.interpolate as interpolate
 from timeit import default_timer as timer
 import time, datetime
 
-spacing = 24100  # 1 second --> 1/4 day --->  umm..?
+# Required imports
 
-
-# 24100 default
-
-# john bandy shishir
-# 1 1 4 7
-# 2 3 9 21
-# 3 5 16 63
+spacing = 18000  # How far away every new x value should be
 
 
 # A B C ...
@@ -23,92 +17,65 @@ spacing = 24100  # 1 second --> 1/4 day --->  umm..?
 # .
 # .
 
-
-# (400-200)/0.1
-
-
-# len(lst) - 2 will give you the amount of duplicates!
 def espace(data):
-    xSpl = [a[0] for a in data[key[0]]]
-    # dataPointSum = sum(xSpl)
-    coords = {x[a]: [] for a in range(numOfDataPoints)}  # gets X values!
-    # n param needed for non-splined version!
-    # fix edge case! #if n is 20 and we got 4 items, div to 6.666666
-    xLength = len(x)
-    # nMod = numOfDataPoints % (len(dataLst)-1)
-    # dataPointY = np.zeros(0)
-    # for coords in range(len(dataLst)-1):
-    #     if coords == len(dataLst) - 1 - nMod:
-    #        n += 1
-    #         print(f"This should be printed approximately {nMod} times!")
-    #     y1,y2 = dataLst[coords][1],dataLst[coords+1][1]
-    # print(y1,y2)
-    # linspace [start,stop]
-    #   firstWaveY = np.linspace(y1,y2,n)
-    #   dataPointY = np.concatenate((dataPointY, firstWaveY))
+    """
+    :param data: A dictionary with x values and y values from a text file
+    :return: A new dictionary with the x values linspaced and the y values interpolated (PCHIP)
+    """
+    xSpl = [a[0] for a in data[key[0]]]  # Get all the x values from the dictionary (Since the x-values are shared
+    # between all values in the dictionary, it does not matter which one is taken
 
-    # only separate if this is run more than once!, how to add 1 more to list??
-    #  for m in range(len(dataLst)-1):
-    #   if m == len(dataLst) - 2:
-    #     dataPointY = np.delete(dataPointY,n*m)
-    #     else:
-    #       np.delete(dataPointY, n * m)
+    coords = {x[a]: [] for a in range(numOfDataPoints)}  # Creates a new dictionary with the x value being the key
+    # and the values being the y values that will be filled in
+    xLength = len(x)  # Length of linspaced x
 
-    # print(len(dataPointY))  # quick check: 20 if 3 entries!
     for o in data:
         initialDash = 0
         endingDash = 0
-        ySpl = [b[1] for b in data[o]]  # where o is key
+        ySpl = [b[1] for b in data[o]]  # Where o is key
         for g in range(len(ySpl)):
-            if ySpl[g] == "-":
+            if ySpl[g] == "-":  # If there is a dash in the y-value
                 initialDash += 1
             else:
                 break
 
-        for h in range(len(ySpl) - 1, 0, -1):
-            if ySpl[h] == "-":
+        for h in range(len(ySpl) - 1, 0, -1):  # Going backwards
+            if ySpl[h] == "-":  # If there is a dash in the y-value
                 endingDash += 1
             else:
                 break
 
-        tempX = [xSpl[m] for m in range(len(xSpl)) if ySpl[m] != "-"]
-        ySpl = [item for item in ySpl if item != "-"]
+        tempX = [xSpl[m] for m in range(len(xSpl)) if ySpl[m] != "-"]  # Get all x's where their corresponding y does
+        # not have a dash
+        ySpl = [item for item in ySpl if item != "-"]  # Get all y values without a dash
 
-        ## sleep(500)
-        #  print(ySpl[negCount:])
-        #   print(len(ySpl[negCount:]))
-        #   print(len(tempX))
-        #   print(len(ySpl))
-        print(endingDash)
-        print(initialDash)
-        # time.sleep(3000)
-        #  m = 3
-        #  spl = make_interp_spline(tempX[negCount:], ySpl[negCount:], k=m)
-        spl = interpolate.PchipInterpolator(np.asarray(tempX), np.asarray(ySpl), extrapolate=True)
+        #  print(endingDash)
+        #  print(initialDash) Debugging
 
-        limitAmtS = int((xSpl[initialDash] - xSpl[0]) / spacing)
-        limitAmtE = int((xSpl[-1] - xSpl[-endingDash - 1]) / spacing)
-        #  print(limitAmtS)
-        # print(limitAmtE)
-        #  print(xSpl)
-        #  time.sleep(3000)
-        zeroList = [-1] * limitAmtS
-        infList = [ySpl[-1]] * limitAmtE
-        dataPointY = np.concatenate([zeroList, spl(x[limitAmtS:xLength - limitAmtE]), infList])
+        spl = interpolate.PchipInterpolator(np.asarray(tempX), np.asarray(ySpl), extrapolate=True)  # Create a PCHIP
+        # interpolator that will interpolate the data
 
-        #  print(len(dataPointY))
-        # print(len(x))
-        # time.sleep(3000)
-        #   time.sleep(5)
+        limitAmtS = int((xSpl[initialDash] - xSpl[0]) / spacing)  # Find the point where the dashes do not appear
+        # anymore in the linspaced x from the start using initialDash
+        limitAmtE = int((xSpl[-1] - xSpl[-endingDash - 1]) / spacing)  # Find the point where the dashes do not appear
+        # anymore in the linspaced x from the end using endingDash
+
+        zeroList = [-1] * limitAmtS  # If there are dashes in the beginning, insert -1 in the interpolated dataset
+        infList = [ySpl[-1]] * limitAmtE  # If there are dashes in the end, insert -1 in the interpolated dataset
+        dataPointY = np.concatenate(
+            [zeroList, spl(x[limitAmtS:xLength - limitAmtE]), infList])  # Concatenate all lists/arrays
+
         for u in range(numOfDataPoints):
-            coords[x[u]] += [round(dataPointY[u], 5)]
+            coords[x[u]] += [round(dataPointY[u], 5)]  # Add the dataset to coords one by one (len(x) == len(dataPointY)
 
-    # print(f"Spline object: {spl}: Splined list: {spl(x)}")
     return coords
-    # dataPointY = [np.delete(dataPointY,10*m) for m in range(len(dataLst)-1)][-1] horribly inefficient fix!
 
 
 def isNum(n):
+    """
+    :param n: Any number
+    :return: Number is a float
+    """
     try:
         float(n)
     except ValueError:
@@ -117,82 +84,68 @@ def isNum(n):
         return True
 
 
-####PROGRAM OUTPUTS FUNCTIONALLY!
-with open("one.txt", mode='r+') as f:
-    f.seek(0)
-    key = f.readline()
-    data = f.readlines()
-    # print(key)
-    # print(file[0])
-    key = key.split()
-    d = {key[a]: [] for a in range(len(key))}  # python i love you!
-    # print(key)
+with open("one.txt", mode='r+') as f:  # Open any text file with values in it separated by spaces
+    """
+    v is not used anywhere outside of this
+    """
+    f.seek(0)  # Go to the beginning of the file
+    key = f.readline()  # Get the first line of the text file where the names should be
+    key = key.split()  # Split the String 'key' into a list
+    data = f.readlines()  # Get a list of all the data in the text file
+    d = {key[a]: [] for a in range(len(key))}  # Create a dictionary to store x values and y values under a named key
+    # d[name] = [(x1,y1),(x2,y2),(x3,y3)] where x values are the same for every name
+
     for v in data:
-        v = v.split()
-        date = v.pop(0)
-        # time.sleep(500)
-        # x = int(v.pop(0)) #convert to unix timestamp
+        v = v.split()  # Split each line of the data
+        date = v.pop(0)  # Get the first item of v and delete the first item from the list
+        # x = int(v.pop(0)) If an integer is wanted for the x-axis
         x = time.mktime(datetime.datetime.strptime(f'{date[6:]}-{date[:2]}-{date[3:5]}', '%Y-%m-%d').timetuple())
-        # v = list(map(int, v)) #turns every thing in v to an integer... maybe not the best idea
-        v = [float(e) if isNum(e) else "-" for e in v]
-        for i in range(len(key)):  ###HUGE CHANGE, REMOVING TUPLE ELEMENT INSIDE LIST! finished
-            d[key[i]] += [(x, v[i])]
-    # print(d)
+        # Turns a YY-MM-DD into a Unix Timestamp
+
+        # v = list(map(int, v)) # If an integer is wanted for the x-axis
+        v = [float(e) if isNum(e) else "-" for e in v]  # If each element in v is a number and not a dash
+        for i in range(len(key)):
+            d[key[i]] += [(x, v[i])]  # Append a tuple (x,y) into the dictionary with the appropriate name key
+
+    # TODO Fix the efficiency of finding the maximum and minimum X value
     xMax = list(d.values())[0][-1][0]
-    xMin = list(d.values())[0][0][0]  # disgusting!
+    xMin = list(d.values())[0][0][0]
 
-f.close()
+f.close()  # Close the file
 
-numOfDataPoints = int((xMax - xMin) / spacing)  # make this (max-min)/n where n is spacing
-# print(numOfDataPoints)
-# numOfDataPoints += (len(d[key[0]])-2)
-x = np.linspace(xMin, xMax, numOfDataPoints)  # it does work! (if not, subtract the len thing) nice! - 2020
+numOfDataPoints = int((xMax - xMin) / spacing)  # Gets the total number of datapoints generated by the spacing
 
-n = int((numOfDataPoints + (len(d[key[0]]) - 2)) / (len(d[key[0]]) - 1))  # n defined here!
+x = np.linspace(xMin, xMax, numOfDataPoints)  # Linspace the original x values to fit numOfDataPoints amount of x values
 
-print(f"Val of n: {n}")
-# print("AAAAAAAAAA")
-print(f"Length of x: {len(x)}")
-# {john: [(x1,y1),(x2,y2)], shishir: [(x1,y1),()]
+with open("datas.txt", mode='w+') as f:  # Create a new text file
+    """
+     Write all the interpolated data into a new text file 
+    """
+    f.write(' '.join(key) + "\n")  # The first line of the new text file is the key
 
-with open("datas.txt", mode='w+') as f:
-    f.write(' '.join(key) + "\n")
-    #  for k in key:
-    # print(d[k])
-    #     y = espace(d[k])
-    #      print(f"Length of y: {len(y)}")
-    #      d[k].clear()
-    #      d[k] += list(zip(x, y))
-    # print(d)
-    start = timer()
+    start = timer()  # Check how long program takes to run
     print("Calculating")
-    coords = espace(d)
-    # print(y)
+    coords = espace(d)  # Get the dictionary returned by espace
     print("Beginning!")
-    # print(" ".join(map(str,coords[x[2]])))
-    statement = ""
+
+    statement = ""  # Create an empty String to be populated
 
     for ind in range(numOfDataPoints - 1):
-        #  if ind % 400 == 0: tester
-        #     print(f"{100 * ind / (numOfDataPoints - 1)}% done!")
-        # f.write(f"\n{str(round(x[ind], 3))} ")
-        statement += f"{str(round(x[ind], 5))} " + " ".join(map(str, coords[x[ind]])) + "\n"
-        # heres the genius! ^^
-    f.write(statement)
-    end = timer()
+        if ind % 3000 == 0:  # Check every 3000 times the loop is run and output a % of completion
+            print(f"{100 * ind / (numOfDataPoints - 1)}% done!")
+
+        statement += f"{str(round(x[ind], 5))} " + " ".join(map(str, coords[x[ind]])) + "\n"  # Add to the String the
+        # dataset information in the same format as the original
+
+        if ind % 8000 == 0:  # Every 8000 times the loop is run, write the statement (so that the statement doesn't
+            # get too big)
+            f.write(statement)
+            statement = ""  # Reset the statement
+
+    f.write(statement)  # Write whatever is left of the statement
+    end = timer()  # End the timer
 
     print(f"Finished in {(end - start)} sec")
-    # there is no way this will be faster! danggg
-
-    #   for k in key:
-    #       writeY = list(d[k])[ind][1]
-    ##      statement += str(round(writeY, 3))
-    #      if k == key[-1]:
-    #          f.write(f"{str(round(writeY, 3))}")
-    #       else:
-    #         f.write(f"{str(round(writeY, 3))} ")
-    # print(f"({x[e]},{3})")
-    # print("finishito")
 
 f.close()
 print("Now complete!")
