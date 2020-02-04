@@ -36,9 +36,9 @@ String[] names;
 Coord[] coordObj;
 
 
+int fadeMoveX = 5;
 int rowLength;
-int max = 3500;
-int count = 0;
+int max = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
 int tailLength = 3000;
 int margin = 320;
@@ -47,7 +47,6 @@ int startMovingX = 110; //lovemyself! <-- def 150
 int marginY = 70; ///70
 int textMovementY = -56; // amount text is moved from canvas line x=0
 
-float scale = 1;
 float e = 1;
 float xPush = 800;
 float marking = 100; //how much the y-axis is moved at origin!!!!! default: 100
@@ -57,8 +56,6 @@ float transpY = 255;
 float transpX = 255;
 float endingY;
 float textY;
-float overtakeM;
-float overtakeC;
 float xV;
 float yChange;
 
@@ -67,7 +64,6 @@ double relMax = 2;
 double value = 100 * (1.0); //DO NOT TOUCH! nah //value is 200, sY is 1 if value is 500, sY has to be 0.4 but can be anything less???
 double maxVal;
 double minVal; 
-double balance = 0;
 double cut;
 double invariant = 760;
 
@@ -92,16 +88,18 @@ Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
 
 /**
- *
- *
+ * Initialize everything
+ * Set
  */
-        void fetch(){
+void fetch(){
+  // Custom values
   sY = 0.43;
   value = 500;
   scalar = 1000;
   boundary = 0.32;
-  //println(testorFan);
-  String[] lines = loadStrings("datas.txt");
+  // Custom values
+
+  String[] lines = loadStrings("datas.txt"); // Load all lines of datas.txt into a file.
   names = lines[0].split(" ");
   xCoord = new double[lines.length-1];
   yCoords = new double[lines.length - 1][names.length]; //yCoords[n][0]
@@ -177,14 +175,14 @@ Scaling xAxis = new Scaling(255);
     date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
 
     
-    image(maxObj.img,260+compensateX,-height+130 + yChange,160,160); //acount for x--> ALSO MAYBE TRY CATCH THIS?
+    image(maxObj.img,260+compensateX,-height+130 + yChange,160,160); // Create an image with the maxObj's image attribute and place it at 260',130'
     text("Leader: ",100+compensateX,-height + 120 + yChange);
     
-    textAlign(LEFT);
-    textFont(nameFont);
+    textAlign(LEFT); // Align all text to the left!
+    textFont(nameFont); // Set textFont to a bolded Lato
     textSize(36);
     
-    text("For " + Math.round(xCoord[max] - cut)/86400 + " days", 360+compensateX, -height + 190 + yChange);
+    text("For " + Math.round(xCoord[max] - cut)/86400 + " days", 360+compensateX, -height + 190 + yChange); // Display difference of current date and date when #1 became #1
     
 
     textSize(50);
@@ -193,13 +191,18 @@ Scaling xAxis = new Scaling(255);
     textAlign(CENTER);
 
 }
+/**
+ * Get the index of the maximum value
+ * @param double[] Array
+ * @return integer index of maximum value
+ */
 
-int getIndexOfMax(double[] john){
-  double largest = john[0];
+int getIndexOfMax(double[] arr){
+  double largest = arr[0];
   int index = 0;
-  for (int i = 1; i < john.length; i++){
-    if (john[i] > largest){
-      largest = john[i];
+  for (int i = 1; i < arr.length; i++){
+    if (arr[i] > largest){
+      largest = arr[i];
       index = i;
     }
   }
@@ -207,18 +210,6 @@ int getIndexOfMax(double[] john){
   
 }
 
-int getClosestPair(int a){
-  double c = getMaxValue(yCoords[max]) + 5; //thats a feelsbad LOL
-  int r = -1;
-  for (int i = 0; i < yCoords[max].length; i++){
-    if (i == a) continue;
-    if (yCoords[max][i] > yCoords[max][a] && yCoords[max][i] < c){ //where 2 !< -2 ;D
-      c = yCoords[max][i];
-      r = i;
-    }
-  }
-  return r;
-}
 
 void info(){ //must multiply by reciprocal!
   //follow();
@@ -228,8 +219,7 @@ void info(){ //must multiply by reciprocal!
   strokeCap(ROUND);
   rectMode(CORNER);
   textSize(36);
-  
- // println(currentValues); //i need to get how the indices moved.
+
 
   strokeCap(SQUARE);
   beginShape();
@@ -335,9 +325,6 @@ void initObjArr(){ //ok i think i know da issue!
    }
    
    Arrays.sort(coordObj); //Collections.reverseOrder()
-  // for (int j = 0; j < rowLength; j++){
-    // println(coordObj[j].toString());
-   //}
    
 }
 
@@ -420,7 +407,7 @@ void initGraph(){
         continue;
       }
       
-      if (a < xCoord[max] - origin - (newWidth - textChange + startMovingX - 15)/sX){ //id: fading default +15 //26 from 120-94 :(
+      if (a < xCoord[max] - origin - (newWidth - textChange + startMovingX - fadeMoveX)/sX){ //id: fading default +15 //26 from 120-94 :(
         //begin fading!
         stroke(122,122,122, xAxis.fadeOut(21));
        // fill(255, xAxis.fadeOut(11));
@@ -792,7 +779,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
         continue;
       }
      
-     if (a < xCoord[max] - origin - (newWidth - textChange + startMovingX - 15)/sX){ //fix that later!
+     if (a < xCoord[max] - origin - (newWidth - textChange + startMovingX - fadeMoveX)/sX){ //fix that later! id: fading
      //stroke(122,122,122,xAxis.getTransp());
      fill(255, xAxis.getTransp());
      } else {
@@ -957,7 +944,7 @@ void draw(){
   
   //println("MAX: " + max);
  // println("XSIZE " + xCoord.size());
-  scale(scale*e);
+  scale(1*e);
   // translate(width/2,height/2);
   initObjArr();
   follow();
