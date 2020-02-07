@@ -7,7 +7,7 @@ import java.util.Collections;
 //just imports it automatically lets goooooooo!
 
 //works at 20k
-
+//160,160,160 rgb for greyyyyyyyyy
 LocalDate date;
 
 PFont myFont;
@@ -35,7 +35,7 @@ double textCoords[];
 String[] names;
 Coord[] coordObj;
 
-
+int grayscaleCoefficient = 190;
 int fadeMoveX = 5;
 int rowLength;
 int max = 0;
@@ -329,7 +329,7 @@ void initObjArr(){ //ok i think i know da issue!
 }
 
 void follow(){
-
+  println("m: " + midline);
   //pushPop = 220/sY;
   if (midline < height/2 - marginY){
     slowPushY = height - marginY;
@@ -414,18 +414,9 @@ void initGraph(){
       } else {
         stroke(122,122,122);
        // fill(255);
-      }
-      
-     
-      //fadeOut();
-      
-      if (midline > height/2 - marginY && movingY){
-          //text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,height/2 - (float) (midline + 6));
-        line(a*sX,-(float) (midline + height/2),a*sX,(float) (height/2 - midline) - marginY); //this is the issue!
-      } else {
-      //text(showText(a).indexOf(".") < 0 ? showText(a) : showText(a).replaceAll("0*$", "").replaceAll("\\.$", ""),a-16,30); // x-axis
-      line(a*sX,-height,a*sX,-2);
-    }
+      }    
+    
+    line(a*sX,yChange-height,a*sX,movingY ? yChange : -2);
     
   }
   
@@ -634,18 +625,17 @@ void sleep(int n){
 */
 float sumMid(){
   float s = 0;
-  int n = yCoords[max].length;
+  int n = 0;
   //n = 2;
-  for (int i = 0; i < n; i++){
-    if (yCoords[max][i] < 0){
-      n--;
-      //print("gaymer");
-      continue;
-      }
-    
-    s += yCoords[max][i];
-  }
-  
+  for (int i = rowLength - 1; i >= 0; i--){
+    double yCheck = coordObj[i].yValue;
+    if (yCheck < 0){
+      break;
+    }
+    s += yCheck;
+    n++;
+  } 
+ 
   return sY*s/n;
 }
 
@@ -758,6 +748,7 @@ void autoScale(){
 }
 
 void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
+  textFont(nameFont); //
   textSize(36);
   //text("gamingFan120",500,-500); works!
   fill(0);
@@ -781,10 +772,9 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
      
      if (a < xCoord[max] - origin - (newWidth - textChange + startMovingX - fadeMoveX)/sX){ //fix that later! id: fading
      //stroke(122,122,122,xAxis.getTransp());
-     fill(255, xAxis.getTransp());
+     fill(grayscaleCoefficient, xAxis.getTransp());
      } else {
-        stroke(122,122,122);
-        fill(255);
+        fill(grayscaleCoefficient);
       }
       
     textAlign(CENTER);
@@ -816,13 +806,12 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     
     if (b % scalar != 0){ //weeding stage! (aka Oy) if 10xxx, just f00kin leave it alone! (ALREADY DONE!)
        // fadeOut(1)
-        fill(255,255,255,yAxis.getTransp());
+        fill(grayscaleCoefficient,yAxis.getTransp());
        // stroke(122,122,122,yAxis.getTransp());
        
       } 
       else {
-          fill(255,255,255);
-          stroke(122,122,122);
+          fill(grayscaleCoefficient,255);
       }
       
      textAlign(CENTER,CENTER); //id fanman1
