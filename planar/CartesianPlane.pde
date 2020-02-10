@@ -47,7 +47,7 @@ public class CartesianPlane implements Plane {
         fill(190);
         
         // Rotation
-        pushMatrix();
+     //   pushMatrix();
         if (easing < 0.05 && abs(rotation-finalRotation) >= 0.01){
         //  println("e: " + easing + " cR " + rotation + " fr: " + finalRotation);
           easing *= 1.045; 
@@ -57,7 +57,7 @@ public class CartesianPlane implements Plane {
           rotation = lerp(rotation,finalRotation,easing);
        
 
-        if (rotation != 0 && finalRotation != 0 && abs(rotation-finalRotation) < 0.01){
+        if (abs(rotation-finalRotation) < 0.01){
           easing = 0.0004;
         }
         //rotation = map(rotation,rotation,finalRotation,rotation,finalRotation);
@@ -77,7 +77,7 @@ public class CartesianPlane implements Plane {
           line(-sX*startingX,sY*y,sX*startingX,sY*y);
          
         }
-        popMatrix();
+     //   popMatrix();
         
         labelAxes();
         

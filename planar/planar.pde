@@ -9,8 +9,8 @@ void setup(){
   size(1920,1080,P2D);
   a = new slowLine();
   //println(Arrays.toString(PFont.list()));
-  myFont = loadFont("test.vlw");
-  //myFont = createFont("CMU Serif Italic",150,true);
+ // myFont = loadFont("test.vlw");
+  myFont = createFont("Lato Bold",150,true);
   textFont(myFont, 32);
   plane = new CartesianPlane(5,5);
   smooth(8);
@@ -57,8 +57,11 @@ void keyPressed(){
     case 'v':
       plane.rotatePlane(PI/2);
       break;
+    case 'c':
+      plane.rotatePlane(0);
+      break;
     case 'd':
-      plane.restrictDomain(-1,1);
+      plane.restrictDomain(-PI/2,PI/2);
       break;
     case 's':
       plane.sY *= 1.1;
@@ -71,6 +74,6 @@ void draw(){
   scale(e);
   plane.generatePlane();
   plane.graph();
-  
+ // saveFrame("rotate90/line-######.png");
  // directions();
 }
