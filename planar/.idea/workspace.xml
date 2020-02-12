@@ -56,5 +56,9 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="808" y="430" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1581211616340" />
+    <state x="656" y="365" key="com.intellij.ide.util.TipDialog" timestamp="1581470444434">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="656" y="365" key="com.intellij.ide.util.TipDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1581470444434" />
   </component>
 </project>

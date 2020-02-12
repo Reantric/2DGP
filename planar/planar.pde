@@ -1,15 +1,12 @@
 float e = 1;
-slowLine a;
 CartesianPlane plane;
 Scaling c = new Scaling(0);
 int max = -width/2;
+float angle;
 PFont myFont;
 
 void setup(){
   size(1920,1080,P2D);
-  a = new slowLine();
-  //println(Arrays.toString(PFont.list()));
- // myFont = loadFont("test.vlw");
   myFont = createFont("Lato Bold",150,true);
   textFont(myFont, 32);
   plane = new CartesianPlane(5,5);
@@ -37,11 +34,9 @@ public class slowLine {
 }
 
 void directions(){
-  if (a.slowLine(200,200,200,-200))
-    return;
-  
-  plane.createPoint(20,-20);
-  plane.createPoint(40,20);
+    plane.rotatePlane(angle);
+//  plane.createPoint(20,-20);
+//  plane.createPoint(40,20);
 }
 
 void mouseWheel(MouseEvent event) {
@@ -55,10 +50,10 @@ void increaseScale(){
 void keyPressed(){
   switch (key){
     case 'v':
-      plane.rotatePlane(PI/2);
+      angle = PI/2;
       break;
     case 'c':
-      plane.rotatePlane(0);
+      angle = 0;
       break;
     case 'd':
       plane.restrictDomain(-PI/2,PI/2);
@@ -74,6 +69,7 @@ void draw(){
   scale(e);
   plane.generatePlane();
   plane.graph();
+  directions();
  // saveFrame("rotate90/line-######.png");
  // directions();
 }
