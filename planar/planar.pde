@@ -35,6 +35,7 @@ public class slowLine {
 
 void directions(){
     plane.rotatePlane(angle);
+    plane.drawVector(new PVector(10,5));
 //  plane.createPoint(20,-20);
 //  plane.createPoint(40,20);
 }
@@ -65,7 +66,6 @@ void keyPressed(){
 }
 
 void draw(){
- // translate(width/2,height/2);scale(e);
   scale(e);
   plane.generatePlane();
   plane.graph();

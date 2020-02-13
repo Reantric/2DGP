@@ -1,5 +1,3 @@
-import processing.core.lerp;
-
 public class Easing {
     float easing = 0.0004;
     float incrementor = 0;
@@ -10,6 +8,7 @@ public class Easing {
 
     public boolean s() {
         // To be implemented
+        return true;
     }
 
     /**
@@ -43,6 +42,6 @@ public class Easing {
      * @param i Increase ease by multiplier "i"
      */
     public void incEase(float i){
-        ease *= i;
+        easing *= i;
     }
 }

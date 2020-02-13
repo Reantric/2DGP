@@ -17,6 +17,12 @@ public class CartesianPlane implements Plane {
     float restrictedDomainX1;
     float restrictedDomainX2;
     
+      int state = 0;
+      int a = 255;
+      int r = 255;
+      int g = 0;
+      int b = 0;
+    
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
@@ -47,9 +53,11 @@ public class CartesianPlane implements Plane {
        textAlign(CENTER,CENTER);
        translate(width/2,height/2);
        stroke(122);
+       strokeWeight(4);
        fill(190);
-        
-       rotate(rotation);
+       
+     //  pushMatrix();
+       rotate(rotation); //-PI/2
                 
        for (float x = startingX; x < -startingX; x+= xValue){
           if (x == 0) continue;
@@ -70,7 +78,8 @@ public class CartesianPlane implements Plane {
         line(-sX*startingX,0,sX*startingX,0);
         line(0,-sY*startingY,0,sY*startingY);
         
-        
+     //   popMatrix();
+
         labelAxes();
         
     }
@@ -181,6 +190,46 @@ public class CartesianPlane implements Plane {
     }
     
     /**
+    *
+    * Cycle through all colors of the rainbow
+    */
+    public int getHexColor(){
+      
+      if(state == 0){
+          g++;
+          if(g == 255)
+              state = 1;
+      }
+      if(state == 1){
+          r--;
+          if(r == 0)
+              state = 2;
+      }
+      if(state == 2){
+          b++;
+          if(b == 255)
+              state = 3;
+      }
+      if(state == 3){
+          g--;
+          if(g == 0)
+              state = 4;
+      }
+      if(state == 4){
+          r++;
+          if(r == 255)
+              state = 5;
+      }
+      if(state == 5){
+          b--;
+          if(b == 0)
+              state = 0;
+      }
+      return (a << 24) + (r << 16) + (g << 8) + (b);
+
+    }
+    
+    /**
     * @param x x-coordinate of point
     * @param y y-coordinate of point
     * Creates a visible point at that location
@@ -192,6 +241,26 @@ public class CartesianPlane implements Plane {
       stroke(255,scaler.fadeIn(9));
       fill(255,scaler.getTransp());
       circle(x,y,20);
+  }
+  
+  /**
+  * @param v Vector to be drawn
+  * Draws vector in Cartesian Space
+  */
+  public void drawVector(PVector v){
+
+    pushMatrix();
+      
+      float triangleSize = 8;
+      float magnitude = sX*v.mag() - 20; // 20 is a constant, figure out why it does not work with abstraction
+      stroke(getHexColor());
+      strokeCap(SQUARE);
+      strokeWeight(10);
+      rotate(-v.heading());
+      line(0,0,magnitude,0);
+      triangle(magnitude,triangleSize,magnitude,-triangleSize,magnitude+triangleSize*1.6,0);
+      
+    popMatrix();
   }
   
   /**
