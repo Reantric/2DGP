@@ -1,24 +1,29 @@
 public class Easing {
-    float easing = 0.0004;
-    float incrementor = 0;
-    float change;
-    public Easing(float c) {
+    float easing;
+    float incrementor;
+    float change; //finalRotation in CP case
+    
+    public Easing(float c, float e) {
         change = c;
+        easing = e;
     }
-
-    public boolean s() {
-        // To be implemented
-        return true;
+    
+    public Easing(float c){
+      change = c;
+      easing = 0.0004;
+    }
+    
+    public boolean isEqual() {
+        return abs(incrementor-change) < 0.01;
     }
 
     /**
      *
-     * @param start
      * @param stop
      * @return Linear interpolated value
      */
-    public float incValue(float start, float stop){ // Make quadratic/polynomial later!
-        return lerp(start,stop,easing);
+    public void incValue(){ // Make quadratic/polynomial later!
+        incrementor = lerp(incrementor,change,easing);
     }
 
     /**
@@ -33,7 +38,7 @@ public class Easing {
     /**
      * Reset easing to default value of 0.0004
      */
-    public void resetEase() {
+    public void reset() {
         easing = 0.0004;
     }
 

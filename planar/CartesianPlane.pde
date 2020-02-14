@@ -10,23 +10,20 @@ public class CartesianPlane implements Plane {
     float startingX;
     float startingY;
     float scaleFactor = 0.06;
-    float max = 0;
-    float easing = 0.0004;
-    float rotation = 0;
+    float max = 0; //counter
     boolean restrictDomain = false;
     float restrictedDomainX1;
     float restrictedDomainX2;
     
-      int state = 0;
-      int a = 255;
-      int r = 255;
-      int g = 0;
-      int b = 0;
-    
+    /* Object initializations */  // Create color object soon for animateVector();
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
-
+    Easing slowRotate = new Easing(0);
+    Easing animVector = new Easing(0);
+    /* Object initializations */
+    
+    
     /**
      *
      * @param xSpace Distance between x ticks
@@ -37,9 +34,9 @@ public class CartesianPlane implements Plane {
         yValue = ySpace;
         sX = 200/xValue;
         sY = 200/yValue;
-         startingX = -width/(2*sX) - xValue/5;
-         startingY = -width/(2*sY) - yValue/5;
-         max = startingX;
+        startingX = -width/(2*sX) - xValue/5;
+        startingY = -width/(2*sY) - yValue/5;
+        max = startingX;
     }
     
     /**
@@ -56,8 +53,9 @@ public class CartesianPlane implements Plane {
        strokeWeight(4);
        fill(190);
        
+       
      //  pushMatrix();
-       rotate(rotation); //-PI/2
+       rotate(slowRotate.incrementor); //-PI/2
                 
        for (float x = startingX; x < -startingX; x+= xValue){
           if (x == 0) continue;
@@ -119,9 +117,9 @@ public class CartesianPlane implements Plane {
       
       for (float i = startingX; i < max; i+=scaleFactor){
         if (i < sMax || i > endG){
-           stroke(125,255,65,fadeGraph.fadeOut(0.01));
+           stroke(125,255,255,fadeGraph.fadeOut(0.01));
         } else
-           stroke(125,255,65);
+           stroke(getColor(i),255,255);
         
         line(sX*i,-sY*f(i),sX*(i+scaleFactor),-sY*(f(i+scaleFactor)));
         
@@ -159,17 +157,19 @@ public class CartesianPlane implements Plane {
      */
     public void rotatePlane(float theta){ // To be changed with Easing class!
       
-      if (easing < 0.05 && abs(rotation-theta) >= 0.01){
-          easing *= 1.045; 
-        }
+      slowRotate.setChange(theta);
+      
+      if (slowRotate.easing < 0.05 && !slowRotate.isEqual())
+          slowRotate.incEase(1.045);
         
-        if (abs(rotation-theta) >= 0.01)
-          rotation = lerp(rotation,theta,easing);
+        
+        if (!slowRotate.isEqual())
+          slowRotate.incValue();
        
 
-        if (abs(rotation-theta) < 0.01){
-          easing = 0.0004;
-        }
+        if (slowRotate.isEqual())
+          slowRotate.reset();
+        
 
     }
     
@@ -193,40 +193,8 @@ public class CartesianPlane implements Plane {
     *
     * Cycle through all colors of the rainbow
     */
-    public int getHexColor(){
-      
-      if(state == 0){
-          g++;
-          if(g == 255)
-              state = 1;
-      }
-      if(state == 1){
-          r--;
-          if(r == 0)
-              state = 2;
-      }
-      if(state == 2){
-          b++;
-          if(b == 255)
-              state = 3;
-      }
-      if(state == 3){
-          g--;
-          if(g == 0)
-              state = 4;
-      }
-      if(state == 4){
-          r++;
-          if(r == 255)
-              state = 5;
-      }
-      if(state == 5){
-          b--;
-          if(b == 0)
-              state = 0;
-      }
-      return (a << 24) + (r << 16) + (g << 8) + (b);
-
+    public float getColor(float m){
+      return map(m,startingX,-startingX,0,255);
     }
     
     /**
@@ -248,17 +216,20 @@ public class CartesianPlane implements Plane {
   * Draws vector in Cartesian Space
   */
   public void drawVector(PVector v){
-
+    colorMode(HSB); 
+    
     pushMatrix();
-      
-      float triangleSize = 8;
-      float magnitude = sX*v.mag() - 20; // 20 is a constant, figure out why it does not work with abstraction
-      stroke(getHexColor());
+      float c = getColor(max);
+      float triangleSize = 12; // tS: 20, m: 1.6, 12:2.4/5
+      float rotationAngle = v.heading();
+      float magnitude = sX*v.mag() - 2.5*triangleSize/5; // 20 is a constant, figure out why it does not work with abstraction - triangleSize*1.6/cos(rotationAngle)
+      stroke(c,255,255);
+      fill(c,255,255);
       strokeCap(SQUARE);
       strokeWeight(10);
-      rotate(-v.heading());
+      rotate(-rotationAngle);
       line(0,0,magnitude,0);
-      triangle(magnitude,triangleSize,magnitude,-triangleSize,magnitude+triangleSize*1.6,0);
+      triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
       
     popMatrix();
   }
@@ -268,7 +239,7 @@ public class CartesianPlane implements Plane {
   * @param output PVector's ending position (Ending)
   * Animates using an ease function the PVector moving to its output
   */
-  public void animateVector(PVector initial, PVector output){
+  public void animateVector(PVector initial, PVector output){ // check implementAV.png
     // To be implemented
   }
     
