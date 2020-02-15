@@ -20,7 +20,8 @@ public class CartesianPlane implements Plane {
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
     Easing slowRotate = new Easing(0);
-    Easing animVector = new Easing(0);
+    Easing animVector = new Easing(0); // change later
+    Easing originTriangle = new Easing(0,12);
     /* Object initializations */
     
     
@@ -125,8 +126,14 @@ public class CartesianPlane implements Plane {
         
 
       }
-
-      if (max < -startingX) max += scaleFactor;
+      
+      drawVector(new PVector(max,f(max)),true);
+      
+      if (max < -startingX) max+=0.05;
+      
+   //  if (max > -0.33 && max < 0.33) max -= 0.044;
+    //  println("x: " + max + " y: " + f(max));
+      
     }
 
     /**
@@ -158,17 +165,19 @@ public class CartesianPlane implements Plane {
     public void rotatePlane(float theta){ // To be changed with Easing class!
       
       slowRotate.setChange(theta);
+      slowRotate.incEase(1.045);
+      slowRotate.doStuff();
       
-      if (slowRotate.easing < 0.05 && !slowRotate.isEqual())
+      /* if (slowRotate.easing < 0.05 && !slowRotate.isEqual())
           slowRotate.incEase(1.045);
         
         
-        if (!slowRotate.isEqual())
+      if (!slowRotate.isEqual())
           slowRotate.incValue();
        
 
         if (slowRotate.isEqual())
-          slowRotate.reset();
+          slowRotate.reset(); */
         
 
     }
@@ -215,18 +224,35 @@ public class CartesianPlane implements Plane {
   * @param v Vector to be drawn
   * Draws vector in Cartesian Space
   */
-  public void drawVector(PVector v){
+  public void drawVector(PVector v, boolean graphDependent){
     colorMode(HSB); 
-    
+    float triangleSize;
     pushMatrix();
       float c = getColor(max);
-      float triangleSize = 12; // tS: 20, m: 1.6, 12:2.4/5
+      
+    if (graphDependent){ // bundle PVector and Easing into one... This will be tough
+      if (max > -5){
+        originTriangle.incEase(1.045);
+        originTriangle.doStuff();
+      }
+      
+      if (max > 0)
+        originTriangle.setChange(12);
+      
+      
+      triangleSize = originTriangle.incrementor;
+      strokeWeight(originTriangle.incrementor * 10.0/12);
+    } else {
+      triangleSize = 12;
+      strokeWeight(10);
+    }
+
       float rotationAngle = v.heading();
-      float magnitude = sX*v.mag() - 2.5*triangleSize/5; // 20 is a constant, figure out why it does not work with abstraction - triangleSize*1.6/cos(rotationAngle)
+      float magnitude = sX*v.mag() - 6; // 6 works...?! apply ease to this
       stroke(c,255,255);
       fill(c,255,255);
       strokeCap(SQUARE);
-      strokeWeight(10);
+
       rotate(-rotationAngle);
       line(0,0,magnitude,0);
       triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
