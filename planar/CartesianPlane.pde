@@ -22,6 +22,7 @@ public class CartesianPlane implements Plane {
     Easing slowRotate = new Easing(0);
     Easing animVector = new Easing(0); // change later
     Easing originTriangle = new Easing(0,12);
+    Arrow traceGraph = new Arrow(12,true);
     /* Object initializations */
     
     
@@ -97,7 +98,7 @@ public class CartesianPlane implements Plane {
           
       for (float y = startingY; y < -startingY; y += yValue){
           if (y == 0) continue;
-          text(round(y),-30,sY*(y-0.5));
+          text(round(-y),-30,sY*(y-0.5));
         }
 
     }
@@ -127,7 +128,8 @@ public class CartesianPlane implements Plane {
 
       }
       
-      drawVector(new PVector(max,f(max)),true);
+      traceGraph.vector.set(max,f(max));
+      drawVector(traceGraph,true);
       
       if (max < -startingX) max+=0.05;
       
@@ -224,13 +226,15 @@ public class CartesianPlane implements Plane {
   * @param v Vector to be drawn
   * Draws vector in Cartesian Space
   */
-  public void drawVector(PVector v, boolean graphDependent){
+  public void drawVector(Arrow arrow, boolean graphDependent){
+    PVector v = arrow.vector; // aliases
     colorMode(HSB); 
     float triangleSize;
     pushMatrix();
+    
       float c = getColor(max);
       
-    if (graphDependent){ // bundle PVector and Easing into one... This will be tough
+ // bundle PVector and Easing into one... This will be tough
       if (max > -5){
         originTriangle.incEase(1.045);
         originTriangle.doStuff();
@@ -242,10 +246,7 @@ public class CartesianPlane implements Plane {
       
       triangleSize = originTriangle.incrementor;
       strokeWeight(originTriangle.incrementor * 10.0/12);
-    } else {
-      triangleSize = 12;
-      strokeWeight(10);
-    }
+
 
       float rotationAngle = v.heading();
       float magnitude = sX*v.mag() - 6; // 6 works...?! apply ease to this
