@@ -1,4 +1,4 @@
-import processing.core.PVector;
+import processing.core.*;
 
 interface Plane {
     void generatePlane();
