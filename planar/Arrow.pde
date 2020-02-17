@@ -1,34 +1,39 @@
 public class Arrow extends Easing {
   PVector vector = new PVector(0,0);
   boolean follow;
-  public Arrow(float triangleSize, boolean graphDependent){
-    super(triangleSize);
+  float triangleSize;
+  
+  public Arrow(float tS, boolean graphDependent){ //  public Easing(float c, float i, float e)
+    super(0,tS);
+    triangleSize = tS;
     follow = graphDependent;
   }
   
-  public void closeToOrigin(boolean closeToZero){ // if follow == true
-     if (closeToZero){
-        this.incEase(1.045);
-        this.doStuff();
+  
+  public void doStuff(float easeInc){
+     // vectorMag = vector.mag();
+      
+      if (vector.x > -5 && vector.x < 0){
+        this.incEase(easeInc);
+        super.doStuff();
       }
       
-      else
-        this.setChange(12);
-  }
-  
-//  @Override
-  public void doStuff(boolean closeToZero){
-      closeToOrigin(closeToZero);
-      if (this.easing < 0.05 && !this.isEqual())
-          this.multEase();
-        
-        
-        if (!this.isEqual())
-          this.incValue();
-       
-
-        if (this.isEqual())
+      if (vector.x > 0){
+        this.setChange(triangleSize);
+     
+        if (follow){
           this.reset();
-    }
+          easing = 0.006;
+          follow = false;
+        }
+        
+        this.incEase(easeInc);
+        super.doStuff();
+      }
+      
+     // System.out.println(this.vector);
+    //  System.out.println(vectorMag);
+      
+  }
   
 }

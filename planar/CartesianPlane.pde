@@ -1,7 +1,7 @@
 import processing.core.*;
 import java.util.*;
 
-public class CartesianPlane implements Plane {
+public class CartesianPlane implements Plane { // Work on mouseDrag after!
     float xValue;
     float yValue;
     float transparency = 255;
@@ -14,6 +14,8 @@ public class CartesianPlane implements Plane {
     boolean restrictDomain = false;
     float restrictedDomainX1;
     float restrictedDomainX2;
+    List<Double> randArr = new ArrayList<Double>();
+    float finalValue;
     
     /* Object initializations */  // Create color object soon for animateVector();
     List<PVector> points = new ArrayList<PVector>();
@@ -22,7 +24,8 @@ public class CartesianPlane implements Plane {
     Easing slowRotate = new Easing(0);
     Easing animVector = new Easing(0); // change later
     Easing originTriangle = new Easing(0,12);
-    Arrow traceGraph = new Arrow(12,true);
+    Arrow traceGraphF = new Arrow(12,true);
+    Arrow traceGraphG = new Arrow(12,true);
     /* Object initializations */
     
     
@@ -102,6 +105,7 @@ public class CartesianPlane implements Plane {
         }
 
     }
+    
 
     /**
      * Graph any function
@@ -117,36 +121,76 @@ public class CartesianPlane implements Plane {
         endG = max;
       }
       
+   //   loadRandArr();
+      
       for (float i = startingX; i < max; i+=scaleFactor){
         if (i < sMax || i > endG){
            stroke(125,255,255,fadeGraph.fadeOut(0.01));
         } else
            stroke(getColor(i),255,255);
         
+        /* Optimize graph, only use if no autoscale! */
+        
+        /*
+        for (int t = 0; t < 5 && f(i) > -startingY; t++){
+          float jumpDistance = 5*scaleFactor;
+          if (f(i+jumpDistance) < -startingY){
+            finalValue = jumpDistance;
+          }
+        }
+        max = finalValue - 5*scaleFactor;
+        */
+        
+        /* Optimize graph, only use if no autoscale! */
+        
         line(sX*i,-sY*f(i),sX*(i+scaleFactor),-sY*(f(i+scaleFactor)));
+        line(sX*i,-sY*g(i),sX*(i+scaleFactor),-sY*(g(i+scaleFactor)));
         
 
       }
       
-      traceGraph.vector.set(max,f(max));
-      drawVector(traceGraph,true);
+      traceGraphF.vector.set(max,f(max));
+      traceGraphG.vector.set(max,g(max));
+      drawVector(traceGraphF);
+      drawVector(traceGraphG);
       
       if (max < -startingX) max+=0.05;
       
-   //  if (max > -0.33 && max < 0.33) max -= 0.044;
+    // if (max > -0.88 && max < 0.88) max -= 0.044;
     //  println("x: " + max + " y: " + f(max));
       
     }
+    
+    public long factorial(int number) {
+        long result = 1;
 
+        for (int factor = 2; factor <= number; factor++) {
+            result *= factor;
+        }
+
+        return result;
+    }
+    
+
+    
     /**
      *
      * @param x Input to the function (x-coord)
      * @return Output to the function (y-coord)
      */
     public float f(float x){
-      return sin(x);
+      
+      return x < 0 ? (float) (Math.random() * x - x) : (float) (0.4*Math.pow(x,cos(x)));
+      //(float) (double) randArr.get((int) x + 25);
     }
+    
+   public float g(float x){
+      return x < 0 ? -(float) (Math.random() * x - x): (float) -(0.4*Math.pow(x,sin(x/2)));
+   }
 
+    public void loadRandArr(){
+      randArr.add(10*Math.random() - 5);
+    }
     /**
      *
      * @param x1 Left side of domain restriction
@@ -183,10 +227,7 @@ public class CartesianPlane implements Plane {
         
 
     }
-    
-    public float g(float x){
-      return cos(x);
-    }
+   
     
     /**
     * Get derivative given two values
@@ -226,34 +267,40 @@ public class CartesianPlane implements Plane {
   * @param v Vector to be drawn
   * Draws vector in Cartesian Space
   */
-  public void drawVector(Arrow arrow, boolean graphDependent){
+  public void drawVector(Arrow arrow){
     PVector v = arrow.vector; // aliases
     colorMode(HSB); 
     float triangleSize;
     pushMatrix();
     
-      float c = getColor(max);
+    float c = getColor(max);
       
  // bundle PVector and Easing into one... This will be tough
-      if (max > -5){
+     /*  if (max > -5){ // <--- boolean conditional
         originTriangle.incEase(1.045);
         originTriangle.doStuff();
       }
       
       if (max > 0)
-        originTriangle.setChange(12);
+        originTriangle.setChange(12);  */
+        
+      arrow.doStuff(1.045);
       
       
-      triangleSize = originTriangle.incrementor;
-      strokeWeight(originTriangle.incrementor * 10.0/12);
+     // triangleSize = originTriangle.incrementor;
+      // strokeWeight(originTriangle.incrementor * 10.0/12);
+     
+     triangleSize = arrow.incrementor;
+     strokeWeight(arrow.incrementor * 10.0/12);
 
 
       float rotationAngle = v.heading();
-      float magnitude = sX*v.mag() - 6; // 6 works...?! apply ease to this
+      float magnitude = sX*v.mag() - 6; //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
+
       stroke(c,255,255);
       fill(c,255,255);
       strokeCap(SQUARE);
-
+      
       rotate(-rotationAngle);
       line(0,0,magnitude,0);
       triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
@@ -266,7 +313,11 @@ public class CartesianPlane implements Plane {
   * @param output PVector's ending position (Ending)
   * Animates using an ease function the PVector moving to its output
   */
-  public void animateVector(PVector initial, PVector output){ // check implementAV.png
+  public void moveVector(PVector initial, PVector output){ // check implementAV.png
+    // To be implemented
+  }
+  
+  public void run(PGraphics p){
     // To be implemented
   }
     

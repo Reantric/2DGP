@@ -4,6 +4,6 @@ interface Plane {
     void generatePlane();
     void autoscale();
     void rotatePlane(float theta);
-    void animateVector(PVector initial, PVector output);
-    //addRotate
+    void moveVector(PVector initial, PVector output);
+    void run(PGraphics p);
 }

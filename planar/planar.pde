@@ -4,6 +4,7 @@ Scaling c = new Scaling(0);
 int max = -width/2;
 float angle;
 PFont myFont;
+PGraphics canvas;
 
 void setup(){
   size(1920,1080,P2D);
@@ -11,6 +12,7 @@ void setup(){
   textFont(myFont, 32);
   plane = new CartesianPlane(5,5);
   smooth(8);
+  canvas = createGraphics(1920,1080,P2D);
 }
 
 
@@ -67,9 +69,11 @@ void keyPressed(){
 
 void draw(){
   scale(e);
+  plane.run(canvas);
   plane.generatePlane();
   plane.graph();
   directions();
+  
  // saveFrame("rotate90/line-######.png");
  // directions();
 }
