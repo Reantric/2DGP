@@ -3,7 +3,7 @@ public class Arrow extends Easing {
   boolean follow;
   float triangleSize;
   
-  public Arrow(float tS, boolean graphDependent){ //  public Easing(float c, float i, float e)
+  public Arrow(float tS, boolean graphDependent){ //  public Easing(float c, float i, float e) Fix triangle not easing correctly!
     super(0,tS);
     triangleSize = tS;
     follow = graphDependent;

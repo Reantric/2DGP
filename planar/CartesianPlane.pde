@@ -16,6 +16,7 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     float restrictedDomainX2;
     List<Double> randArr = new ArrayList<Double>();
     float finalValue;
+    PGraphics canvas;
     
     /* Object initializations */  // Create color object soon for animateVector();
     List<PVector> points = new ArrayList<PVector>();
@@ -34,13 +35,14 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * @param xSpace Distance between x ticks
      * @param ySpace Distance between y ticks
      */
-    public CartesianPlane(float xSpace, float ySpace){
+    public CartesianPlane(float xSpace, float ySpace,PGraphics p){
         xValue = xSpace;
         yValue = ySpace;
         sX = 200/xValue;
         sY = 200/yValue;
-        startingX = -width/(2*sX) - xValue/5;
-        startingY = -width/(2*sY) - yValue/5;
+        canvas = p;
+        startingX = -canvas.width/(2*sX) - xValue/5; // <---- Issues here when resizing canvas 
+        startingY = -canvas.width/(2*sY) - yValue/5; // <---- Issues here when resizing canvas 
         max = startingX;
     }
     
@@ -49,37 +51,39 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * Creates a 2D Cartesian Plane with an x axis and a y axis
      */
     public void generatePlane(){
-       background(0);
-       textFont(myFont);
-       textSize(38);
-       textAlign(CENTER,CENTER);
-       translate(width/2,height/2);
-       stroke(122);
-       strokeWeight(4);
-       fill(190);
+       canvas.beginDraw();
+       
+       canvas.background(0);
+       canvas.textFont(myFont);
+       canvas.textSize(38);
+       canvas.textAlign(CENTER,CENTER);
+       canvas.translate(canvas.width/2,canvas.height/2);
+       canvas.stroke(122);
+       canvas.strokeWeight(4);
+       canvas.fill(190);
        
        
      //  pushMatrix();
-       rotate(slowRotate.incrementor); //-PI/2
+       canvas.rotate(slowRotate.incrementor); //-PI/2
                 
        for (float x = startingX; x < -startingX; x+= xValue){
           if (x == 0) continue;
-          line(sX*x,sY*startingY,sX*x,sY*-startingY);
+          canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY);
   
         }
         
         
         for (float y = startingY; y < -startingY; y += yValue){
           if (y == 0) continue;
-          line(-sX*startingX,sY*y,sX*startingX,sY*y);
+          canvas.line(-sX*startingX,sY*y,sX*startingX,sY*y);
          
         }
         
-        stroke(255);
-        strokeWeight(4);
+        canvas.stroke(255);
+        canvas.strokeWeight(4);
         
-        line(-sX*startingX,0,sX*startingX,0);
-        line(0,-sY*startingY,0,sY*startingY);
+        canvas.line(-sX*startingX,0,sX*startingX,0);
+        canvas.line(0,-sY*startingY,0,sY*startingY);
         
      //   popMatrix();
 
@@ -91,19 +95,28 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     * Label all axes
     */
     public void labelAxes(){
-      fill(255);
+      canvas.fill(255);
 
       for (float x = startingX; x < -startingX; x += xValue){ //-width/(2*sX) - xValue/5 + xValue, starting 0,0 at width/2, height/2
 
             if (x == 0) continue;
-            text(round(x),sX*(x + 0.5),30);
+            canvas.text(round(x),sX*(x + 0.5),30);
           }
           
       for (float y = startingY; y < -startingY; y += yValue){
           if (y == 0) continue;
-          text(round(-y),-30,sY*(y-0.5));
+          canvas.text(round(-y),-30,sY*(y-0.5));
         }
 
+    }
+    
+    public void finish(){
+      canvas.endDraw();
+      //PImage frame = canvas.get(); Much more laggy!
+      //pushMatrix();
+      //translate(canvas.width/2,canvas.height/2);
+      image(canvas,0,0);
+     // popMatrix();
     }
     
 
@@ -111,7 +124,7 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * Graph any function
      */
     public void graph(){
-      strokeWeight(5);
+      canvas.strokeWeight(5);
       float sMax, endG;
       if (restrictDomain){
         sMax = restrictedDomainX1;
@@ -125,9 +138,9 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       
       for (float i = startingX; i < max; i+=scaleFactor){
         if (i < sMax || i > endG){
-           stroke(125,255,255,fadeGraph.fadeOut(0.01));
+           canvas.stroke(125,255,255,fadeGraph.fadeOut(0.01));
         } else
-           stroke(getColor(i),255,255);
+           canvas.stroke(getColor(i),255,255);
         
         /* Optimize graph, only use if no autoscale! */
         
@@ -143,8 +156,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
         
         /* Optimize graph, only use if no autoscale! */
         
-        line(sX*i,-sY*f(i),sX*(i+scaleFactor),-sY*(f(i+scaleFactor)));
-        line(sX*i,-sY*g(i),sX*(i+scaleFactor),-sY*(g(i+scaleFactor)));
+        canvas.line(sX*i,-sY*f(i),sX*(i+scaleFactor),-sY*(f(i+scaleFactor)));
+        canvas.line(sX*i,-sY*g(i),sX*(i+scaleFactor),-sY*(g(i+scaleFactor)));
         
 
       }
@@ -233,8 +246,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     * Get derivative given two values
     */
     public void derivative(float y1, float y2, float distX){
-      stroke(255);
-      line(sX*(max+2),sY*y1,sX*(max-2),sY*y2);
+      canvas.stroke(255);
+      canvas.line(sX*(max+2),sY*y1,sX*(max-2),sY*y2);
     }
     
     public void autoscale(){
@@ -258,9 +271,9 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       
       points.add(new PVector(x,y));
 
-      stroke(255,scaler.fadeIn(9));
-      fill(255,scaler.getTransp());
-      circle(x,y,20);
+      canvas.stroke(255,scaler.fadeIn(9));
+      canvas.fill(255,scaler.getTransp());
+      canvas.circle(x,y,20);
   }
   
   /**
@@ -269,9 +282,9 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
   */
   public void drawVector(Arrow arrow){
     PVector v = arrow.vector; // aliases
-    colorMode(HSB); 
+    canvas.colorMode(HSB); 
     float triangleSize;
-    pushMatrix();
+    canvas.pushMatrix();
     
     float c = getColor(max);
       
@@ -291,21 +304,21 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       // strokeWeight(originTriangle.incrementor * 10.0/12);
      
      triangleSize = arrow.incrementor;
-     strokeWeight(arrow.incrementor * 10.0/12);
+     canvas.strokeWeight(arrow.incrementor * 10.0/12);
 
 
       float rotationAngle = v.heading();
       float magnitude = sX*v.mag() - 6; //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
 
-      stroke(c,255,255);
-      fill(c,255,255);
-      strokeCap(SQUARE);
+      canvas.stroke(c,255,255);
+      canvas.fill(c,255,255);
+      canvas.strokeCap(SQUARE);
       
-      rotate(-rotationAngle);
-      line(0,0,magnitude,0);
-      triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
+      canvas.rotate(-rotationAngle);
+      canvas.line(0,0,magnitude,0);
+      canvas.triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
       
-    popMatrix();
+    canvas.popMatrix();
   }
   
   /**
