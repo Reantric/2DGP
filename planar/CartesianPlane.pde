@@ -41,9 +41,9 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
         sX = 200/xValue;
         sY = 200/yValue;
         canvas = p;
-        startingX = -canvas.width/(2*sX) - xValue/5; // <---- Issues here when resizing canvas 
-        startingY = -canvas.width/(2*sY) - yValue/5; // <---- Issues here when resizing canvas 
-        max = startingX;
+        startingX = Useful.floorAny(-canvas.width/(2*sX),xValue); // <---- Issues here when resizing canvas 
+        startingY = Useful.floorAny(-canvas.height/(2*sY),yValue); // <---- Issues here when resizing canvas 
+        max = -canvas.width/(2*sY) - xValue/5;
     }
     
     /**
@@ -51,6 +51,7 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * Creates a 2D Cartesian Plane with an x axis and a y axis
      */
     public void generatePlane(){
+      
        canvas.beginDraw();
        
        canvas.background(0);
@@ -66,7 +67,7 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      //  pushMatrix();
        canvas.rotate(slowRotate.incrementor); //-PI/2
                 
-       for (float x = startingX; x < -startingX; x+= xValue){
+       for (float x = startingX; x < -startingX; x += xValue){
           if (x == 0) continue;
           canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY);
   
@@ -110,12 +111,12 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
 
     }
     
-    public void finish(){
+    public void display(float x, float y){
       canvas.endDraw();
       //PImage frame = canvas.get(); Much more laggy!
       //pushMatrix();
       //translate(canvas.width/2,canvas.height/2);
-      image(canvas,0,0);
+      image(canvas,x,y);
      // popMatrix();
     }
     

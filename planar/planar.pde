@@ -10,7 +10,7 @@ void setup(){
   size(1920,1080,P2D);
   myFont = createFont("Lato Bold",150,true);
   textFont(myFont, 32);
-  canvas = createGraphics(1920,1080,P2D);
+  canvas = createGraphics(1444,500,P2D);
   plane = new CartesianPlane(5,5,canvas);
   smooth(8);
 }
@@ -68,12 +68,13 @@ void keyPressed(){
 }
 
 void draw(){
+  background(0);
   scale(e);
   plane.run(canvas);
   plane.generatePlane();
   plane.graph();
   directions();
-  plane.finish();
+  plane.display(canvas.width/2,canvas.height/2);
   
  // saveFrame("rotate90/line-######.png");
  // directions();

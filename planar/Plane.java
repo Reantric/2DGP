@@ -5,5 +5,5 @@ interface Plane {
     void autoscale();
     void rotatePlane(float theta);
     void moveVector(PVector initial, PVector output);
-    void run(PGraphics p);
+    void display(float x, float y);
 }
