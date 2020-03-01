@@ -16,6 +16,7 @@ DecimalFormat df = new DecimalFormat("#.00");
 Calendar cal = Calendar.getInstance();
 String[] days = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
 String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"};
+List<Long> dateBuffer = new ArrayList<Long>();
 boolean scalingDone = true;
 boolean doNotMove = false;
 boolean linesGone = false;
@@ -23,10 +24,12 @@ boolean runOnce = false;
 boolean movingY = false;
 boolean fading = false;
 boolean debug = false;
-boolean topDog = true;
+boolean midlineScaling = false;
+boolean isNull = false;
 
 //PShader blur;
 //FIX 100 multiple when 5'ving!
+double debugMidline;
 double midline;
 double doublingFactor;
 double xCoord[];
@@ -42,10 +45,14 @@ int max = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
 int tailLength = 3000;
 int margin = 320;
-int startingY = 100;
+long startingY = 100;
 int startMovingX = 110; //lovemyself! <-- def 150
 int marginY = 70; ///70
-int textMovementY = -56; // amount text is moved from canvas line x=0
+int textMovementY = -56; // amount text is moved from canvas line x=0 <--- 26 comes from here i think...?
+int monthCounter = 0;
+int initialMonth = 9;
+int prevNOA = 0;
+int numOfArtists = 0;
 
 float e = 1;
 float xPush = 800;
@@ -73,16 +80,21 @@ Map<Double,double[]> coords = new HashMap<Double,double[]>(); //04:17:02
 int[] hexValues = {#00FFFF,#ff0000,#00ff00,#966FD6,#ffff00,#ffc0cb,#008080,#d4560d};
 int[][] countY;
 PImage[] images;
-float sX = 1 / (19723.0); //default 20.0k
-float xValue = 400 * (19723.0); //seconds!
-int startingX = (int) xValue;
+PImage anon;
+float sX = 1 / (19723.0); //default 20.0k, this SHOULD remain constant!
+float xValue; //seconds! 
+long startingX;
 float sY = 2.3; //default : 2.3
 float testorFan = sY*(1/2); //INTEGER DIVISION!
 //float boundary = sY * (2.0/3); //this is a problem
 float boundary = (sY * (2.0/3)); //comment out after!
 float textChange = 120; //thank god for this! default: 100
 double scalar = value*2; //lol
+long epochAdv;
+long epochBef;
 
+Easing midlineEase;
+Easing yScaleEase = new Easing(0);
 Scaling yAxis = new Scaling(255);
 Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
@@ -92,13 +104,14 @@ Scaling xAxis = new Scaling(255);
  * Set
  */
 void fetch(){
+
   // Custom values
   sY = 0.43;
   value = 500;
   scalar = 1000;
   boundary = 0.32;
   // Custom values
-
+  
   String[] lines = loadStrings("datas.txt"); // Load all lines of datas.txt into a file.
   names = lines[0].split(" ");
   xCoord = new double[lines.length-1];
@@ -124,6 +137,7 @@ void fetch(){
   for (int i = 0; i < images.length; i++){
     images[i] = loadImage(names[i].toLowerCase()+".png"); //all files must be saved in lowercase! remember this !!!!!!!
   }
+  anon = loadImage("anon.png");
   //println(yCoords[6][0]);
   //println("text: " + Arrays.toString(text), "xCoords: " + xCoord, "yCoords: " + yCoord.toString());
   //print("hashMap coords: " + coords);
@@ -142,6 +156,29 @@ void fetch(){
    cut = origin;
    println("Origin: " + origin);
    println(xCoord.length);
+   
+  date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object! (.withDayOfMonth(1))
+  
+  println("STARTING DATE: " + date);
+ // stop();
+  for (int m = 0; m < initialMonth; m++){ // safe side
+     // println(date.plusMonths(m*3));
+      epochBef = date.plusMonths(m*3).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+      epochAdv = date.plusMonths((m+1)*3).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+      dateBuffer.add(epochAdv - epochBef);
+   }
+   
+   startingX = (long) dateBuffer.get(0);
+   
+   for (int i = rowLength - 1; i >= 0; i--){
+      double yCheck = coordObj[i].yValue;
+      if (yCheck < 0){
+        break;
+      }
+      numOfArtists++;
+  }
+  prevNOA = numOfArtists;
+  midlineEase = new Easing(height/2 - marginY - 1,height/2 - marginY - 1);
 }
 
 //final float minY = min(IT );
@@ -156,6 +193,7 @@ void fetch(){
   nameFont = createFont("Lato Bold",150,true);
   textFont(myFont);
   smooth(8);
+  imageMode(CENTER);
 }
 
 /**
@@ -163,7 +201,7 @@ void fetch(){
  * Leader is in the top left along with the amount of days that they have been leader.
  * Date is in the top right, in Mon. Day, Year
  */
-    void leaderboard(){
+  void leaderboard(){
   fill(255);
   textSize(42);
   int maxInd = rowLength - 1;
@@ -171,12 +209,12 @@ void fetch(){
   if (maxObj.name != names[getIndexOfMax(yCoords[max+1])]){ // Check if the maxObj will be different in the next tick
     cut = xCoord[max]; // Reset cut to the point where the maximum object was 'overthrown'
   }
-    //UNIX TS:
-    date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
-
     
-    image(maxObj.img,260+compensateX,-height+130 + yChange,160,160); // Create an image with the maxObj's image attribute and place it at 260',130'
-    text("Leader: ",100+compensateX,-height + 120 + yChange);
+    date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
+    
+   // println(dateBuffer);
+    
+    text("Leader: ",100+compensateX,-height + 130 + yChange);
     
     textAlign(LEFT); // Align all text to the left!
     textFont(nameFont); // Set textFont to a bolded Lato
@@ -184,9 +222,16 @@ void fetch(){
     
     text("For " + Math.round(xCoord[max] - cut)/86400 + " days", 360+compensateX, -height + 190 + yChange); // Display difference of current date and date when #1 became #1
     
-
     textSize(50);
-    text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",360 + compensateX,-height + 135 + yChange);
+    
+    if (maxObj.yValue != -1){
+      text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",360 + compensateX,-height + 135 + yChange);
+      image(maxObj.img,260+compensateX,-height+145 + yChange,160,150); // Create an image with the maxObj's image attribute and place it at 260',130'
+    }
+    else {
+      text("? (--)",360 + compensateX,-height + 135 + yChange);
+      image(anon,260+compensateX,-height+145 + yChange,160,150);
+    }
 
     textAlign(CENTER);
 
@@ -213,6 +258,7 @@ int getIndexOfMax(double[] arr){
 
 void info(){ //must multiply by reciprocal!
   //follow();
+  
   leaderboard();
   fill(0);
   stroke(255); 
@@ -220,7 +266,8 @@ void info(){ //must multiply by reciprocal!
   rectMode(CORNER);
   textSize(36);
 
-
+     //   println("GAAAAAAAAAAAAAAAAAAAAAAMMMMMMMMEEEEEEEEPLAY");
+        
   strokeCap(SQUARE);
   beginShape();
     vertex(width - 350 - marking + compensateX, -height+21 + yChange);
@@ -230,7 +277,8 @@ void info(){ //must multiply by reciprocal!
   endShape();
   strokeCap(ROUND);
     //rect(width - 350 - marking, -height + 50, 350, height-50)
-    
+
+        
     fill(255);
     textSize(34);
     text("        Current Date:",width-200-marking + compensateX,-(height - 120) + yChange);
@@ -247,7 +295,6 @@ void info(){ //must multiply by reciprocal!
   
   
   //textCoords[rowLength-1] = coordObj[rowLength - 1].yValue + 1/sY; //aka maximum of the list!
-  
   for (int c = 0; c < rowLength; c++){ //first init..:?
     if (coordObj[c].yValue < 0) continue;
     
@@ -274,7 +321,6 @@ void info(){ //must multiply by reciprocal!
     // println("gamers");
        if (countY[c][c+1] > 9){
          countY[c][c+1] = 0;
-         if (debug) stop();
        }
      }
    }
@@ -286,7 +332,7 @@ void info(){ //must multiply by reciprocal!
    
  for (int c = 0; c < rowLength; c++){ //doesnt work because richard comes before andy! a change from andy does not affect richard!
    if (coordObj[c].getYCoord() < 0) continue;
-      fill(coordObj[c].hexCode);
+      fill(coordObj[c].hexCode,255);
       //check();
     //  int k = 3;
       textAlign(LEFT);
@@ -299,7 +345,6 @@ void info(){ //must multiply by reciprocal!
        if (textY < 10/sY){
          textY = 10/sY;
        }
-       imageMode(CENTER);
        image(coordObj[c].img,sX* (float) (xCoord[max] - origin) + 35,-sY*textY - 10,30,30); //hmm..?
        //println("SY: " + sY);
        text(coordObj[c].name.replace("_"," ") + " (" + Math.round(coordObj[c].yValue) + ")",sX* (float) (xCoord[max] - origin) + 60,-sY*textY); //shit made it SO CONFUSING
@@ -328,19 +373,87 @@ void initObjArr(){ //ok i think i know da issue!
    
 }
 
+
+/**
+  * 
+  *
+  *
+*/
+float sumMid(){
+  
+
+  
+  float s = 0;
+  int n = 0;
+  //n = 2;
+  for (int i = rowLength - 1; i >= 0; i--){
+    double yCheck = coordObj[i].yValue;
+    if (yCheck < 0){
+      break;
+    }
+    s += yCheck;
+    n++;
+  } 
+   
+  numOfArtists = n;
+  
+  float midlineToBe = sY*s/n;
+  
+  if (Double.isNaN(midlineToBe)){
+    midlineToBe = 0;
+  }
+  
+  if (debug)
+    return (float) debugMidline;
+   
+  midlineScaler(midlineToBe);
+   
+  return midlineEase.incrementor;
+
+}
+
+void midlineScaler(float ml){
+  // if prevN == ? and n == !, then ease!
+  println("TF: " + midlineEase.incrementor + " status: " + midlineScaling);
+  if (numOfArtists != prevNOA && ml > height/2 - marginY){
+      midlineEase.setChange(ml);
+      midlineScaling = true;
+  }
+  
+  if (midlineScaling){
+    midlineEase.incEase(1.03);
+    midlineEase.doStuff();
+    
+    if (midlineEase.isEqual()){
+      midlineScaling = false;  
+      prevNOA = numOfArtists;
+      
+    }
+  }  
+   else {
+     //println("JUMP");
+     if (ml > height/2 - marginY)
+       midlineEase.incrementor = ml;   
+
+   }
+
+}
+
 void follow(){
-  println("m: " + midline);
+//  println("m: " + midline);
   //pushPop = 220/sY;
-  if (midline < height/2 - marginY){
+
+  if (midlineEase.incrementor < height/2 - marginY){
     slowPushY = height - marginY;
     movingY = false;
     yChange = 0;
     
   }
   else {
-    slowPushY = (float) (height/2 + midline);
+    println(midline);
+    slowPushY = (float) (height/2 + midlineEase.incrementor);
     movingY = true;
-    yChange = -(float) (midline - height/2 + marginY);
+    yChange = -(float) (midlineEase.incrementor - height/2 + marginY);
   }
 
   if (sX*(xCoord[max] - origin) > newWidth - marking + startMovingX){ //thats perfect! <--- Ok, now what?
@@ -354,17 +467,6 @@ void follow(){
 
 }
 
-boolean slowAdjustY(){
-  if (slowPushY < midline - height/2 + marginY){
-  //println("spY: " + slowPushY);
-  slowPushY += ((float) (midline - height/2 + marginY))/100;
-  return false;
-  }
- // stop();
-  return true;
- 
- 
-}
 
 int floorAny(double jjfanman, double val){
   return max((int) (val*Math.floor(jjfanman/val)),0);
@@ -378,7 +480,7 @@ void initGraph(){
   stroke(255);
   //line(0,-(float) (220)/sY + yChange,xV,-(float) (220)/sY + yChange);
  // line(0,-(float) (760) + yChange,xV,-(float) (760) + yChange); //midline! maxVal * sY < 760 :DD::D:D:D:D if maxVal*sY > 760, 760/maxVal
-  
+    
   stroke(255);
   xV = (compensateX + width)/sX;
   strokeWeight(3);
@@ -399,7 +501,12 @@ void initGraph(){
 
   //if value
   //println(starting);
-  for (float a = startingX; a < xV; a+=xValue){ //initialize lines and grid lines (x)
+  int mC = 0;
+  xValue = dateBuffer.get(mC);
+  for (float a = startingX; a < xV; a += xValue){ //initialize lines and grid lines (x) 
+      mC++;
+      xValue = dateBuffer.get(mC);
+     // println("XV: " + xValue + " A: " + a);
       if (a <= 0) {
        // startingX = floorAny(sX*(xCoord[max] - origin) - newWidth + marking,xValue); //default: xValue keeps reverting to 750 (maybe -origin)
         textSize(25);
@@ -417,11 +524,14 @@ void initGraph(){
       }    
     
     line(a*sX,yChange-height,a*sX,movingY ? yChange : -2);
-    
   }
   
   if (xAxis.isFinished()) {
-       // stop();
+        monthCounter += 3;
+        dateBuffer.remove(0);
+        epochBef = date.plusMonths(monthCounter + initialMonth*3).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+        epochAdv = date.plusMonths(monthCounter + initialMonth*3).atStartOfDay(ZoneId.systemDefault()).toEpochSecond();
+        dateBuffer.add(epochAdv - epochBef);
         xAxis.reset();
         startingX += xValue;
      } 
@@ -446,7 +556,7 @@ void initGraph(){
       if (b % scalar != 0){ 
         
         //  fill(255,255,255,yAxis.fadeOut(1.6));
-          stroke(122,122,122,yAxis.fadeOut(1.6));
+          stroke(122,122,122,yAxis.fadeOut(3.6));
        
       } 
       else {
@@ -484,8 +594,8 @@ void initGraph(){
     stroke(122,122,122,yAxis.fadeIn());
     for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it? this fills in the 500xxx!
        if (c == 0 || c % (2*scalar) == 0) continue;
-       if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX){
-          line((float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX) + approximateLineDistance(showText(c).length())),(-c)*sY,xV,(-c)*sY); // < ---- adjusts the 1280 - value!
+       if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX + 26){             //
+          line((float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX + 26)),(-c)*sY,xV,(-c)*sY); // < ---- adjusts the 1280 - value! + approximateLineDistance(showText(c).length())
       } else {
         line(-10,(-c)*sY,xV,(-c)*sY);
       }
@@ -515,7 +625,7 @@ String showTextEpoch(double a){
 
 
 void slowIncreaseSY(float v){
-  println("sY: " + sY + " v: " + v);
+  //println("sY: " + sY + " v: " + v);
   if (sY < v){
     if (sY + v/1000 > v && sY < v){
       sY = v;
@@ -594,14 +704,12 @@ int approximateLineDistance(int n){
 }
 
 void essentialsY(float n){
-  //line(0,(-n)*sY,10000,(-n)*sY);
-//  if (midline < 50) return;
-  if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX + 26){
-     //println("testor123");
-    //  text(showText(n),(float) (xCoord[max] - newWidth/2 - xPush),(-n+5)*sY);
-      line((float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX + 26) + approximateLineDistance(showText(n).length())),(-n)*sY,xV,(-n)*sY); // < ---- adjusts the 1280 - value! (no +200)
+
+  if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX + 26){ 
+                                                                                           //  + approximateLineDistance(showText(n).length())
+      line((float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX + 26)),(-n)*sY,xV,(-n)*sY); // < ---- adjusts the 1280 - value! (no +200)
     } else {
-   // text(showText(n),-60,(-n + 5)*sY); // y-axis
+
     line(-10,(-n)*sY,xV,(-n)*sY);
     }
   
@@ -618,39 +726,14 @@ void sleep(int n){
   }
 }
 
-/**
-  * 
-  *
-  *
-*/
-float sumMid(){
-  float s = 0;
-  int n = 0;
-  //n = 2;
-  for (int i = rowLength - 1; i >= 0; i--){
-    double yCheck = coordObj[i].yValue;
-    if (yCheck < 0){
-      break;
-    }
-    s += yCheck;
-    n++;
-  } 
- 
-  return sY*s/n;
-}
-
 void graphData(){ //max++ is intrinsic!
-  autoScale(); //decor! 
+  isNull = Math.abs(coordObj[rowLength - 1].yValue + 1.0) < 0.001;
+  //println(isNull);
+  autoScale(); //decor!
   //background 0 is happening here.... no clue why :??
-  //text("gamingFan120",500,-500);
-  //initGraph();
-   //Arrays.sort(yCoords[max]);
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!) //advances 1 every time it is redrawn 
     if (i < 0) continue;
-    //print(i);s
-    //sleep(1000);
-    //println(yCoord.get(i)[0]);
-    //println(max + " " + xCoord.get(i));
+
     strokeWeight(5);
     
     for (int c = 0; c < rowLength; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
@@ -661,14 +744,6 @@ void graphData(){ //max++ is intrinsic!
       noStroke();
     } //should be fine............!
     
-   // stroke(255,20,20);
-
-    //line((float) xCoord[i], -sY* (float) yCoords[i][0], (float) xCoord[i+1], -sY* (float) yCoords[i+1][0]); //MESS WITH THIS !
-   // stroke(20,255,50);
-   // line((float) xCoord[i], -sY* (float) yCoords[i][1], (float) xCoord[i+1], -sY* (float) yCoords[i+1][1]);
-   // stroke(20,50,255);
-   // line((float) xCoord[i], -sY* (float) yCoords[i][2], (float) xCoord[i+1], -sY* (float) yCoords[i+1][2]);
-    //filter(BLUR,0);
     }
    // text("gamingFan120",500,-500);
     for (int d = 0; d < yCoords[max].length; d++){
@@ -677,67 +752,35 @@ void graphData(){ //max++ is intrinsic!
       circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][d]),12);
     }
     // text("gamingFan120",500,-500); DOESNT WORK!
-    info(); //<--- only works info?!
-    //text("gamingFan120",500,-500);
-   // midline = sY * ((yCoords[max][0] + yCoords[max][1])/2); //intrinsic!
-  /// */
-    /*double[] average = new double[2];
-    for (int g = 0; g < average.length; g++){
-      average[g] = yCoords[max][g] - midline;
-    }
-    getTickY(average);
-    */
-        //fade();
-    //line(xCoord.get(x),yCoord.get(x));
-   // noStroke();
-   // line((float) (xCoord[max] - 500),(float) -midline,(float) (xCoord[max] + 500),(float) -midline);
-    
-   // circle((float) xCoord[max],(float) (-sY*yCoords[max][2]),12);
-  // getScaleY(yCoords[max]);
-    
+  //  if (!isNull)
+    info(); //<--- Fix when no yCoords...
+
     blackBox();
     midline = sumMid();
+    println("MIDLINE: " + midline);
+   // if (Double.isNaN(midline))
+     // midline = 0; // this is probably not the best solution...? <-- some how ease this!
+    
+
     //circle(sX*200,sY*  300,40); i^ and j^? (unit vectors)..? lol linear alg
 }
 
 void autoScale(){
+    
+    
+  
    // line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
     maxVal = coordObj[rowLength - 1].yValue; // pushPop  is 220/sY + yChange
     if (maxVal * sY > invariant){ //very important! not changing the coordinate plane, just the values that objects take up in that coordinate plane!
-     println("CALLED");
+    // println("CALLED");
   //   sY = (float) ((pushPop*sY)/(maxVal - yChange));
-     sY = (float) (invariant/maxVal); //proud!
-     println("SY: " + sY + "BOUNDARY: " + boundary);
+     sY = (float) (invariant/maxVal); //proud! <--- This is causing a fast movement, delay for now!
+     print("Something's happening...");
+    // println("SY: " + sY + "BOUNDARY: " + boundary);
      // println("BOUNDARY: " + boundary + " SY: " + sY + " FREQ: " + (2));
     }
-   // if ((midline + margin)/maxVal < relMax && moving){
-     // println("ML : " + ((midline + 100)/maxVal) + " rM: " + relMax + "sY: " + sY + "xCoord : " + xCoord[max]);
-  //    relMax = (midline + margin)/maxVal;
-  //    instaChange(relMax,false);
- //  } //else println("relMax: " + relMax + " b: " + boundary + " dx " + dx);
+
    initGraph();
-  // text("gamingFan120",500,-500);// does not work!
-    //relMax = (midline + margin)/yCoords[max][0];
-  /* stroke(255);
-    strokeWeight(10);
-   line(-700,-(float) (midline - margin),700,-(float) (midline - margin));
-   line(-700,-400,700,-400); //keeps the line at a constant place but not static in terms of the graph
-    line(-700,-(float) (midline+margin), 700, -(float) (midline+margin));
-    text("MaxVal : " + maxVal + " minVal: " + minVal, 200, -(float) (midline + 340));
-    */
-  /* else if ((midline + 100)/maxVal > relMax){
-    // println("halleloyaaa");
-    // stop();
-     //relMax = (midline + 100)/maxVal;
-    // instaChange(relMax,false);
-   } else if (sY / 1.15 < boundary){
-     linDec(boundary*0.96);
-   }*/
-   
-     //println("ML : " + ((midline + 100)/maxVal) + " rM: " + relMax + "sY: " + sY + "xCoord : " + xCoord[max]);
-  //put all this into a function!
-    //println(relMax);
-  //  instaChange(relMax);
      
      
     if (sY*maxVal > midline + margin){
@@ -761,8 +804,13 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     rect((float) (sX*(xCoord[max] - origin) - newWidth - startMovingX),-(float) (midline + height - marginY),100,(float) (midline + height)); //verticalRect
   }
   fill(255);
-
-  for (float a = startingX; a < xV; a+=xValue){ //initialize lines and grid lines (x)
+  
+  int mC = 0;
+  xValue = dateBuffer.get(mC);
+  
+  for (float a = startingX; a < xV; a += xValue){ //initialize lines and grid lines (x)
+      mC++;
+      xValue = dateBuffer.get(mC);
       if (a <= 0) {
         startingX = floorAny(sX*(xCoord[max] - origin) - width/2 - marginY,xValue); //maybe -origin, first startingX not needed :?
        // textSize(25); //oh this thing stops getting run lol
@@ -797,12 +845,6 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
       continue;
     }
     
-    //startingY = 0;
-   // println(startingY);
-    
-   // if () 
-    //println("XD: " + ((-b+5)*sY) + " ZAV: " + (height/2 - midline + 50));
-      //continue;
     
     if (b % scalar != 0){ //weeding stage! (aka Oy) if 10xxx, just f00kin leave it alone! (ALREADY DONE!)
        // fadeOut(1)
@@ -827,14 +869,14 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
   }
   
   if (Integer.parseInt(Double.toString(scalar).substring(0,1)) == 5){ //skip 10x!
-          fill(255,255,255,yAxis.fadeIn());
+          fill(grayscaleCoefficient,yAxis.fadeIn());
           //println(yAxis.fadeIn() * (255.0f/122));
           for (int c = floorAny(startingY,scalar); c < endingY; c += scalar){ //cant be exactly startingY now can it?
         //  println("C: " + c + " SCL: " + 2*scalar + " C % 2SCALAR == 0 " + (c%2*scalar==0)); //order of fuckin operations LOL
               if (c == 0 || c % (2*scalar) == 0) continue;
-              if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX){
+              if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX + 20){
               // println("testor123");
-                text(showText(c),(float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX) + textMovementY),-c*sY);
+                text(showText(c),(float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX + 20) + textMovementY),-c*sY);
                 //-50 + something
               } else {
                 text(showText(c),textMovementY,-c*sY); // y-axis
@@ -901,17 +943,17 @@ void keyPressed(){
       value /= 2;
       break;
     case 'f':
-    // fS *= 2;
+     debug = true;
      break;
     case 'x':
-      debug = true;
       frameRate(1);
       break;
     case 'v':
       linesGone = !linesGone;
       break;
     case 'g':
-      //gracefulD();
+      debug = true;
+      debugMidline += 100;
       break;
      case 't':
        sY /= 2;
@@ -931,23 +973,15 @@ void draw(){
     stop();
   }
   
-  //println("MAX: " + max);
  // println("XSIZE " + xCoord.size());
   scale(1*e);
-  // translate(width/2,height/2);
   initObjArr();
   follow();
   graphData();
- //translate(width - 800 +max,200+f(max));
   //info();
   max++; 
 
- // if (valInc) {
-    //gracefulU();
-    //sY += 0.01;
-    //increaseScale();
-//  }
-//  saveFrame("frameReplace/line-######.png");
+  //saveFrame("testAilun/line-######.png");
 }
 
 

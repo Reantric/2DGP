@@ -7,11 +7,13 @@ public class Coord implements Comparable<Coord>{
     public int hexCode;
     public String name;
     public PImage img;
-    public Coord(double y, int hex, String n, PImage i){
+    public double futureY;
+    public Coord(double y, int hex, String n, PImage i, double yTen){
         this.yValue = y;
         this.hexCode = hex;
         this.name = n;
         this.img = i;
+        this.futureY = yTen;
     }
 
     public double getYCoord(){
