@@ -13,6 +13,7 @@ LocalDate date;
 PFont myFont;
 PFont nameFont;
 DecimalFormat df = new DecimalFormat("#.00");
+DecimalFormat yearFormat = new DecimalFormat("0.##");
 Calendar cal = Calendar.getInstance();
 String[] days = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"};
 String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"};
@@ -73,7 +74,7 @@ double maxVal;
 double minVal; 
 double cut;
 double invariant = 760;
-
+float yCoefficient;
 Map<Double,double[]> coords = new HashMap<Double,double[]>(); //04:17:02
 //Map<Integer[],String> responses = new HashMap<Integer[],String>();
 
@@ -94,7 +95,7 @@ long epochAdv;
 long epochBef;
 
 Easing midlineEase;
-Easing yScaleEase = new Easing(0);
+Easing sYEase;
 Scaling yAxis = new Scaling(255);
 Scaling yAxisVertical = new Scaling(255);
 Scaling xAxis = new Scaling(255);
@@ -112,6 +113,7 @@ void fetch(){
   boundary = 0.32;
   // Custom values
   
+  yCoefficient = sY;
   String[] lines = loadStrings("datas.txt"); // Load all lines of datas.txt into a file.
   names = lines[0].split(" ");
   xCoord = new double[lines.length-1];
@@ -179,6 +181,8 @@ void fetch(){
   }
   prevNOA = numOfArtists;
   midlineEase = new Easing(height/2 - marginY - 1,height/2 - marginY - 1);
+  sYEase = new Easing(sY,sY);
+  println("BEGINNNT: " + sYEase.incrementor);
 }
 
 //final float minY = min(IT );
@@ -196,6 +200,15 @@ void fetch(){
   imageMode(CENTER);
 }
 
+String splitDate(long l){
+  if (l > 365){
+    return String.format("%d years and %d days",l/365,l%365);
+  } 
+  else {
+    return String.format("%d days (~%s years)",l,yearFormat.format(l/365.0)); 
+  }
+}
+
 /**
  * Sets up the main text in the top half of the canvas.
  * Leader is in the top left along with the amount of days that they have been leader.
@@ -208,7 +221,7 @@ void fetch(){
     cut = xCoord[max]; // Reset cut to the point where the maximum object was 'overthrown'
   }
     
-    String daysPassed = Long.toString(Math.round(xCoord[max] - cut)/86400);
+    String daysPassed = splitDate(Math.round(xCoord[max] - cut)/86400);
     date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
     
    // println(dateBuffer);
@@ -218,11 +231,11 @@ void fetch(){
     noStroke();
     beginShape();
       if (maxObj.yValue != -1){
-      vertex(700 + (""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")").length() * 10 - marking + compensateX, -height+41 + yChange);
-      vertex(700 + (""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")").length() * 10 - marking + compensateX, -height+261 + yChange);
+      vertex(700 + daysPassed.length() * 21.5 - marking + compensateX, -height+41 + yChange);
+      vertex(700 + daysPassed.length() * 21.5 - marking + compensateX, -height+261 + yChange);
       } else {
-        vertex(690 - marking + compensateX, -height+41 + yChange);
-        vertex(690 - marking + compensateX, -height+261 + yChange);
+        vertex(690 - marking + daysPassed.length() * 21.5 + compensateX, -height+41 + yChange);
+        vertex(690 - marking + daysPassed.length() * 21.5 + compensateX, -height+261 + yChange);
       }
       vertex(135 - marking + compensateX, -height+261 + yChange);
       vertex(135 - marking + compensateX, -height+41 + yChange);
@@ -231,24 +244,24 @@ void fetch(){
     fill(255);
     stroke(255);
     
-    textSize(45);
-    text("Leader: ",100+compensateX,-height + 150 + yChange);
+    textSize(62);
+    text("Leader: ",130+compensateX,-height + 150 + yChange);
     
     textAlign(LEFT); // Align all text to the left!
     textFont(nameFont); // Set textFont to a bolded Lato
-    textSize(44);
+    textSize(52);
     
-    text("For " + daysPassed + " days", 360+compensateX, -height + 215 + yChange); // Display difference of current date and date when #1 became #1
+    text("For " + daysPassed, 420+compensateX, -height + 224 + yChange); // Display difference of current date and date when #1 became #1
     
-    textSize(50);
+    textSize(60);
     
     if (maxObj.yValue != -1){
-      text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",360 + compensateX,-height + 155 + yChange);
-      image(maxObj.img,260+compensateX,-height+165 + yChange,160,150); // Create an image with the maxObj's image attribute and place it at 260',130'
+      text(""+maxObj.name.replace("_"," ") + " (" + Math.round(maxObj.yValue) + ")",420 + compensateX,-height + 160 + yChange);
+      image(maxObj.img,320+compensateX,-height+165 + yChange,160,150); // Create an image with the maxObj's image attribute and place it at 260',130'
     }
     else {
-      text("? (--)",360 + compensateX,-height + 155 + yChange);
-      image(anon,260+compensateX,-height+165 + yChange,160,150);
+      text("? (--)",420 + compensateX,-height + 160 + yChange);
+      image(anon,320+compensateX,-height+165 + yChange,160,150);
     }
 
     textAlign(CENTER);
@@ -296,12 +309,12 @@ void info(){ //must multiply by reciprocal!
 
         
     fill(255);
-    textSize(56);
-    text("        Current Date:",width-275-marking + compensateX,-(height - 150) + yChange);
+    textSize(64);
+    text("        Current Date:",width-280-marking + compensateX,-(height - 160) + yChange);
   //  funAilun(width-170-marking + compensateX,-480);
-    textSize(50);
+    textSize(55);
     String strMonth = date.getMonth().toString().substring(0,3);
-    text("" + strMonth.substring(0,1) + strMonth.substring(1,3).toLowerCase() + " " + date.getDayOfMonth() + ", " + date.getYear(),width-234-marking + compensateX,-height + 220 + yChange);
+    text("" + strMonth.substring(0,1) + strMonth.substring(1,3).toLowerCase() + " " + date.getDayOfMonth() + ", " + date.getYear(),width-235-marking + compensateX,-height + 230 + yChange);
   
   //fill(255);
  // text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max] - xPush),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
@@ -463,7 +476,7 @@ void follow(){
     
   }
   else {
-    println(midline);
+   // println(midline);
     slowPushY = (float) (height/2 + midlineEase.incrementor);
     movingY = true;
     yChange = -(float) (midlineEase.incrementor - height/2 + marginY);
@@ -712,6 +725,7 @@ void sleep(int n){
 void graphData(){ //max++ is intrinsic!
   isNull = Math.abs(coordObj[rowLength - 1].yValue + 1.0) < 0.001;
   //println(isNull);
+      midline = sumMid();
   autoScale(); //decor!
   //background 0 is happening here.... no clue why :??
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!) //advances 1 every time it is redrawn 
@@ -739,7 +753,7 @@ void graphData(){ //max++ is intrinsic!
     info(); //<--- Fix when no yCoords...
 
     blackBox();
-    midline = sumMid();
+
    // println("MIDLINE: " + midline);
    println("CURRENT SY: " + sY + " CURRENT BG: " + boundary);
    // if (Double.isNaN(midline))
@@ -749,20 +763,37 @@ void graphData(){ //max++ is intrinsic!
     //circle(sX*200,sY*  300,40); i^ and j^? (unit vectors)..? lol linear alg
 }
 
+void sYScaling(float v){
+
+   // if prevN == ? and n == !, then ease!
+  //println("TF: " + midlineEase.incrementor + " status: " + midlineScaling);
+  sYEase.setChange(v);
+  
+  if (!midlineScaling || sYEase.isEqual()){
+    sYEase.incrementor = v;
+    return;
+  }
+
+  sYEase.incEase(1.03);
+  sYEase.doStuff();
+  
+
+}
+
 void autoScale(){
     
     if (max > 1 && getMaxValue(yCoords[max-1]) > getMaxValue(yCoords[max]) && sY / 1.1 < boundary){
         // use the Easing sY object!
     }
-   // line((float) xCoord[max] - width/2 - 15,-500,(float) xCoord[max] - width/2 - 15,500);
+    
+    
     maxVal = coordObj[rowLength - 1].yValue; // pushPop  is 220/sY + yChange
+    sYScaling(yCoefficient);
+
     if (maxVal * sY > invariant){ //very important! not changing the coordinate plane, just the values that objects take up in that coordinate plane!
-    // println("CALLED");
-  //   sY = (float) ((pushPop*sY)/(maxVal - yChange));
-     sY = (float) (invariant/maxVal); //proud! <--- This is causing a fast movement, delay for now!
-     print("Something's happening...");
-    // println("SY: " + sY + "BOUNDARY: " + boundary);
-     // println("BOUNDARY: " + boundary + " SY: " + sY + " FREQ: " + (2));
+     yCoefficient = (float) (invariant/maxVal);
+     sY = sYEase.incrementor; // <--- This is causing a fast movement, delay for now!
+
     }
 
    initGraph();
@@ -821,7 +852,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
     
   textSize(42);
   for (float b = startingY; b < endingY + 6/sY; b += value){ // its only the text LOL 
-    if (b == 0 || b*sY < midline - height/2 + marginY + 4){//erase y-axis ticks before they hit the rect!
+    if (b == 0 || b*sY < midline - height/2 + marginY + 2){//erase y-axis ticks before they hit the rect! ID: disappear
       continue;
     }
     
@@ -962,30 +993,6 @@ void draw(){
   max++; 
 
   //saveFrame("testAilun/line-######.png");
-}
-
-
-void increaseValue(double val){
-  println(val);
-  if (value < val){
-  for (float x = 10; x > 0; x--){
-    if (value + x/80 > val)
-      value = val; //make more smooth l8er!
-    else 
-    value += x/80;
-    }
-  }
-}
-
-void decreaseValue(double val){
-  if (value > 50){
-  for (float x = 10; x > 0; x--){
-    if (value - x/80 < val)
-      value = val; //make more smooth l8er!
-    else 
-      value -= x/80;
-    }
-  } 
 }
 
 void increaseScale(){
