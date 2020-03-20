@@ -1,19 +1,82 @@
+import java.util.*;
+
 public class Arrow extends Easing {
-  PVector vector = new PVector(0,0);
+  PVector vector;
   boolean follow;
   float triangleSize;
+  double xVal;
+  List<float[]> coords;
+  int coordsSize;
+  int optimalDelVal;
   
-  public Arrow(float tS, boolean graphDependent){ //  public Easing(float c, float i, float e) Fix triangle not easing correctly!
+  public Arrow(float x, float y){
+    this(12,false,0);
+    vector = new PVector(x,y);
+  }
+  
+  public Arrow(float tS, boolean graphDependent,double xV){ //  public Easing(float c, float i, float e) Fix triangle not easing correctly!
     super(0,tS);
     triangleSize = tS;
     follow = graphDependent;
+    xVal = xV;
+    vector = new PVector(0,0);
+    coords = new ArrayList<float[]>();
+    coordsSize = 0;
+    optimalDelVal = 0;
   }
   
+  public void drawArc(PGraphics c){ // apparently angle is a processing word? who woulda thought!
+    float angle = vector.heading();
+    if (angle < 0) angle = TAU + vector.heading();
+    c.noFill();
+    c.stroke(255);
+  //  println(angle);
+    c.arc(0, 0, 60, 60, -angle%TAU+radians(0.2), radians(0.2));
+  }
+  
+  public void setVector(float x, float y){
+    vector.set(x,y);
+  }
+  
+  public void addPoint(float x, float y){
+    coords.add(new float[]{x,y});
+    coordsSize++;
+   // println(coordsSize);
+  }
+  
+  public void graph(PGraphics c, float delVal){
+    /* float epsX = (coords.get(coordsSize-1)[0]+0.001)/(coords.get(0)[0]+0.001); //buffer
+    float epsY = (coords.get(coordsSize-1)[1]+0.001)/(coords.get(0)[1]+0.001); //buffer */
+    
+    boolean epsX = coords.get(0)[0]/coords.get(coordsSize-1)[0] > 0.99 && coords.get(0)[0]/coords.get(coordsSize-1)[0] < 1.01; // x does not start/end at 0 !
+    boolean epsY = coordsSize > 1 && coords.get(coordsSize-2)[1] > coords.get(0)[1] && coords.get(coordsSize-1)[1] <= coords.get(0)[1];
+     
+   //  if (coordsSize > 1)
+      //  println(String.format("%f < %f && %f >= %f",coords.get(coordsSize-2)[0],coords.get(0)[0],coords.get(coordsSize-1)[0],coords.get(0)[0]));
+    
+   // println(coords.get(0)[0]/coords.get(coordsSize-1)[0]);
+    if (epsX && epsY){
+      optimalDelVal = coordsSize;
+      println("Optimal delVal: " + optimalDelVal);
+  //    stop();
+    }
+    
+    if (coordsSize > delVal){
+      coords.remove(0);
+      coordsSize--;
+    }
+    
+    for (int i = 0; i < coordsSize-1; i++){
+      c.stroke(Useful.getColor(i,0,delVal),255,255);
+      c.strokeWeight(5);
+      c.line(coords.get(i)[0],coords.get(i)[1],coords.get(i+1)[0],coords.get(i+1)[1]);
+    }
+  }
   
   public void doStuff(float easeInc){
      // vectorMag = vector.mag();
       
-      if (vector.x > -5 && vector.x < 0){
+    /*  if (vector.x > xVal && vector.x < 0){
         this.incEase(easeInc);
         super.doStuff();
       }
@@ -29,11 +92,22 @@ public class Arrow extends Easing {
         
         this.incEase(easeInc);
         super.doStuff();
-      }
+      } */
       
      // System.out.println(this.vector);
     //  System.out.println(vectorMag);
       
+  }
+  
+  public float getMag(float sX){
+    if (follow && vector.x > 0)
+      return sX*vector.mag();
+      
+    return sX*vector.mag() - 16;
+  }
+  
+  public void display(PGraphics c){
+    
   }
   
 }

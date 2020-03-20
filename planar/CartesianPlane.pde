@@ -1,5 +1,7 @@
 import processing.core.*;
 import java.util.*;
+import java.text.DecimalFormat;
+DecimalFormat df = new DecimalFormat("###.#");
 
 public class CartesianPlane implements Plane { // Work on mouseDrag after!
     float xValue;
@@ -9,8 +11,11 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     float sY;
     float startingX;
     float startingY;
-    float scaleFactor = 0.06;
+    float rescaleX;
+    float rescaleY;
+    float scaleFactor;
     float max = 0; //counter
+    float currentColor = 0;
     boolean restrictDomain = false;
     float restrictedDomainX1;
     float restrictedDomainX2;
@@ -25,8 +30,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     Easing slowRotate = new Easing(0);
     Easing animVector = new Easing(0); // change later
     Easing originTriangle = new Easing(0,12);
-    Arrow traceGraphF = new Arrow(12,true);
-    Arrow traceGraphG = new Arrow(12,true);
+    Arrow traceGraphF = new Arrow(12,true,xValue);
+    Arrow traceGraphG = new Arrow(12,true,xValue);
     /* Object initializations */
     
     
@@ -38,12 +43,18 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     public CartesianPlane(float xSpace, float ySpace,PGraphics p){
         xValue = xSpace;
         yValue = ySpace;
-        sX = 200/xValue;
-        sY = 200/yValue;
         canvas = p;
+        println((float) height);
+        rescaleX = (float) canvas.width/width;
+        rescaleY = (float) canvas.height/1080;
+        sX = 200/xValue * rescaleX;
+        sY = 200/yValue * rescaleY;
+        scaleFactor = 6/5.0 * xValue/100.0;
+        scaleFactor = 0.06; // debug
         startingX = Useful.floorAny(-canvas.width/(2*sX),xValue); // <---- Issues here when resizing canvas 
         startingY = Useful.floorAny(-canvas.height/(2*sY),yValue); // <---- Issues here when resizing canvas 
-        max = -canvas.width/(2*sY) - xValue/5;
+        max = startingX - xValue/5; // should start at 25
+        println("rescaleY : " + rescaleY);
     }
     
     /**
@@ -51,9 +62,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * Creates a 2D Cartesian Plane with an x axis and a y axis
      */
     public void generatePlane(){
-      
+       currentColor = Useful.getColor(max,startingX,-startingX);
        canvas.beginDraw();
-       
        canvas.background(0);
        canvas.textFont(myFont);
        canvas.textSize(38);
@@ -67,15 +77,27 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      //  pushMatrix();
        canvas.rotate(slowRotate.incrementor); //-PI/2
                 
-       for (float x = startingX; x < -startingX; x += xValue){
+       for (float x = startingX; x < -startingX; x += xValue/2){
           if (x == 0) continue;
+          
+          if (x % xValue == 0)
+            canvas.strokeWeight(4);
+          else
+            canvas.strokeWeight(1.5);
+            
           canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY);
   
         }
         
         
-        for (float y = startingY; y < -startingY; y += yValue){
+        for (float y = startingY; y < -startingY; y += yValue/2){
           if (y == 0) continue;
+          
+          if (y % yValue == 0)
+            canvas.strokeWeight(4);
+          else
+            canvas.strokeWeight(1.5);
+            
           canvas.line(-sX*startingX,sY*y,sX*startingX,sY*y);
          
         }
@@ -97,16 +119,17 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     */
     public void labelAxes(){
       canvas.fill(255);
-
+      canvas.textSize(42);
+      
       for (float x = startingX; x < -startingX; x += xValue){ //-width/(2*sX) - xValue/5 + xValue, starting 0,0 at width/2, height/2
 
             if (x == 0) continue;
-            canvas.text(round(x),sX*(x + 0.5),30);
+            canvas.text(round(x),sX*x + 20,20);
           }
           
       for (float y = startingY; y < -startingY; y += yValue){
           if (y == 0) continue;
-          canvas.text(round(-y),-30,sY*(y-0.5));
+          canvas.text(round(-y),-30,sY*y - 28);
         }
 
     }
@@ -116,6 +139,10 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       //PImage frame = canvas.get(); Much more laggy!
       //pushMatrix();
       //translate(canvas.width/2,canvas.height/2);
+      stroke(currentColor,255,255);
+      strokeWeight(7);
+      noFill();
+      rect(x,y,canvas.width,canvas.height);
       image(canvas,x,y);
      // popMatrix();
     }
@@ -125,7 +152,6 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * Graph any function
      */
     public void graph(){
-      canvas.strokeWeight(5);
       float sMax, endG;
       if (restrictDomain){
         sMax = restrictedDomainX1;
@@ -136,15 +162,20 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       }
       
    //   loadRandArr();
-      
+
+      traceGraphF.vector.set(max,f(max+scaleFactor) * (width/1080)/(rescaleX/rescaleY)); // just the aspect ratios!
+      traceGraphG.vector.set(max,g(max+scaleFactor) * (width/1080)/(rescaleX/rescaleY));
+
+      canvas.strokeWeight(5);
+      canvas.strokeCap(ROUND);
       for (float i = startingX; i < max; i+=scaleFactor){
         if (i < sMax || i > endG){
            canvas.stroke(125,255,255,fadeGraph.fadeOut(0.01));
         } else
-           canvas.stroke(getColor(i),255,255);
+           canvas.stroke(Useful.getColor(i,startingX,-startingX),255,255);
         
         /* Optimize graph, only use if no autoscale! */
-        
+
         /*
         for (int t = 0; t < 5 && f(i) > -startingY; t++){
           float jumpDistance = 5*scaleFactor;
@@ -163,18 +194,17 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
 
       }
       
-      traceGraphF.vector.set(max,f(max));
-      traceGraphG.vector.set(max,g(max));
+      if (max < -startingX) max+=scaleFactor;
+      
+
+      
+     if (max > -2.88 && max < 2.88) max -= 0.058;
+    //  println("x: " + max + " y: " + f(max));
       drawVector(traceGraphF);
       drawVector(traceGraphG);
-      
-      if (max < -startingX) max+=0.05;
-      
-    // if (max > -0.88 && max < 0.88) max -= 0.044;
-    //  println("x: " + max + " y: " + f(max));
-      
     }
-    
+
+      
     public long factorial(int number) {
         long result = 1;
 
@@ -194,12 +224,12 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      */
     public float f(float x){
       
-      return x < 0 ? (float) (Math.random() * x - x) : (float) (0.4*Math.pow(x,cos(x)));
+      return 0.2*x;
       //(float) (double) randArr.get((int) x + 25);
     }
     
    public float g(float x){
-      return x < 0 ? -(float) (Math.random() * x - x): (float) -(0.4*Math.pow(x,sin(x/2)));
+      return x < 0 ? -4*sin(x): (float) -log(x);
    }
 
     public void loadRandArr(){
@@ -256,14 +286,6 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     }
     
     /**
-    *
-    * Cycle through all colors of the rainbow
-    */
-    public float getColor(float m){
-      return map(m,startingX,-startingX,0,255);
-    }
-    
-    /**
     * @param x x-coordinate of point
     * @param y y-coordinate of point
     * Creates a visible point at that location
@@ -283,43 +305,53 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
   */
   public void drawVector(Arrow arrow){
     PVector v = arrow.vector; // aliases
+    arrow.drawArc(canvas);
     canvas.colorMode(HSB); 
     float triangleSize;
+    int delVal = 630;
     canvas.pushMatrix();
-    
-    float c = getColor(max);
-      
- // bundle PVector and Easing into one... This will be tough
-     /*  if (max > -5){ // <--- boolean conditional
-        originTriangle.incEase(1.045);
-        originTriangle.doStuff();
-      }
-      
-      if (max > 0)
-        originTriangle.setChange(12);  */
+
         
       arrow.doStuff(1.045);
-      
-      
-     // triangleSize = originTriangle.incrementor;
-      // strokeWeight(originTriangle.incrementor * 10.0/12);
+
      
      triangleSize = arrow.incrementor;
      canvas.strokeWeight(arrow.incrementor * 10.0/12);
 
 
       float rotationAngle = v.heading();
-      float magnitude = sX*v.mag() - 6; //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
-
-      canvas.stroke(c,255,255);
-      canvas.fill(c,255,255);
-      canvas.strokeCap(SQUARE);
       
+      float magnitude = arrow.getMag(sX); // max < 0 ? sX*v.mag() - 16 : sX*v.mag(); //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
+
+      canvas.stroke(currentColor,255,255);
+      canvas.fill(currentColor,255,255);
+      canvas.strokeCap(ROUND);
+      
+
+      
+          //text
+      canvas.fill(Useful.getColor(arrow.coordsSize,0,delVal),255,255);
+      Useful.rotatedText(df.format(degrees(rotationAngle))+"°",canvas,sX*v.x/5,-sY*v.y/5,PI-rotationAngle);
+      canvas.textSize(80);
+      canvas.fill(255,255,255);
+      Useful.rotatedText(Useful.propFormat(v.mag()),canvas,sX*v.x/2 ,-sY*v.y/2,PI-rotationAngle);
+    //text
+    
       canvas.rotate(-rotationAngle);
+
       canvas.line(0,0,magnitude,0);
-      canvas.triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
+      
+      canvas.beginShape(TRIANGLES);
+        canvas.vertex(magnitude - triangleSize*1.5 + 8,-triangleSize);
+        canvas.vertex(magnitude + 8, 0);
+        canvas.vertex(magnitude - triangleSize*1.5 + 8,triangleSize);
+      canvas.endShape();
+     // canvas.triangle(magnitude-triangleSize*1.6,triangleSize,magnitude-triangleSize*1.6,-triangleSize,magnitude,0);
       
     canvas.popMatrix();
+    
+    arrow.addPoint(sX*v.x,-sY*v.y);
+    arrow.graph(canvas,delVal);
   }
   
   /**
