@@ -2,12 +2,12 @@ import java.lang.*;
 
 public static class Useful {
   
-  public static int floorAny(double jjfanman, double val){
-    return (int) (val*Math.floor(jjfanman/val));
+  public static double floorAny(double jjfanman, double val){ // can only spit out integers... damn thsi!
+    return  val*Math.floor(jjfanman/val);
 }
 
-  public static int ceilAny(double jjfanman, double val){
-    return (int) (val*Math.ceil(jjfanman/val));
+  public static double ceilAny(double jjfanman, double val){
+    return val*Math.ceil(jjfanman/val);
 }
   
   public static String propFormat(float x){
@@ -33,12 +33,25 @@ public static class Useful {
         c.translate(x,y); // where to place TXT?
       
         c.pushMatrix();
-      
-        c.rotate(theta);
         
-       // println(CENTER);
-        c.textAlign(CENTER,BOTTOM);
+        if (theta < 0)
+          theta += TAU;
         
+
+       // println(theta);
+         
+          if (theta < 3*PI/2 && theta > PI/2){ //centBottom both does work, but it is a jarring experience!
+             c.textAlign(CENTER,TOP);
+             c.rotate(theta-PI);
+          }
+          else {
+             c.textAlign(CENTER,BOTTOM);
+             c.rotate(theta);
+          }
+
+
+          
+          
         c.text(txt,0,0);
    c. popMatrix();
    

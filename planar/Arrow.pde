@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Arrow extends Easing {
+public class Arrow {
   PVector vector;
   boolean follow;
   float triangleSize;
@@ -15,7 +15,6 @@ public class Arrow extends Easing {
   }
   
   public Arrow(float tS, boolean graphDependent,double xV){ //  public Easing(float c, float i, float e) Fix triangle not easing correctly!
-    super(0,tS);
     triangleSize = tS;
     follow = graphDependent;
     xVal = xV;
@@ -44,7 +43,15 @@ public class Arrow extends Easing {
    // println(coordsSize);
   }
   
-  public void graph(PGraphics c, float delVal){
+  public void addPoint(float x, float y,int delVal){
+    if (coordsSize < delVal){
+      coords.add(new float[]{x,y});
+      coordsSize++;
+    }
+   // println(coordsSize);
+  }
+  
+  public void graph(PGraphics c, int delVal){
     /* float epsX = (coords.get(coordsSize-1)[0]+0.001)/(coords.get(0)[0]+0.001); //buffer
     float epsY = (coords.get(coordsSize-1)[1]+0.001)/(coords.get(0)[1]+0.001); //buffer */
     
@@ -57,11 +64,12 @@ public class Arrow extends Easing {
    // println(coords.get(0)[0]/coords.get(coordsSize-1)[0]);
     if (epsX && epsY){
       optimalDelVal = coordsSize;
-      println("Optimal delVal: " + optimalDelVal);
+     // println("Optimal delVal: " + optimalDelVal);
   //    stop();
     }
     
     if (coordsSize > delVal){
+      println("is this ever happening?");
       coords.remove(0);
       coordsSize--;
     }
@@ -99,11 +107,11 @@ public class Arrow extends Easing {
       
   }
   
-  public float getMag(float sX){
+  public float getMag(float sX, float aR){
     if (follow && vector.x > 0)
-      return sX*vector.mag();
+      return aR*sX*vector.mag();
       
-    return sX*vector.mag() - 16;
+    return aR*(sX*vector.mag() - 16);  //-16:?
   }
   
   public void display(PGraphics c){

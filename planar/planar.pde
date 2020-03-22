@@ -3,20 +3,29 @@ CartesianPlane plane;
 Scaling c = new Scaling(0);
 int max = -width/2;
 float angle;
-PFont myFont;
+PFont myFont, italics;
 PGraphics canvas;
 float inc = 0;
 Arrow arr;
+PImage narrator, vectorV;
+final int WIDTH = 1920;
+final int HEIGHT = 1080;
 
 void setup() {
   size(1920, 1080, P2D);
   myFont = createFont("cmunbmr.ttf", 150, true);
+  italics = createFont("cmunbmo.ttf",150,true);
   textFont(myFont, 64);
   canvas = createGraphics(1920, 1080, P2D);
-  plane = new CartesianPlane(3, 3, canvas);
-  arr = new Arrow(6*cos(inc), 6*sin(inc));
+  plane = new CartesianPlane(0.5,0.5, canvas);
+  arr = new Arrow(cos(inc), sin(inc));
   smooth(8);
-  shapeMode(CENTER);
+  canvas.shapeMode(CENTER);
+  rectMode(CENTER);
+  narrator = loadImage("cM3.png");
+  vectorV = loadImage("vectorV.png");
+  vectorV.resize(100,100);
+  setupNarrator();
 }
 
 
@@ -40,16 +49,15 @@ public class slowLine {
 
 void directions() {
   plane.rotatePlane(angle);
-  arr.setVector(6*cos(inc),6*sin(inc));
-  plane.drawVector(arr);
+  arr.setVector(cos(inc),sin(inc));
+ // plane.drawVector(arr);
   //  plane.createPoint(20,-20);
-  inc += 0.01;
+  arr.addPoint(plane.sX*arr.vector.x,-plane.sY*arr.vector.y,plane.delVal); //no cool color effect!
+  arr.graph(canvas,plane.delVal);
+  inc += 0.04;
   //  plane.createPoint(40,20);
 }
 
-void narration(){
-  canvas.text("Here's text!",-200,-400);
-}
 
 void mouseWheel(MouseEvent event) {
   e += -0.07*event.getCount();
@@ -86,9 +94,9 @@ void draw() {
   plane.generatePlane();
   // plane.graph();
   directions();
-  narration();
-  plane.display(0, 0);
+  narrate();
+  plane.display();
 
-  //saveFrame("rotate90/line-######.png");
+  //saveFrame("basicVector/line-######.png");
   // directions();
 }

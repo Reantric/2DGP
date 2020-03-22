@@ -3,7 +3,7 @@ import java.util.*;
 import java.text.DecimalFormat;
 DecimalFormat df = new DecimalFormat("###.#");
 
-public class CartesianPlane implements Plane { // Work on mouseDrag after!
+public class CartesianPlane extends MObject implements Plane { // Work on mouseDrag after!
     float xValue;
     float yValue;
     float transparency = 255;
@@ -22,6 +22,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     List<Double> randArr = new ArrayList<Double>();
     float finalValue;
     PGraphics canvas;
+    float aspectRatio;
+    int delVal;
     
     /* Object initializations */  // Create color object soon for animateVector();
     List<PVector> points = new ArrayList<PVector>();
@@ -41,20 +43,23 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
      * @param ySpace Distance between y ticks
      */
     public CartesianPlane(float xSpace, float ySpace,PGraphics p){
+        super(p,0,0,p.width,p.height,0);
         xValue = xSpace;
         yValue = ySpace;
         canvas = p;
-        println((float) height);
-        rescaleX = (float) canvas.width/width;
-        rescaleY = (float) canvas.height/1080;
+        rescaleX = (float) canvas.width/WIDTH;
+        rescaleY = (float) canvas.height/HEIGHT;
         sX = 200/xValue * rescaleX;
         sY = 200/yValue * rescaleY;
         scaleFactor = 6/5.0 * xValue/100.0;
         scaleFactor = 0.06; // debug
-        startingX = Useful.floorAny(-canvas.width/(2*sX),xValue); // <---- Issues here when resizing canvas 
-        startingY = Useful.floorAny(-canvas.height/(2*sY),yValue); // <---- Issues here when resizing canvas 
+        startingX = (float) Useful.floorAny(-canvas.width/(2*sX),xValue); // <---- Issues here when resizing canvas 
+        startingY = (float) Useful.floorAny(-canvas.height/(2*sY),yValue); // <---- Issues here when resizing canvas 
         max = startingX - xValue/5; // should start at 25
-        println("rescaleY : " + rescaleY);
+        aspectRatio = (WIDTH/1080)/(rescaleX/rescaleY);
+        delVal = 159;
+        println("please: " + WIDTH + " diff: " + width);
+
     }
     
     /**
@@ -67,11 +72,12 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
        canvas.background(0);
        canvas.textFont(myFont);
        canvas.textSize(38);
+       canvas.rectMode(CENTER);
        canvas.textAlign(CENTER,CENTER);
+       canvas.colorMode(HSB);
        canvas.translate(canvas.width/2,canvas.height/2);
-       canvas.stroke(122);
+       canvas.stroke(150,200,255);
        canvas.strokeWeight(4);
-       canvas.fill(190);
        
        
      //  pushMatrix();
@@ -102,7 +108,7 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
          
         }
         
-        canvas.stroke(255);
+        canvas.stroke(0,0,255);
         canvas.strokeWeight(4);
         
         canvas.line(-sX*startingX,0,sX*startingX,0);
@@ -110,7 +116,6 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
         
      //   popMatrix();
 
-        labelAxes();
         
     }
     
@@ -118,23 +123,33 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     * Label all axes
     */
     public void labelAxes(){
-      canvas.fill(255);
       canvas.textSize(42);
-      
+      canvas.textAlign(CENTER);
       for (float x = startingX; x < -startingX; x += xValue){ //-width/(2*sX) - xValue/5 + xValue, starting 0,0 at width/2, height/2
 
             if (x == 0) continue;
-            canvas.text(round(x),sX*x + 20,20);
+            
+            String tX = df.format(x);
+            canvas.noStroke();
+            canvas.fill(0,0,0,125);
+            canvas.rect(sX*x,30,60 + (tX.length()-3)*10,56);
+            canvas.fill(255);
+            if (x > 0)
+              canvas.text(tX,sX*x,44);
+            else
+              canvas.text(tX,sX*x-8,44);
           }
-          
+      
+      canvas.textAlign(RIGHT);
       for (float y = startingY; y < -startingY; y += yValue){
           if (y == 0) continue;
-          canvas.text(round(-y),-30,sY*y - 28);
+          canvas.text(df.format(-y),-12,sY*y-12);
         }
 
     }
     
-    public void display(float x, float y){
+    public void display(Object... obj){
+      labelAxes();
       canvas.endDraw();
       //PImage frame = canvas.get(); Much more laggy!
       //pushMatrix();
@@ -142,8 +157,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       stroke(currentColor,255,255);
       strokeWeight(7);
       noFill();
-      rect(x,y,canvas.width,canvas.height);
-      image(canvas,x,y);
+      rect(pos.x,pos.y,canvas.width,canvas.height);
+      image(canvas,pos.x,pos.y);
      // popMatrix();
     }
     
@@ -163,8 +178,8 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
       
    //   loadRandArr();
 
-      traceGraphF.vector.set(max,f(max+scaleFactor) * (width/1080)/(rescaleX/rescaleY)); // just the aspect ratios!
-      traceGraphG.vector.set(max,g(max+scaleFactor) * (width/1080)/(rescaleX/rescaleY));
+      traceGraphF.vector.set(max,f(max+scaleFactor) * aspectRatio); // just the aspect ratios!
+      traceGraphG.vector.set(max,g(max+scaleFactor) * aspectRatio);
 
       canvas.strokeWeight(5);
       canvas.strokeCap(ROUND);
@@ -303,39 +318,42 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
   * @param v Vector to be drawn
   * Draws vector in Cartesian Space
   */
-  public void drawVector(Arrow arrow){
+  public void drawVector(Arrow arrow){ //no need to graph and that stuff, just show vector!
     PVector v = arrow.vector; // aliases
     arrow.drawArc(canvas);
     canvas.colorMode(HSB); 
     float triangleSize;
-    int delVal = 630;
     canvas.pushMatrix();
 
         
       arrow.doStuff(1.045);
 
      
-     triangleSize = arrow.incrementor;
-     canvas.strokeWeight(arrow.incrementor * 10.0/12);
+     triangleSize = arrow.triangleSize;
+     canvas.strokeWeight(arrow.triangleSize * 10.0/12);
 
 
       float rotationAngle = v.heading();
-      
-      float magnitude = arrow.getMag(sX); // max < 0 ? sX*v.mag() - 16 : sX*v.mag(); //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
+      //should draw Ellipse but is drawing circle (FIX FOR OTHER RES OF CANVAS)
+      float magnitude = arrow.getMag(sX,aspectRatio); // max < 0 ? sX*v.mag() - 16 : sX*v.mag(); //arrow.vectorMag; // 6 works...?! apply ease to this v.mag() - 6
 
       canvas.stroke(currentColor,255,255);
-      canvas.fill(currentColor,255,255);
       canvas.strokeCap(ROUND);
       
 
       
-          //text
+      /* text */
       canvas.fill(Useful.getColor(arrow.coordsSize,0,delVal),255,255);
-      Useful.rotatedText(df.format(degrees(rotationAngle))+"°",canvas,sX*v.x/5,-sY*v.y/5,PI-rotationAngle);
+      
+      if (TAU + rotationAngle > 3*PI/2 && rotationAngle < 0)
+        Useful.rotatedText(df.format(degrees(rotationAngle > 0 ? rotationAngle : TAU + rotationAngle))+"°",canvas,sX*v.x/4,-sY*v.y/4,PI-rotationAngle);
+      else
+        Useful.rotatedText(df.format(degrees(rotationAngle > 0 ? rotationAngle : TAU + rotationAngle))+"°",canvas,sX*v.x/4.75,-sY*v.y/4.75,PI-rotationAngle);
+        
       canvas.textSize(80);
       canvas.fill(255,255,255);
       Useful.rotatedText(Useful.propFormat(v.mag()),canvas,sX*v.x/2 ,-sY*v.y/2,PI-rotationAngle);
-    //text
+      /* text */
     
       canvas.rotate(-rotationAngle);
 
@@ -351,7 +369,22 @@ public class CartesianPlane implements Plane { // Work on mouseDrag after!
     canvas.popMatrix();
     
     arrow.addPoint(sX*v.x,-sY*v.y);
-    arrow.graph(canvas,delVal);
+    arrow.graph(canvas,delVal); //delVAL
+    /* overlaying text */
+     canvas.textSize(42);
+     canvas.fill(128,255,255);
+     if (PI-rotationAngle < 3*PI/2 && PI-rotationAngle > PI/2)
+       canvas.textAlign(LEFT,CENTER);
+     else
+       canvas.textAlign(RIGHT,CENTER);
+     canvas.text(String.format("[cos(%s),sin(%s)]",df.format(v.x),df.format(v.y)),1.09*sX*v.x,1.09*-sY*v.y);
+    /* overlaying text */
+    
+    /* cherry on top */
+    canvas.noStroke();
+    canvas.fill(Useful.getColor(arrow.coordsSize,0,delVal),255,255);
+    canvas.circle(sX*v.x,-sY*v.y,8);
+    
   }
   
   /**
