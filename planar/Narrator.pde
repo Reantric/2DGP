@@ -7,7 +7,6 @@ void setupNarrator(){
 
 void narration(){
   canvas.textAlign(LEFT);
-  //println(canvas.textAlign);
   canvas.textSize(70);
   canvas.text("Sample text",-790,-420);
   tN.display();
@@ -20,4 +19,8 @@ void afterNarration(){
 void narrate(){
   narration();
   afterNarration(); 
+}
+
+void test(){
+  println("I exist!");
 }

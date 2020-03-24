@@ -1,4 +1,5 @@
 package vanim.mfunc;
+import vanim.planar;
 
 public class Easing {
     float easing;

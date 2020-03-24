@@ -1,10 +1,11 @@
 package vanim.mfunc;
 
+import vanim.planar;
 import vanim.misc.*;
+import vanim.shapes.*;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
-import vanim.shapes.MObject;
 
 import java.util.ArrayList;
 import java.util.List;

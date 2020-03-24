@@ -1,3 +1,4 @@
+
 float e = 1;
 CartesianPlane plane;
 Scaling c = new Scaling(0);
@@ -10,7 +11,7 @@ Arrow arr;
 PImage narrator, vectorV;
 final int WIDTH = 1920;
 final int HEIGHT = 1080;
-
+Line l;
 void setup() {
   size(1920, 1080, P2D);
   myFont = createFont("cmunbmr.ttf", 150, true);
@@ -18,7 +19,7 @@ void setup() {
   textFont(myFont, 64);
   canvas = createGraphics(1920, 1080, P2D);
   plane = new CartesianPlane(0.5,0.5, canvas);
-  arr = new Arrow(cos(inc), sin(inc));
+  arr = new Arrow(canvas,cos(inc), sin(inc));
   smooth(8);
   canvas.shapeMode(CENTER);
   rectMode(CENTER);
@@ -26,6 +27,7 @@ void setup() {
   vectorV = loadImage("vectorV.png");
   vectorV.resize(100,100);
   setupNarrator();
+  l = new Line(canvas,0,0,sin(0.4),cos(0.4),6,122);
 }
 
 
@@ -50,11 +52,13 @@ public class slowLine {
 void directions() {
   plane.rotatePlane(angle);
   arr.setVector(cos(inc),sin(inc));
+  
  // plane.drawVector(arr);
   //  plane.createPoint(20,-20);
   arr.addPoint(plane.sX*arr.vector.x,-plane.sY*arr.vector.y,plane.delVal); //no cool color effect!
   arr.graph(canvas,plane.delVal);
   inc += 0.04;
+  l.display();
   //  plane.createPoint(40,20);
 }
 
@@ -96,7 +100,10 @@ void draw() {
   directions();
   narrate();
   plane.display();
-
+  
+  /* debug space */
+  // bruv();
+  /* debug space */
   //saveFrame("basicVector/line-######.png");
   // directions();
 }

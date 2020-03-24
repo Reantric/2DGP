@@ -6,6 +6,11 @@ public abstract class MObject {
   float height;
   PGraphics canvas;
   float hue;
+  
+  public MObject(PGraphics c, float x, float y, float colHue){
+    this(c,x,y,0,0,colHue);
+  }
+  
   public MObject(PGraphics c,float x, float y,float w, float h, float colHue) {
     pos = new PVector(x,y);
     width = w; 
@@ -17,9 +22,16 @@ public abstract class MObject {
   
   public void backgroundRect(){ // work on this tom it is now tom
     canvas.noStroke();
-    canvas.rectMode(CENTER);
     canvas.fill(0,0,0,125);
-    canvas.rect(pos.x,pos.y+10,width,height);
+    if (canvas.textAlign == LEFT){
+      canvas.rectMode(CORNER);
+      canvas.rect(pos.x,pos.y-height+10,width,height);
+    }
+    else {
+      canvas.rectMode(CENTER);
+      canvas.rect(pos.x,pos.y+10,width,height);
+    }
+    
   }
   
   //rotate, translate, move, a lot more!

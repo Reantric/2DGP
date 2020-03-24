@@ -1,8 +1,8 @@
 package vanim.mfunc;
 
+import vanim.planar;
 import vanim.shapes.*;
 import processing.core.*;
-
 
 public class Narrator {
     PGraphics canvas;
@@ -19,7 +19,7 @@ public class Narrator {
 
 
     public void narration() {
-        canvas.textAlign(planar.LEFT);
+        canvas.textAlign(PApplet.LEFT);
         canvas.textSize(70);
         canvas.text("Sample text", -790, -420);
         tN.display();

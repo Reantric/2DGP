@@ -1,5 +1,5 @@
 package vanim.mfunc;
-
+import vanim.planar;
 import vanim.misc.*;
 import vanim.shapes.*;
 import processing.core.*;
@@ -26,11 +26,11 @@ import java.io.IOException;
 
 
 public class CartesianPlane extends MObject implements Plane { // Work on mouseDrag after!
-    float xValue;
-    float yValue;
-    float transparency = 255;
-    float sX;
-    float sY;
+    public float xValue;
+    public float yValue;
+    public float transparency = 255;
+    public float sX = 1;
+    public float sY = 1;
     float startingX;
     float startingY;
     float rescaleX;
@@ -45,7 +45,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
     float finalValue;
     PGraphics canvas;
     float aspectRatio;
-    int delVal;
+    public int delVal;
 
     /* Object initializations */  // Create color object soon for animateVector();
     List<PVector> points = new ArrayList<PVector>();
@@ -80,7 +80,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         max = startingX - xValue/5; // should start at 25
         aspectRatio = (planar.WIDTH/1080.0f)/(rescaleX/rescaleY);
         delVal = 159;
-        processing.println("please: " + planar.WIDTH + " diff: " + width);
+        PApplet.println("please: " + planar.WIDTH + " diff: " + width);
 
     }
 
@@ -94,8 +94,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         canvas.background(0);
         canvas.textFont(planar.myFont);
         canvas.textSize(38);
-        canvas.textAlign(processing.CENTER,processing.CENTER);
-        canvas.colorMode(processing.HSB);
+        canvas.textAlign(PApplet.CENTER,PApplet.CENTER);
+        canvas.colorMode(PApplet.HSB);
         canvas.translate(canvas.width/2.0f,canvas.height/2.0f);
         canvas.stroke(150,200,255);
         canvas.strokeWeight(4);
@@ -145,8 +145,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      */
     public void labelAxes(){
         canvas.textSize(42);
-        canvas.textAlign(processing.CENTER);
-        canvas.rectMode(processing.CENTER);
+        canvas.textAlign(PApplet.CENTER);
+        canvas.rectMode(PApplet.CENTER);
         for (float x = startingX; x < -startingX; x += xValue){ //-width/(2*sX) - xValue/5 + xValue, starting 0,0 at width/2, height/2
 
             if (x == 0) continue;
@@ -162,7 +162,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
                 canvas.text(tX,sX*x-8,44);
         }
 
-        canvas.textAlign(processing.RIGHT);
+        canvas.textAlign(PApplet.RIGHT);
         for (float y = startingY; y < -startingY; y += yValue){
             if (y == 0) continue;
             canvas.text(planar.df.format(-y),-12,sY*y-12);
@@ -344,7 +344,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
     public void drawVector(Arrow arrow){ //no need to graph and that stuff, just show vector!
         PVector v = arrow.vector; // aliases
         arrow.drawArc(canvas);
-        canvas.colorMode(processing.HSB);
+        canvas.colorMode(PApplet.HSB);
         float triangleSize;
         canvas.pushMatrix();
 
@@ -397,9 +397,9 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         canvas.textSize(42);
         canvas.fill(128,255,255);
         if (processing.PI-rotationAngle < 3*processing.PI/2 && processing.PI-rotationAngle > processing.PI/2)
-            canvas.textAlign(processing.LEFT,processing.CENTER);
+            canvas.textAlign(PApplet.LEFT,PApplet.CENTER);
         else
-            canvas.textAlign(processing.RIGHT,processing.CENTER);
+            canvas.textAlign(PApplet.RIGHT,PApplet.CENTER);
         canvas.text(String.format("[cos(%s),sin(%s)]",planar.df.format(v.x),planar.df.format(v.y)),1.09f*sX*v.x,1.09f*-sY*v.y);
         /* overlaying text */
 

@@ -28,15 +28,19 @@ public abstract class MObject {
         //this.c = col;
     }
 
+    public MObject(PGraphics c,float x, float y,float s, float colHue) {
+        this(null,c,x,y,s,s,colHue);
+    }
+
     public void backgroundRect(){ // work on this tom it is now tom
         canvas.noStroke();
         canvas.fill(0,0,0,125);
-        if (canvas.textAlign == processing.LEFT){
-            canvas.rectMode(processing.CORNER);
+        if (canvas.textAlign == PApplet.LEFT){
+            canvas.rectMode(PApplet.CORNER);
             canvas.rect(pos.x,pos.y-height+10,width,height);
         }
         else {
-            canvas.rectMode(processing.CENTER);
+            canvas.rectMode(PApplet.CENTER);
             canvas.rect(pos.x,pos.y+10,width,height);
         }
 

@@ -1,5 +1,5 @@
 package vanim.misc;
-import vanim.mfunc.*;
+import processing.core.*;
 
 public class Mapper {
     /* The map2() function supports the following easing types */
@@ -42,14 +42,14 @@ public class Mapper {
             case SQRT:
                 if (when == EASE_IN) {
                     t /= d;
-                    return c * planar.pow(t, p) + b;
+                    return c * PApplet.pow(t, p) + b;
                 } else if (when == EASE_OUT) {
                     t /= d;
-                    return c * (1 - planar.pow(1 - t, p)) + b;
+                    return c * (1 - PApplet.pow(1 - t, p)) + b;
                 } else if (when == EASE_IN_OUT) {
                     t /= d / 2;
-                    if (t < 1) return c / 2 * planar.pow(t, p) + b;
-                    return c / 2 * (2 - planar.pow(2 - t, p)) + b;
+                    if (t < 1) return c / 2 * PApplet.pow(t, p) + b;
+                    return c / 2 * (2 - PApplet.pow(2 - t, p)) + b;
                 }
                 break;
             case QUADRATIC:
@@ -113,38 +113,38 @@ public class Mapper {
                 break;
             case SINUSOIDAL:
                 if (when == EASE_IN) {
-                    return -c * planar.cos(t / d * (planar.PI / 2)) + c + b;
+                    return -c * PApplet.cos(t / d * (PApplet.PI / 2)) + c + b;
                 } else if (when == EASE_OUT) {
-                    return c * planar.sin(t / d * (planar.PI / 2)) + b;
+                    return c * PApplet.sin(t / d * (PApplet.PI / 2)) + b;
                 } else if (when == EASE_IN_OUT) {
-                    return -c / 2 * (planar.cos(planar.PI * t / d) - 1) + b;
+                    return -c / 2 * (PApplet.cos(PApplet.PI * t / d) - 1) + b;
                 }
                 break;
             case EXPONENTIAL:
                 if (when == EASE_IN) {
-                    return c * planar.pow(2, 10 * (t / d - 1)) + b;
+                    return c * PApplet.pow(2, 10 * (t / d - 1)) + b;
                 } else if (when == EASE_OUT) {
-                    return c * (-planar.pow(2, -10 * t / d) + 1) + b;
+                    return c * (-PApplet.pow(2, -10 * t / d) + 1) + b;
                 } else if (when == EASE_IN_OUT) {
                     t /= d / 2;
-                    if (t < 1) return c / 2 * planar.pow(2, 10 * (t - 1)) + b;
+                    if (t < 1) return c / 2 * PApplet.pow(2, 10 * (t - 1)) + b;
                     t--;
-                    return c / 2 * (-planar.pow(2, -10 * t) + 2) + b;
+                    return c / 2 * (-PApplet.pow(2, -10 * t) + 2) + b;
                 }
                 break;
             case CIRCULAR:
                 if (when == EASE_IN) {
                     t /= d;
-                    return -c * (planar.sqrt(1 - t * t) - 1) + b;
+                    return -c * (PApplet.sqrt(1 - t * t) - 1) + b;
                 } else if (when == EASE_OUT) {
                     t /= d;
                     t--;
-                    return c * planar.sqrt(1 - t * t) + b;
+                    return c * PApplet.sqrt(1 - t * t) + b;
                 } else if (when == EASE_IN_OUT) {
                     t /= d / 2;
-                    if (t < 1) return -c / 2 * (planar.sqrt(1 - t * t) - 1) + b;
+                    if (t < 1) return -c / 2 * (PApplet.sqrt(1 - t * t) - 1) + b;
                     t -= 2;
-                    return c / 2 * (planar.sqrt(1 - t * t) + 1) + b;
+                    return c / 2 * (PApplet.sqrt(1 - t * t) + 1) + b;
                 }
                 break;
         }
@@ -173,14 +173,14 @@ public class Mapper {
         float out = 0;
         if (when == EASE_IN) {
             t /= d;
-            out = c * planar.pow(t, p) + b;
+            out = c * PApplet.pow(t, p) + b;
         } else if (when == EASE_OUT) {
             t /= d;
-            out = c * (1 - planar.pow(1 - t, p)) + b;
+            out = c * (1 - PApplet.pow(1 - t, p)) + b;
         } else if (when == EASE_IN_OUT) {
             t /= d / 2;
-            if (t < 1) return c / 2 * planar.pow(t, p) + b;
-            out = c / 2 * (2 - planar.pow(2 - t, p)) + b;
+            if (t < 1) return c / 2 * PApplet.pow(t, p) + b;
+            out = c / 2 * (2 - PApplet.pow(2 - t, p)) + b;
         }
         return out;
     }
