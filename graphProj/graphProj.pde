@@ -42,14 +42,15 @@ Coord[] coordObj;
 int grayscaleCoefficient = 190;
 int fadeMoveX = 5;
 int rowLength;
+int reigning = 0;
 int max = 0;
 int newWidth = 1400; // i guess i gotta hard code this in :( 
 int tailLength = 3000;
 int margin = 320;
 long startingY = 100;
-int startMovingX = 110; //lovemyself! <-- def 150
+int startMovingX = -55; //lovemyself! <-- def 150
 int marginY = 90; ///70
-int textMovementY = -68; // amount text is moved from canvas line x=0 <--- 26 comes from here i think...?
+int textMovementY = -33; // amount text is moved from canvas line x=0 <--- 26 comes from here i think...?
 int monthCounter = 0;
 int initialMonth = 9;
 int prevNOA = 0;
@@ -201,12 +202,25 @@ void fetch(){
 }
 
 String splitDate(long l){
-  if (l > 365){
-    return String.format("%d years and %d days",l/365,l%365);
-  } 
-  else {
-    return String.format("%d days (~%s years)",l,yearFormat.format(l/365.0)); 
+  LocalDate beginning = Instant.ofEpochMilli((long) cut * 1000).atZone(ZoneId.systemDefault()).toLocalDate().plusMonths(1+reigning);
+
+  if (date.compareTo(beginning) > 0){ //hmmm....? :?:?:?:?
+    reigning++;
+    //stop();
+   // return String.format("%d months and %d days",reigning,l); 
   }
+  
+  println("REIGN: " + reigning);
+  if (reigning > 0)
+   return String.format("%d months and %d days",reigning,(date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() - beginning.plusMonths(-1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond())/86400); 
+    
+ // else if (l > 365){
+ //   return String.format("%d years and %d months",l/365,reigning-1);
+//  } 
+
+  else
+   return String.format("%d days (~%s years)",l,yearFormat.format(l/365.0)); 
+
 }
 
 /**
@@ -219,23 +233,25 @@ String splitDate(long l){
   Coord maxObj = coordObj[rowLength-1]; // Get maximum object
   if (maxObj.name != names[getIndexOfMax(yCoords[max+1])]){ // Check if the maxObj will be different in the next tick
     cut = xCoord[max]; // Reset cut to the point where the maximum object was 'overthrown'
+    reigning = 0;
   }
     
     String daysPassed = splitDate(Math.round(xCoord[max] - cut)/86400);
     date = Instant.ofEpochMilli((long) xCoord[max] * 1000).atZone(ZoneId.systemDefault()).toLocalDate(); // Create a unix time object!
     
-   // println(dateBuffer);
+    //println(dateBuffer);
+    //println("millis: " + Math.round(xCoord[max] - cut));
 
 
     fill(0,100);
     noStroke();
     beginShape();
       if (maxObj.yValue != -1){
-      vertex(700 + daysPassed.length() * 21.5 - marking + compensateX, -height+41 + yChange);
-      vertex(700 + daysPassed.length() * 21.5 - marking + compensateX, -height+261 + yChange);
+      vertex(700 + daysPassed.length() * 24 - marking + compensateX, -height+41 + yChange);
+      vertex(700 + daysPassed.length() * 24 - marking + compensateX, -height+261 + yChange);
       } else {
-        vertex(690 - marking + daysPassed.length() * 21.5 + compensateX, -height+41 + yChange);
-        vertex(690 - marking + daysPassed.length() * 21.5 + compensateX, -height+261 + yChange);
+        vertex(690 - marking + daysPassed.length() * 24 + compensateX, -height+41 + yChange);
+        vertex(690 - marking + daysPassed.length() * 24 + compensateX, -height+261 + yChange);
       }
       vertex(135 - marking + compensateX, -height+261 + yChange);
       vertex(135 - marking + compensateX, -height+41 + yChange);
@@ -243,15 +259,15 @@ String splitDate(long l){
     
     fill(255);
     stroke(255);
-    
+    textAlign(CENTER,CENTER);
     textSize(62);
     text("Leader: ",130+compensateX,-height + 150 + yChange);
     
     textAlign(LEFT); // Align all text to the left!
     textFont(nameFont); // Set textFont to a bolded Lato
-    textSize(52);
+    textSize(58);
     
-    text("For " + daysPassed, 420+compensateX, -height + 224 + yChange); // Display difference of current date and date when #1 became #1
+    text("For " + daysPassed, 420+compensateX, -height + 227 + yChange); // Display difference of current date and date when #1 became #1
     
     textSize(60);
     
@@ -299,9 +315,9 @@ void info(){ //must multiply by reciprocal!
         
   noStroke();
   beginShape();
-    vertex(width - 450 - marking + compensateX, -height+41 + yChange);
-    vertex(width - 450 - marking + compensateX, -height+251 + yChange);
-    vertex(width - marking + compensateX, -height+251 + yChange);
+    vertex(width - 520 - marking + compensateX, -height+41 + yChange);
+    vertex(width - 520 - marking + compensateX, -height+271 + yChange);
+    vertex(width - marking + compensateX, -height+271 + yChange);
     vertex(width - marking + compensateX, -height+41 + yChange);
   endShape();
   stroke(255);
@@ -309,36 +325,36 @@ void info(){ //must multiply by reciprocal!
 
         
     fill(255);
-    textSize(64);
-    text("        Current Date:",width-280-marking + compensateX,-(height - 160) + yChange);
+    textSize(76);
+    text("        Current Date:",width-330-marking + compensateX,-height + 168 + yChange);
   //  funAilun(width-170-marking + compensateX,-480);
-    textSize(55);
+    textSize(72);
     String strMonth = date.getMonth().toString().substring(0,3);
-    text("" + strMonth.substring(0,1) + strMonth.substring(1,3).toLowerCase() + " " + date.getDayOfMonth() + ", " + date.getYear(),width-235-marking + compensateX,-height + 230 + yChange);
+    text("" + strMonth.substring(0,1) + strMonth.substring(1,3).toLowerCase() + " " + date.getDayOfMonth() + ", " + date.getYear(),width-271-marking + compensateX,-height + 249 + yChange);
   
   //fill(255);
  // text(sX*xCoord[max]+","+ (yCoords[max][0]), (float) (width/2 + 70 + xCoord[max] - xPush),(float) -(midline + 410)); //index yCoords because it is a list of values, adding 1 should make such an insignifcant difference that it is not needed
   //(float) (double) xCoord.get(i), (float) (double) xCoord.get(i+1), (float) yCoord.get(i)[0],(float) yCoord.get(i+1)[0]
   textFont(nameFont);
-  textSize(32);
+  textSize(52); // 52 change!
   
   
   //textCoords[rowLength-1] = coordObj[rowLength - 1].yValue + 1/sY; //aka maximum of the list!
   for (int c = 0; c < rowLength; c++){ //first init..:?
     if (coordObj[c].yValue < 0) continue;
     else if (coordObj[c].yValue < 10/sY && c == rowLength - 1) textCoords[c] = 10/sY;
-    textCoords[c] = coordObj[c].yValue + 1/sY; //initialize TC properly!
+    textCoords[c] = coordObj[c].yValue - 5/sY; //initialize TC properly!
   }
 
   for (int c = rowLength - 2; c >= 0; c--){
    int k = 3;
    if (coordObj[c].yValue < 0) continue;
    
-   if (textCoords[c+1] - textCoords[c] < 34/sY || (c != rowLength - 2 && textCoords[c+1] - k/sY*countY[c+1][c+2] - textCoords[c] < 34/sY)){ ///oh shit L O L o_O Kevin IS NO LONGER AFFECTED BY THIS!!!!!!!!!!!!!!!
+   if (textCoords[c+1] - textCoords[c] < 46/sY || (c != rowLength - 2 && textCoords[c+1] - k/sY*countY[c+1][c+2] - textCoords[c] < 46/sY)){ ///oh shit L O L o_O Kevin IS NO LONGER AFFECTED BY THIS!!!!!!!!!!!!!!!
      if (c == rowLength - 2)
-       textCoords[c] = textCoords[c+1] - 33/sY;
+       textCoords[c] = textCoords[c+1] - 45/sY; // ok, this is linked to the textSize, not the -c/sY! they are not inversly related
      else
-       textCoords[c] = textCoords[c+1] - 33/sY - k/sY*countY[c+1][c+2]; // k/sY*countY[c+1][c+2] if only there was a way to keep tc[c+1] - 33/sY frozen for long enough so that the transition has finished...
+       textCoords[c] = textCoords[c+1] - 45/sY - k/sY*countY[c+1][c+2]; // k/sY*countY[c+1][c+2] if only there was a way to keep tc[c+1] - 33/sY frozen for long enough so that the transition has finished...
      
      if (coordObj[c].futureY > coordObj[c+1].futureY){
        countY[c][c+1]++;
@@ -731,7 +747,7 @@ void graphData(){ //max++ is intrinsic!
   for (int i = max-tailLength; i < max; i++){ //change 0 to max-constant (keeps program a little efficient!) //advances 1 every time it is redrawn 
     if (i < 0) continue;
 
-    strokeWeight(5);
+    strokeWeight(10);
     
     for (int c = 0; c < rowLength; c++){ //could put text into this one too, but that should go into info because they cannot overlap! 
     //or who knows might change my mind for efficiency reasons!
@@ -746,7 +762,7 @@ void graphData(){ //max++ is intrinsic!
     for (int d = 0; d < yCoords[max].length; d++){
       if (yCoords[max][d] < 0) continue;
       fill(255);
-      circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][d]),12);
+      circle(sX* (float) (xCoord[max]-origin),(float) (-sY*yCoords[max][d]),25);
     }
     // text("gamingFan120",500,-500); DOESNT WORK!
   //  if (!isNull)
@@ -766,10 +782,10 @@ void graphData(){ //max++ is intrinsic!
 void sYScaling(float v){
 
    // if prevN == ? and n == !, then ease!
-  //println("TF: " + midlineEase.incrementor + " status: " + midlineScaling);
+  println("TF: " + midlineEase.incrementor + " status: " + midlineScaling);
   sYEase.setChange(v);
   
-  if (!midlineScaling || sYEase.isEqual()){
+  if (sYEase.isEqual()){
     sYEase.incrementor = v;
     return;
   }
@@ -850,7 +866,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
       }
     }
     
-  textSize(42);
+  textSize(48);
   for (float b = startingY; b < endingY + 6/sY; b += value){ // its only the text LOL 
     if (b == 0 || b*sY < midline - height/2 + marginY + 2){//erase y-axis ticks before they hit the rect! ID: disappear
       continue;
@@ -866,7 +882,7 @@ void blackBox(){ //WORKS, DO MORE TESTING WITH IT LATER!!!!
           fill(grayscaleCoefficient,255);
       }
       
-     textAlign(CENTER,CENTER); //id fanman1
+     textAlign(RIGHT,CENTER); //id fanman1
     if (sX*(xCoord[max] - origin) > newWidth - textChange + startMovingX){ //120-94
 
       text(showText(b),(float) (sX*(xCoord[max] - origin) - (newWidth - textChange + startMovingX) + textMovementY),-b*sY - 2);

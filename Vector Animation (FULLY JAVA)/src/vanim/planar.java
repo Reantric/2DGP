@@ -109,7 +109,7 @@ public void draw() {
 
   public void settings() {  size(1920, 1080, P2D);  smooth(8); }
   static public void main(String[] passedArgs) {
-    String[] appletArgs = new String[] { "vanim.planar" };
+    String[] appletArgs = new String[] {  planar.class.getCanonicalName() };
     if (passedArgs != null) {
       PApplet.main(concat(appletArgs, passedArgs));
     } else {
