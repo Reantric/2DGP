@@ -4,6 +4,7 @@ import vanim.misc.*;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
+import vanim.shapes.MObject;
 
 import java.util.ArrayList;
 import java.util.List;

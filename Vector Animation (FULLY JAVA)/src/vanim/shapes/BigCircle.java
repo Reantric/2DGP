@@ -8,7 +8,7 @@ public class BigCircle extends MObject{
     int delVal;
 
     public BigCircle(PGraphics c, float size, int delValRGB){
-        super(); // will fix!
+        super(c,2,2,2,2,2); // will fix!
         this.size = size;
         delVal = delValRGB;
     }
