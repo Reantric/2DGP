@@ -1,5 +1,6 @@
 package vanim.mfunc;
 import vanim.planar;
+import static vanim.planar.*;
 
 public class Easing {
     float easing;
@@ -39,7 +40,7 @@ public class Easing {
     }
 
     public boolean isEqual() {
-        return planar.abs(incrementor-change) < 0.01f;
+        return abs(incrementor-change) < 0.01f;
     }
 
     /**
@@ -47,7 +48,7 @@ public class Easing {
      * @return Linear interpolated value
      */
     public void incValue(){ // Make quadratic/polynomial later!
-        incrementor = planar.lerp(incrementor,change,easing);
+        incrementor = lerp(incrementor,change,easing);
     }
 
     /**

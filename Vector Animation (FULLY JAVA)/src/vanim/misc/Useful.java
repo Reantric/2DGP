@@ -1,5 +1,6 @@
 package vanim.misc;
 import processing.core.*;
+import static vanim.planar.*;
 
 public class Useful {
     
@@ -57,6 +58,13 @@ public class Useful {
         c. popMatrix();
 
         c.popMatrix();
+    }
+
+    /**
+     * Get derivative given two values
+     */
+    public static float derivative(float y1, float y2, float distX){
+        return (y2-y1)/distX;
     }
 
 }

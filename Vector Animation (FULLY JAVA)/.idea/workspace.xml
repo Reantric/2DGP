@@ -1,45 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="16440c7b-6ffb-46a2-aefd-e357a36e7ec9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/core.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/library.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/library.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/library1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/cM2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/cM3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/circleMatrix.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/circleVec.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/cmunbmo.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/cmunbmr.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/cmunci.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/data/vectorV.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/Arrow.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/CartesianPlane.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/Easing.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/Narrator.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/Plane.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/Scaling.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/TextMObject.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/cM2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/cM3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/circleMatrix.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/circleVec.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/cmunbmo.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/cmunbmr.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/cmunci.ttf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/data/vectorV.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/planar$slowLine.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/mfunc/planar.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/misc/Mapper.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/misc/Useful.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/shapes/BigCircle.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/planarJav/vanim/shapes/MObject.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/vectoranim/vanim/mfunc/Narrator.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/vectoranim/vanim/mfunc/Narrator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/vectoranim/vanim/planar.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/vectoranim/vanim/planar.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vectoranim.iml" beforeDir="false" afterPath="$PROJECT_DIR$/vectoranim.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../graphProj/data/pd420.png" beforeDir="false" />
-    </list>
+    <list default="true" id="16440c7b-6ffb-46a2-aefd-e357a36e7ec9" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -52,9 +14,6 @@
       </list>
     </option>
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
-  </component>
   <component name="ProjectId" id="1ZXY922gXt8cgGLvKcmT6CDYdmT" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -63,7 +22,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/processing-3.5.4/core/library" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Documents/GitHub/2DGP/Vector Animation (FULLY JAVA)" />
     <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -103,10 +62,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="414" y="196" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1585016677582">
+    <state x="414" y="196" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1585082541101">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="414" y="196" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1585016677582" />
+    <state x="414" y="196" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1585082541101" />
     <state x="765" y="249" key="#com.intellij.ide.util.MemberChooser" timestamp="1585019039340">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
@@ -115,34 +74,50 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="689" y="324" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1585016676016" />
-    <state x="666" y="282" key="FileChooserDialogImpl" timestamp="1585082653378">
+    <state x="666" y="282" key="FileChooserDialogImpl" timestamp="1585082579746">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="666" y="282" key="FileChooserDialogImpl/0.0.1920.1080@0.0.1920.1080" timestamp="1585082653378" />
-    <state width="1877" height="175" key="GridCell.Tab.0.bottom" timestamp="1585082796533">
+    <state x="666" y="282" key="FileChooserDialogImpl/0.0.1920.1080@0.0.1920.1080" timestamp="1585082579746" />
+    <state width="1877" height="175" key="GridCell.Tab.0.bottom" timestamp="1585264143778">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="175" key="GridCell.Tab.0.bottom/0.0.1920.1080@0.0.1920.1080" timestamp="1585082796533" />
-    <state width="1877" height="175" key="GridCell.Tab.0.center" timestamp="1585082796533">
+    <state width="1877" height="175" key="GridCell.Tab.0.bottom/0.0.1920.1080@0.0.1920.1080" timestamp="1585264143778" />
+    <state width="1877" height="175" key="GridCell.Tab.0.center" timestamp="1585264143777">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="175" key="GridCell.Tab.0.center/0.0.1920.1080@0.0.1920.1080" timestamp="1585082796533" />
-    <state width="1877" height="175" key="GridCell.Tab.0.left" timestamp="1585082796533">
+    <state width="1877" height="175" key="GridCell.Tab.0.center/0.0.1920.1080@0.0.1920.1080" timestamp="1585264143777" />
+    <state width="1877" height="175" key="GridCell.Tab.0.left" timestamp="1585264143777">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="175" key="GridCell.Tab.0.left/0.0.1920.1080@0.0.1920.1080" timestamp="1585082796533" />
-    <state width="1877" height="175" key="GridCell.Tab.0.right" timestamp="1585082796533">
+    <state width="1877" height="175" key="GridCell.Tab.0.left/0.0.1920.1080@0.0.1920.1080" timestamp="1585264143777" />
+    <state width="1877" height="175" key="GridCell.Tab.0.right" timestamp="1585264143777">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="175" key="GridCell.Tab.0.right/0.0.1920.1080@0.0.1920.1080" timestamp="1585082796533" />
-    <state x="440" y="115" key="SettingsEditor" timestamp="1585082658392">
+    <state width="1877" height="175" key="GridCell.Tab.0.right/0.0.1920.1080@0.0.1920.1080" timestamp="1585264143777" />
+    <state width="1877" height="363" key="GridCell.Tab.1.bottom" timestamp="1585252771205">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="440" y="115" key="SettingsEditor/0.0.1920.1080@0.0.1920.1080" timestamp="1585082658392" />
-    <state x="656" y="364" key="com.intellij.ide.util.TipDialog" timestamp="1585014799632">
+    <state width="1877" height="363" key="GridCell.Tab.1.bottom/0.0.1920.1080@0.0.1920.1080" timestamp="1585252771205" />
+    <state width="1877" height="363" key="GridCell.Tab.1.center" timestamp="1585252771205">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="656" y="364" key="com.intellij.ide.util.TipDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1585014799632" />
+    <state width="1877" height="363" key="GridCell.Tab.1.center/0.0.1920.1080@0.0.1920.1080" timestamp="1585252771205" />
+    <state width="1877" height="363" key="GridCell.Tab.1.left" timestamp="1585252771205">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="363" key="GridCell.Tab.1.left/0.0.1920.1080@0.0.1920.1080" timestamp="1585252771205" />
+    <state width="1877" height="363" key="GridCell.Tab.1.right" timestamp="1585252771205">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="1877" height="363" key="GridCell.Tab.1.right/0.0.1920.1080@0.0.1920.1080" timestamp="1585252771205" />
+    <state x="440" y="115" key="SettingsEditor" timestamp="1585082120278">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="440" y="115" key="SettingsEditor/0.0.1920.1080@0.0.1920.1080" timestamp="1585082120278" />
+    <state x="656" y="364" key="com.intellij.ide.util.TipDialog" timestamp="1585257686929">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="656" y="364" key="com.intellij.ide.util.TipDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1585257686929" />
     <state x="591" y="237" width="807" height="606" key="find.popup" timestamp="1584995910251">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
@@ -155,9 +130,9 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="616" y="250" key="run.anything.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1584991091931" />
-    <state x="623" y="235" width="672" height="678" key="search.everywhere.popup" timestamp="1585018827823">
+    <state x="623" y="235" width="672" height="678" key="search.everywhere.popup" timestamp="1585257745732">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state x="623" y="235" width="672" height="678" key="search.everywhere.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1585018827823" />
+    <state x="623" y="235" width="672" height="678" key="search.everywhere.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1585257745732" />
   </component>
 </project>

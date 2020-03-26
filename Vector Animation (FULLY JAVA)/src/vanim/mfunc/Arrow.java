@@ -1,11 +1,9 @@
 package vanim.mfunc;
 
-import vanim.planar;
+import static vanim.planar.*;
 import vanim.misc.*;
 import vanim.shapes.*;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PVector;
+import processing.core.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +38,11 @@ public class Arrow extends MObject {
 
     public void drawArc(PGraphics c){ // apparently angle is a processing word? who woulda thought!
         float angle = vector.heading();
-        if (angle < 0) angle = PApplet.TAU + vector.heading();
+        if (angle < 0) angle = TAU + vector.heading();
         c.noFill();
         c.stroke(255);
         //  println(angle);
-        c.arc(0, 0, 60, 60, -angle%PApplet.TAU+ PApplet.radians(0.2f), PApplet.radians(0.2f));
+        c.arc(0, 0, 60, 60, -angle%TAU+ radians(0.2f), radians(0.2f));
     }
 
     public void setVector(float x, float y){
@@ -83,7 +81,7 @@ public class Arrow extends MObject {
         }
 
         if (coordsSize > delVal){
-            planar.println("is this ever happening?");
+            println("is this ever happening?");
             coords.remove(0);
             coordsSize--;
         }
@@ -128,8 +126,8 @@ public class Arrow extends MObject {
         return aR*(sX*vector.mag() - 16);  //-16:?
     }
 
-    public void display(Object... obj){
-
+    public boolean display(Object... obj){
+        return false;
     }
 
 }

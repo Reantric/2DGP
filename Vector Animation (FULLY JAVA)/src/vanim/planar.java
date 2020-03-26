@@ -12,21 +12,22 @@ import java.util.*;
 public class planar extends PApplet {
 
 public static DecimalFormat df = new DecimalFormat("###.#");
-float e = 1;
-CartesianPlane plane;
-Scaling c = new Scaling(0);
-float angle;
+public static float e = 1;
+public static CartesianPlane plane;
+public static Scaling c = new Scaling(0);
+public static float angle;
 public static PFont myFont, italics;
 public static PGraphics canvas;
-float inc = 0;
+public static float inc = 0;
 public static Arrow arr;
-PImage narrator, vectorV;
+public static PImage narrator, vectorV;
 public static final int WIDTH = 1920;
 public static final int HEIGHT = 1080;
-Narrator n;
-List<Boolean> directions = new ArrayList<>();
+public static Narrator n;
+public static boolean[] directions = new boolean[100];
 /* sprites */
-MObject b, crLine;
+public static MObject crLine;
+public static BigCircle b;
 /* sprites */
 
 public void setup() {
@@ -36,6 +37,7 @@ public void setup() {
   textFont(myFont, 64);
   canvas = createGraphics(1920, 1080, P2D);
   plane = new CartesianPlane(this,canvas,0.5f,0.5f);
+
   arr = new Arrow(canvas,cos(inc), sin(inc));
   
   canvas.shapeMode(CENTER);
@@ -46,24 +48,32 @@ public void setup() {
   n = new Narrator(canvas);
 
   /* Sprites */
+  //crLine = new Line(canvas,0,0,cos(0.3f),sin(0.5f),7,255);
   b = new BigCircle(canvas,0,0,(plane.sX+plane.sY)/2.0f,0.04f,plane.delVal);
-  crLine = new Line(canvas,0,0,plane.sX*cos(0.3f),plane.sY*sin(0.5f),4,255);
+ //
   /* Sprites */
+
+  /* Directions setup*/
+  /* Directions setup*/
 }
 
 public void directions() {
   plane.rotatePlane(angle);
   arr.setVector(cos(inc),sin(inc));
- // plane.drawVector(arr);
-  //  plane.createPoint(20,-20);
-  //arr.addPoint(plane.sX*arr.vector.x,-plane.sY*arr.vector.y,plane.delVal); //no cool color effect!
-  //arr.graph(canvas,plane.delVal);
-  //inc += 0.04f;
-  //  plane.createPoint(40,20);
+
+
 
   /* Maybe think about a MObject[] or ArrayList<MObject> where display can be called on everyone */
-  b.display();
-  crLine.display();
+  if (directions[0])
+    directions[1] = b.display();
+  if (directions[1])
+    directions[2] = b.drawTangentLine(cos(inc),sin(inc));
+
+  inc += 0.01;
+
+
+  //println(inc);
+
 }
 
 
@@ -95,7 +105,7 @@ public void draw() {
   background(0);
   scale(e);
   plane.run(canvas);
-  plane.generatePlane();
+  directions[0] = plane.generatePlane();
   // plane.graph();
   directions();
   n.narrate();
@@ -103,7 +113,7 @@ public void draw() {
   /* debug space */
   // bruv();
   /* debug space */
-  //saveFrame("basicVector/line-######.png");
+  //saveFrame("circleDerivative/line-######.png");
   // directions();
 }
 

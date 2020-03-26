@@ -1,5 +1,6 @@
 package vanim.shapes;
-
+import static vanim.planar.*;
+import static processing.core.PApplet.*;
 import processing.core.*;
 
 public abstract class MObject {
@@ -9,12 +10,14 @@ public abstract class MObject {
     public PGraphics canvas;
     public float hue;
     public PApplet processing;
+    public float incrementor = 0;
 
     public MObject(PGraphics c, float x, float y, float colHue){
         this(null,c,x,y,0,0,colHue);
     }
 
-    public MObject(PApplet p, PGraphics c, float x, float y, float w, float h, float colHue){
+    public MObject(PApplet p,PGraphics c, float x, float y, float w, float h, float colHue){
+        //println("IS NULL? " + p);
         processing = p;
         canvas = c;
         pos = new PVector(x,y);
@@ -23,9 +26,8 @@ public abstract class MObject {
         hue = colHue;
     }
 
-    public MObject(PGraphics c,float x, float y,float w, float h, float colHue) {
-        this(null,c,x,y,w,h,colHue);
-        //this.c = col;
+    public MObject(PApplet p, PGraphics c, float x, float y, float colHue){
+        this(p,c,x,y,0,0,colHue);
     }
 
     public MObject(PGraphics c,float x, float y,float s, float colHue) {
@@ -35,12 +37,12 @@ public abstract class MObject {
     public void backgroundRect(){ // work on this tom it is now tom
         canvas.noStroke();
         canvas.fill(0,0,0,125);
-        if (canvas.textAlign == PApplet.LEFT){
-            canvas.rectMode(PApplet.CORNER);
-            canvas.rect(pos.x,pos.y-height+10,width,height);
+        if (canvas.textAlign == LEFT){
+            canvas.rectMode(CORNER);
+            canvas.rect(pos.x,pos.y-height+14,width,height);
         }
         else {
-            canvas.rectMode(PApplet.CENTER);
+            canvas.rectMode(CENTER);
             canvas.rect(pos.x,pos.y+10,width,height);
         }
 
@@ -48,5 +50,5 @@ public abstract class MObject {
 
     //rotate, translate, move, a lot more!
 
-    public abstract void display(Object... obj);
+    public abstract boolean display(Object... obj);
 }
