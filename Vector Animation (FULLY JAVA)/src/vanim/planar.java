@@ -14,7 +14,8 @@ public class planar extends PApplet {
 public static DecimalFormat df = new DecimalFormat("###.#");
 public static float e = 1;
 public static CartesianPlane plane;
-public static Scaling c = new Scaling(0);
+public static boolean directionCompleted = true;
+public static int frameWait = 0;
 public static float angle;
 public static PFont myFont, italics;
 public static PGraphics canvas;
@@ -113,7 +114,7 @@ public void draw() {
   /* debug space */
   // bruv();
   /* debug space */
-  //saveFrame("circleDerivative/line-######.png");
+  //saveFrame("test/line-######.png");
   // directions();
 }
 

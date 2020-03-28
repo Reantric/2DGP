@@ -36,7 +36,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
     public int delVal;
 
     /* Object initializations */  // Create color object soon for animateVector();
-    public MObject xAxisR, yAxisU, xAxisL, yAxisD;
+    public MObject xAxis,yAxis;
+    public MObject[] xLines, yLines;
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
@@ -70,10 +71,19 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         aspectRatio = (WIDTH/1080.0f)/(rescaleX/rescaleY);
         delVal = 159;
         //canvas.line(-sX*startingX,0,sX*startingX,0);
-        xAxisR = new Line(canvas,0,0,sX*startingX,0);
-        yAxisU = new Line(canvas,0,0,0,sY*startingY);
-        xAxisL = new Line(canvas,0,0,-sX*startingX,0);
-        yAxisD = new Line(canvas,0,0,0,-sY*startingY);
+        xAxis = new DoubleLine(canvas,sX*startingX,0,-sX*startingX,0);
+        yAxis = new DoubleLine(canvas,0,sY*startingY,0,-sY*startingY);
+
+        /* MObject[] inits */
+        xLines = new MObject[(int) (-4*startingX/xValue)];
+        yLines = new MObject[(int) (-4*startingY/yValue)];
+        for (int i = 0; i < xLines.length; i++){
+            
+        }
+
+        for (int j = 0; j < yLines.length; j++){
+
+        }
     }
 
     /**
@@ -82,6 +92,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      * @return
      */
     public boolean generatePlane(){
+        boolean complete = false;
         currentColor = Useful.getColor(max,startingX,-startingX);
         canvas.beginDraw();
         canvas.background(0);
@@ -130,8 +141,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         //>= optimalDelVal
         //   popMatrix();
 
-
-        return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
+        return xAxis.display() & yAxis.display();
+       // return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
     }
 
     /**

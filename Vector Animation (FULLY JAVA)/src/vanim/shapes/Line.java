@@ -3,6 +3,8 @@ import vanim.misc.*;
 import processing.core.*;
 import vanim.planar;
 
+import javax.swing.*;
+
 import static vanim.planar.*;
 import static vanim.misc.Mapper.*;
 
@@ -16,11 +18,11 @@ public class Line extends MObject {
 
 
     public Line(PApplet p, PGraphics c, float x1, float y1, float x2, float y2){
-        this(p,c, x1, y1, x2,y2,7,255);
+        this(p,c, x1, y1, x2,y2,4,255);
     }
 
     public Line(PGraphics c, float x1, float y1, float x2, float y2){
-        this(null,c,x1,y1,x2,y2,5,255);
+        this(null,c,x1,y1,x2,y2,4,255);
     }
 
     public Line(PGraphics c, float x1, float y1, float x2, float y2, float weight, float colHue){
@@ -35,7 +37,7 @@ public class Line extends MObject {
         startX = pos.x;
         incX = 0;
         incY = 0;
-        println("BEGINNING: " + pos.x);
+       // println("BEGINNING: " + pos.x);
     }
 
 
@@ -58,25 +60,42 @@ public class Line extends MObject {
         amtPushX = (finalX - startX) / 50.0f;
         amtPushY = (finalY - startY) / 50.0f;
 
-        if (abs(pos.x) < abs(finalX)) {
-            incX += amtPushX;
-            pos.x = map2(incX, startX, finalX, startX, finalX, QUADRATIC, EASE_IN_OUT);
+        if (amtPushX > 0) {
+            if (pos.x < finalX) {
+                incX += amtPushX;
+                pos.x = map2(incX, startX, finalX, startX, finalX, QUADRATIC, EASE_IN_OUT);
+            }
+            if (pos.x > finalX)
+                pos.x = finalX;
         }
 
-        if (abs(pos.y) < abs(finalY)) {
-            incY += amtPushY;
-            pos.y = map2(incY, startY, finalY, startY, finalY, QUADRATIC, EASE_IN_OUT);
+        else {
+            if (pos.x > finalX) {
+                incX += amtPushX;
+                pos.x = map2(incX, startX, finalX, startX, finalX, QUADRATIC, EASE_IN_OUT);
+            }
+            if (pos.x < finalX)
+                pos.x = finalX;
         }
 
-        println("x1: " + pos.x + " y1: " + pos.y);
+        if (amtPushY > 0){
+            if (pos.y < finalY){
+                incY += amtPushY;
+                pos.y = map2(incY, startY, finalY, startY, finalY, QUADRATIC, EASE_IN_OUT);
+            }
+            if (pos.y > finalY)
+                pos.y = finalY;
+        } else {
+            if (pos.y > finalY){
+                incY += amtPushY;
+                pos.y = map2(incY, startY, finalY, startY, finalY, QUADRATIC, EASE_IN_OUT);
+            }
+            if (pos.y < finalY)
+                pos.y = finalY;
+        }
 
-        if (abs(pos.x) > abs(finalX))
-            pos.x = finalX;
 
-
-        if (abs(pos.y) > abs(finalY))
-            pos.y = finalY;
-
+        //println("x1: " + pos.x + " y1: " + pos.y);
        // println("x2: " + pos.x + " y2: " + pos.y);
     }
 
