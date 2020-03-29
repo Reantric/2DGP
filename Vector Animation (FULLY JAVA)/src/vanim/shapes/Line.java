@@ -50,20 +50,23 @@ public class Line extends MObject {
         strokeNum = WHAT;
     }
 
+    public void setMapPower(float jj){
+        mapPower = jj;
+    }
     public void setStart(float x, float y) {
         startX = x;
         startY = y;
     }
 
     //float value, float start1, float stop1, float start2, float stop2, int type, int when
-    public void push() {
-        amtPushX = (finalX - startX) / 50.0f;
-        amtPushY = (finalY - startY) / 50.0f;
+    public void push(float dividend) {
+        amtPushX = (finalX - startX) / dividend;
+        amtPushY = (finalY - startY) / dividend;
 
         if (amtPushX > 0) {
             if (pos.x < finalX) {
                 incX += amtPushX;
-                pos.x = map2(incX, startX, finalX, startX, finalX, QUADRATIC, EASE_IN_OUT);
+                pos.x = map3(incX, startX, finalX, startX, finalX, mapPower, EASE_IN_OUT);
             }
             if (pos.x > finalX)
                 pos.x = finalX;
@@ -72,7 +75,7 @@ public class Line extends MObject {
         else {
             if (pos.x > finalX) {
                 incX += amtPushX;
-                pos.x = map2(incX, startX, finalX, startX, finalX, QUADRATIC, EASE_IN_OUT);
+                pos.x = map3(incX, startX, finalX, startX, finalX, mapPower, EASE_IN_OUT);
             }
             if (pos.x < finalX)
                 pos.x = finalX;
@@ -81,14 +84,14 @@ public class Line extends MObject {
         if (amtPushY > 0){
             if (pos.y < finalY){
                 incY += amtPushY;
-                pos.y = map2(incY, startY, finalY, startY, finalY, QUADRATIC, EASE_IN_OUT);
+                pos.y = map3(incY, startY, finalY, startY, finalY, mapPower, EASE_IN_OUT);
             }
             if (pos.y > finalY)
                 pos.y = finalY;
         } else {
             if (pos.y > finalY){
                 incY += amtPushY;
-                pos.y = map2(incY, startY, finalY, startY, finalY, QUADRATIC, EASE_IN_OUT);
+                pos.y = map3(incY, startY, finalY, startY, finalY, mapPower, EASE_IN_OUT);
             }
             if (pos.y < finalY)
                 pos.y = finalY;
@@ -102,7 +105,7 @@ public class Line extends MObject {
 
     public boolean display(Object... obj) {
         canvas.strokeCap(strokeNum);
-        push();
+        push(50);
         if (weight != 0)
             canvas.strokeWeight(weight);
 

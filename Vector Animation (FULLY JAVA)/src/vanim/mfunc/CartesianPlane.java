@@ -73,16 +73,23 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         //canvas.line(-sX*startingX,0,sX*startingX,0);
         xAxis = new DoubleLine(canvas,sX*startingX,0,-sX*startingX,0);
         yAxis = new DoubleLine(canvas,0,sY*startingY,0,-sY*startingY);
-
+        frameCountInit = processing.frameCount;
+        frameCountBuffer = 15;
         /* MObject[] inits */
-        xLines = new MObject[(int) (-4*startingX/xValue)];
-        yLines = new MObject[(int) (-4*startingY/yValue)];
+        xLines = new MObject[(int) (-4*startingX/xValue)]; // skip over 0
+        yLines = new MObject[(int) (-4*startingY/yValue)]; // skip over 0
+
+        // Make for loop more efficient
         for (int i = 0; i < xLines.length; i++){
-            
+            if (i == xLines.length/2) continue;
+
+            xLines[i] = new DoubleLine(canvas,sX*(startingX + xValue*i/2),sY*startingY,sX*(startingX + xValue*i/2),sY*-startingY,(startingX + xValue*i/2)%xValue == 0 ? 4 : 1.5f);
         }
 
         for (int j = 0; j < yLines.length; j++){
+            if (j == yLines.length/2) continue;
 
+            yLines[j] = new DoubleLine(canvas,sX*startingX,sY*(startingY + yValue*j/2),-sX*startingX,sY*(startingY + yValue*j/2),(startingY + yValue*j/2)%yValue == 0 ? 4 : 1.5f);
         }
     }
 
@@ -92,7 +99,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      * @return
      */
     public boolean generatePlane(){
-        boolean complete = false;
+        boolean complete = true;
         currentColor = Useful.getColor(max,startingX,-startingX);
         canvas.beginDraw();
         canvas.background(0);
@@ -107,21 +114,38 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
 
         //  pushMatrix();
         canvas.rotate(slowRotate.incrementor); //-processing.PI/2
+       // incrementor = 0;
 
-        for (float x = startingX; x < -startingX; x += xValue/2){
+        for (int j = 0; j < yLines.length; j++){
+            if (j == yLines.length/2) continue;
+            if (!yLines[j].display())
+                complete = false;
+        }
+        //Make both for loops more efficient, both here and in the constructor!
+        if (!xAxis.display()) complete = false;
+        if (processing.frameCount < frameCountInit + frameCountBuffer) return false;
+
+        for (int i = 0; i < xLines.length; i++){
+            if (i == xLines.length/2) continue;
+            if (!xLines[i].display())
+                complete = false;
+        }
+       /* for (float x = startingX; x < -startingX; x += xValue/2){
             if (x == 0) continue;
+
 
             if (x % xValue == 0)
                 canvas.strokeWeight(4);
             else
                 canvas.strokeWeight(1.5f);
 
-            canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY);
+            canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY); // |
 
-        }
+            //incrementor++;
+        } */
+     //   println("INC: " + incrementor + " ART: " + xLines.length); INCREMENTOR is 1 less than xLines.length, expected!
 
-
-        for (float y = startingY; y < -startingY; y += yValue/2){
+     /*   for (float y = startingY; y < -startingY; y += yValue/2){
             if (y == 0) continue;
 
             if (y % yValue == 0)
@@ -129,19 +153,17 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             else
                 canvas.strokeWeight(1.5f);
 
-            canvas.line(-sX*startingX,sY*y,sX*startingX,sY*y);
+            canvas.line(-sX*startingX,sY*y,sX*startingX,sY*y); // --
 
-        }
+        } */
 
         canvas.stroke(0,0,255);
         canvas.strokeWeight(4);
 
-      //  canvas.line(-sX*startingX,0,sX*startingX,0);
-        //canvas.line(0,-sY*startingY,0,sY*startingY);
         //>= optimalDelVal
-        //   popMatrix();
 
-        return xAxis.display() & yAxis.display();
+
+        return complete & yAxis.display();
        // return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
     }
 

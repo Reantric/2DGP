@@ -26,13 +26,21 @@ public class DoubleLine extends Line{
     @Override
     public boolean display(Object... obj){
         canvas.strokeCap(strokeNum);
-        push();
+        setMapPower(3);
+        push(100);
         if (weight != 0)
             canvas.strokeWeight(weight);
 
-        canvas.stroke(hue, hue == 255 ? 0 : 255, 255);
+        //canvas.stroke(hue, hue == 255 ? 0 : 255, 255);
+        //reflecting the point over the point xAverage,yAverage
+
+        //for now, just hardCode
         canvas.line(xAverage,yAverage, pos.x, pos.y);
-        canvas.line(xAverage, yAverage, -pos.x, -pos.y);
+        if (yAverage == 0)
+            canvas.line(xAverage, yAverage, pos.x, -pos.y);
+
+        if (xAverage == 0)
+            canvas.line(xAverage,yAverage,-pos.x,pos.y);
         return pos.x == finalX && pos.y == finalY;
     }
 }

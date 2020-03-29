@@ -4,6 +4,8 @@ import static processing.core.PApplet.*;
 import processing.core.*;
 
 public abstract class MObject {
+    public int frameCountInit;
+    public int frameCountBuffer;
     public PVector pos;
     public float width;
     public float height;
@@ -11,10 +13,11 @@ public abstract class MObject {
     public float hue;
     public PApplet processing;
     public float incrementor = 0;
+    public float mapPower = 1;
 
     public MObject(PGraphics c, float x, float y, float colHue){
         this(null,c,x,y,0,0,colHue);
-    }
+    }//add mapper and points[] ?
 
     public MObject(PApplet p,PGraphics c, float x, float y, float w, float h, float colHue){
         //println("IS NULL? " + p);
