@@ -37,7 +37,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
 
     /* Object initializations */  // Create color object soon for animateVector();
     public MObject xAxis,yAxis;
-    public MObject[] xLines, yLines;
+    public MObject[] xLines, yLines, xText, yText;
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
@@ -55,7 +55,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      * @param ySpace Distance between y ticks
      */
     public CartesianPlane(PApplet p, PGraphics c, float xSpace, float ySpace){
-        super(p,c,0,0,p.width,p.height,0);
+        super(p,c,0,0,p.width,p.height);
         xValue = xSpace;
         yValue = ySpace;
         canvas = c;
@@ -78,19 +78,26 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         /* MObject[] inits */
         xLines = new MObject[(int) (-4*startingX/xValue)]; // skip over 0
         yLines = new MObject[(int) (-4*startingY/yValue)]; // skip over 0
-
-        // Make for loop more efficient
+        xText = new MObject[xLines.length/2];
+        yText = new MObject[yLines.length/2];
+        // Assuming xLines.length > yLines.length
+        canvas.textSize(42);
         for (int i = 0; i < xLines.length; i++){
-            if (i == xLines.length/2) continue;
+            if (i != yLines.length/2 && i < yLines.length)
+                yLines[i] = new DoubleLine(canvas,sX*startingX,sY*(startingY + yValue*i/2),-sX*startingX,sY*(startingY + yValue*i/2),(startingY + yValue*i/2)%yValue == 0 ? 4 : 1.5f,150,200,255);
 
-            xLines[i] = new DoubleLine(canvas,sX*(startingX + xValue*i/2),sY*startingY,sX*(startingX + xValue*i/2),sY*-startingY,(startingX + xValue*i/2)%xValue == 0 ? 4 : 1.5f);
+            if (i != xLines.length/2) {
+                xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY, (startingX + xValue * i / 2) % xValue == 0 ? 4 : 1.5f,150,200,255);
+
+                if (i % 2 == 0)
+                    if (startingX + xValue * i / 2 > 0)
+                        xText[i/2] = new TextMObject(canvas,df.format(startingX + xValue*i/2),sX * (startingX + xValue * i / 2),44,255,0,255);
+                    else
+                        xText[i/2] = new TextMObject(canvas,df.format(startingX + xValue*i/2),sX * (startingX + xValue * i / 2)-8,44,255,0,255);
+            }
         }
 
-        for (int j = 0; j < yLines.length; j++){
-            if (j == yLines.length/2) continue;
 
-            yLines[j] = new DoubleLine(canvas,sX*startingX,sY*(startingY + yValue*j/2),-sX*startingX,sY*(startingY + yValue*j/2),(startingY + yValue*j/2)%yValue == 0 ? 4 : 1.5f);
-        }
     }
 
     /**
@@ -102,15 +109,15 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         boolean complete = true;
         currentColor = Useful.getColor(max,startingX,-startingX);
         canvas.beginDraw();
+        canvas.translate(canvas.width/2.0f,canvas.height/2.0f);
         canvas.background(0);
+
         canvas.textFont(myFont);
         canvas.textSize(38);
         canvas.textAlign(CENTER,CENTER);
         canvas.colorMode(HSB);
-        canvas.translate(canvas.width/2.0f,canvas.height/2.0f);
         canvas.stroke(150,200,255);
         canvas.strokeWeight(4);
-
 
         //  pushMatrix();
         canvas.rotate(slowRotate.incrementor); //-processing.PI/2
@@ -121,56 +128,29 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             if (!yLines[j].display())
                 complete = false;
         }
-        //Make both for loops more efficient, both here and in the constructor!
-        if (!xAxis.display()) complete = false;
+        //Cant make this loop more efficient because of line below...
         if (processing.frameCount < frameCountInit + frameCountBuffer) return false;
 
         for (int i = 0; i < xLines.length; i++){
             if (i == xLines.length/2) continue;
             if (!xLines[i].display())
                 complete = false;
+          //  if (i % 2 == 0)
+            //    xText[i/2].display();
         }
-       /* for (float x = startingX; x < -startingX; x += xValue/2){
-            if (x == 0) continue;
-
-
-            if (x % xValue == 0)
-                canvas.strokeWeight(4);
-            else
-                canvas.strokeWeight(1.5f);
-
-            canvas.line(sX*x,sY*startingY,sX*x,sY*-startingY); // |
-
-            //incrementor++;
-        } */
-     //   println("INC: " + incrementor + " ART: " + xLines.length); INCREMENTOR is 1 less than xLines.length, expected!
-
-     /*   for (float y = startingY; y < -startingY; y += yValue/2){
-            if (y == 0) continue;
-
-            if (y % yValue == 0)
-                canvas.strokeWeight(4);
-            else
-                canvas.strokeWeight(1.5f);
-
-            canvas.line(-sX*startingX,sY*y,sX*startingX,sY*y); // --
-
-        } */
-
         canvas.stroke(0,0,255);
         canvas.strokeWeight(4);
 
         //>= optimalDelVal
 
-
-        return complete & yAxis.display();
+        return complete & xAxis.display() & yAxis.display() & labelAxes();
        // return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
     }
 
     /**
      * Label all axes
      */
-    public void labelAxes(){
+    public boolean labelAxes(){
         canvas.textSize(42);
         canvas.textAlign(CENTER);
         canvas.rectMode(CENTER);
@@ -179,10 +159,11 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             if (x == 0) continue;
 
             String tX = df.format(x);
-            canvas.noStroke();
             canvas.fill(0,0,0,125);
+            canvas.noStroke();
             canvas.rect(sX*x,30,60 + (tX.length()-3)*10,56);
             canvas.fill(255);
+
             if (x > 0)
                 canvas.text(tX,sX*x,44);
             else
@@ -195,10 +176,11 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             canvas.text(df.format(-y),-12,sY*y-12);
         }
 
+        return true;
+
     }
 
     public boolean display(Object... obj){
-        labelAxes();
         canvas.endDraw();
         //processing.PImage frame = canvas.get(); Much more laggy!
         //pushMatrix();

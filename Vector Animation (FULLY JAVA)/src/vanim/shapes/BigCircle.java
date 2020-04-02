@@ -18,7 +18,7 @@ public class BigCircle extends MObject{
     Line dy;
 
     public BigCircle(PGraphics c, float x, float y, float radius,float speed, int delVal){
-        super(c,x,y,radius,0); // will fix!
+        super(c,x,y,radius,0,255,255); // will fix!
         this.speed = speed;
         incrementor = 0;
         this.delVal = delVal;

@@ -16,20 +16,21 @@ public class Line extends MObject {
     int strokeNum;
     float incX, incY;
 
-
     public Line(PApplet p, PGraphics c, float x1, float y1, float x2, float y2){
-        this(p,c, x1, y1, x2,y2,4,255);
+        this(p,c, x1, y1, x2,y2,4,255,255,255);
     }
 
     public Line(PGraphics c, float x1, float y1, float x2, float y2){
-        this(null,c,x1,y1,x2,y2,4,255);
+        this(null,c,x1,y1,x2,y2,4,255,255,255);
     }
 
     public Line(PGraphics c, float x1, float y1, float x2, float y2, float weight, float colHue){
-        this(null,c,x1,y1,x2,y2,weight,colHue);
+        this(null,c,x1,y1,x2,y2,weight,colHue,255,255);
     }
-    public Line(PApplet p,PGraphics c, float x1, float y1, float x2, float y2, float weight, float colHue) { //p not used here...
-        super(p,c, x1, y1, colHue);
+
+
+    public Line(PApplet p,PGraphics c, float x1, float y1, float x2, float y2, float weight, float colHue, float colSat, float colBright) { //p not used here...
+        super(p,c, x1, y1, 0,colHue,colSat,colBright);
         this.weight = weight;
         finalX = x2;
         finalY = y2;
