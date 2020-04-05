@@ -126,6 +126,7 @@ public class Arrow extends MObject {
         return aR*(sX*vector.mag() - 16);  //-16:?
     }
 
+
     public boolean display(Object... obj){
         return false;
     }

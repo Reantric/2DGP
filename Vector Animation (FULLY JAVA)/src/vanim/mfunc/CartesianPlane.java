@@ -14,21 +14,17 @@ import java.util.ArrayList;
 
 
 public class CartesianPlane extends MObject implements Plane { // Work on mouseDrag after!
-    public float xValue;
-    public float yValue;
+    public float xValue, yValue;
     public float transparency = 255;
-    public float sX = 1;
-    public float sY = 1;
-    float startingX;
-    float startingY;
-    float rescaleX;
-    float rescaleY;
+    public float sX = 1,sY = 1;
+    float startingX, startingY;
+    float rescaleX, rescaleY;
     float scaleFactor;
-    float max = 0; //counter
+    float max; //counter
     float currentColor = 0;
     boolean restrictDomain = false;
-    float restrictedDomainX1;
-    float restrictedDomainX2;
+    boolean gridDrawn, textDrawn = false;
+    float restrictedDomainX1, restrictedDomainX2;
     List<Double> randArr = new ArrayList<Double>();
     float finalValue;
     PGraphics canvas;
@@ -37,7 +33,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
 
     /* Object initializations */  // Create color object soon for animateVector();
     public MObject xAxis,yAxis;
-    public MObject[] xLines, yLines, xText, yText;
+    public MObject[] xLines, yLines;
+    public TextMObject[] xText, yText;
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
@@ -71,29 +68,37 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         aspectRatio = (WIDTH/1080.0f)/(rescaleX/rescaleY);
         delVal = 159;
         //canvas.line(-sX*startingX,0,sX*startingX,0);
-        xAxis = new DoubleLine(canvas,sX*startingX,0,-sX*startingX,0);
-        yAxis = new DoubleLine(canvas,0,sY*startingY,0,-sY*startingY);
+        xAxis = new DoubleLine(canvas,sX*startingX,0,-sX*startingX,0,4,255,0,255);
+        yAxis = new DoubleLine(canvas,0,sY*startingY,0,-sY*startingY,4,255,0,255);
         frameCountInit = processing.frameCount;
         frameCountBuffer = 15;
         /* MObject[] inits */
-        xLines = new MObject[(int) (-4*startingX/xValue)]; // skip over 0
-        yLines = new MObject[(int) (-4*startingY/yValue)]; // skip over 0
-        xText = new MObject[xLines.length/2];
-        yText = new MObject[yLines.length/2];
+        xLines = new MObject[(int) (-4*startingX/xValue)];
+        yLines = new MObject[(int) (-4*startingY/yValue)];
+        xText = new TextMObject[xLines.length/2]; // skip over 0
+        yText = new TextMObject[yLines.length/2]; // skip over 0
+        println("xLength: " + xText.length + " yLength: " + yText.length); //9, 5 or 8, 4 :(
         // Assuming xLines.length > yLines.length
         canvas.textSize(42);
+
         for (int i = 0; i < xLines.length; i++){
-            if (i != yLines.length/2 && i < yLines.length)
-                yLines[i] = new DoubleLine(canvas,sX*startingX,sY*(startingY + yValue*i/2),-sX*startingX,sY*(startingY + yValue*i/2),(startingY + yValue*i/2)%yValue == 0 ? 4 : 1.5f,150,200,255);
+
+            if (i != yLines.length/2 && i < yLines.length) {
+                if ((startingY + yValue * i / 2) % yValue == 0) {
+                    yLines[i] = new DoubleLine(canvas, sX * startingX, sY * (startingY + yValue * i / 2), -sX * startingX, sY * (startingY + yValue * i / 2), 4, 150, 200, 255);
+                    yText[i / 2] = new TextMObject(canvas, df.format(-startingY - yValue * i / 2), -12, sY * (startingY + yValue * i / 2) - 12, 255, 0, 255);
+                    yText[i / 2].setTextAlign(RIGHT);
+                    yText[i / 2].setDisplayRect(false);
+                } else
+                    yLines[i] = new DoubleLine(canvas, sX * startingX, sY * (startingY + yValue * i / 2), -sX * startingX, sY * (startingY + yValue * i / 2), 1.5f, 150, 200, 255);
+            }
 
             if (i != xLines.length/2) {
-                xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY, (startingX + xValue * i / 2) % xValue == 0 ? 4 : 1.5f,150,200,255);
-
-                if (i % 2 == 0)
-                    if (startingX + xValue * i / 2 > 0)
-                        xText[i/2] = new TextMObject(canvas,df.format(startingX + xValue*i/2),sX * (startingX + xValue * i / 2),44,255,0,255);
-                    else
-                        xText[i/2] = new TextMObject(canvas,df.format(startingX + xValue*i/2),sX * (startingX + xValue * i / 2)-8,44,255,0,255);
+                if ((startingX + xValue * i / 2) % xValue == 0) {
+                    xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY,4,150,200,255);
+                    xText[i / 2] = new TextMObject(canvas, df.format(startingX + xValue * i / 2), startingX + xValue * i / 2 > 0 ? sX * (startingX + xValue * i / 2) : sX * (startingX + xValue * i / 2) - 8, 44, 255, 0, 255);
+                } else
+                    xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY,1.5f,150,200,255);
             }
         }
 
@@ -106,15 +111,15 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      * @return
      */
     public boolean generatePlane(){
-        boolean complete = true;
+        gridDrawn = true;
         currentColor = Useful.getColor(max,startingX,-startingX);
         canvas.beginDraw();
         canvas.translate(canvas.width/2.0f,canvas.height/2.0f);
         canvas.background(0);
-
         canvas.textFont(myFont);
+        canvas.textAlign(CENTER);
+        canvas.rectMode(CENTER);
         canvas.textSize(38);
-        canvas.textAlign(CENTER,CENTER);
         canvas.colorMode(HSB);
         canvas.stroke(150,200,255);
         canvas.strokeWeight(4);
@@ -124,27 +129,33 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
        // incrementor = 0;
 
         for (int j = 0; j < yLines.length; j++){
-            if (j == yLines.length/2) continue;
-            if (!yLines[j].display())
-                complete = false;
+            if (j != yLines.length/2 && !yLines[j].display())
+                gridDrawn = false;
         }
         //Cant make this loop more efficient because of line below...
         if (processing.frameCount < frameCountInit + frameCountBuffer) return false;
 
         for (int i = 0; i < xLines.length; i++){
-            if (i == xLines.length/2) continue;
-            if (!xLines[i].display())
-                complete = false;
-          //  if (i % 2 == 0)
-            //    xText[i/2].display();
+
+            if (i != xLines.length/2 && !xLines[i].display())
+                gridDrawn = false;
+
+            if (i % 2 == 0) {
+                if (i != xText.length)
+                    xText[i/2].setWidthHeight(60 + (xText[i/2].str.length()-3)*10,56);
+                if ((i != xText.length && !textDrawn && xText[i / 2].display()) | (i != yText.length && i < 2*yText.length && !textDrawn && yText[i / 2].display()))
+                    textDrawn = true;
+
+            }
         }
+
         canvas.stroke(0,0,255);
         canvas.strokeWeight(4);
 
         //>= optimalDelVal
 
-        return complete & xAxis.display() & yAxis.display() & labelAxes();
-       // return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
+        return textDrawn & xAxis.display() & yAxis.display();
+        // return xAxisR.display() & yAxisU.display() & xAxisL.display() & yAxisD.display();
     }
 
     /**
@@ -181,10 +192,13 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
     }
 
     public boolean display(Object... obj){
+        if (textDrawn) {
+            gridDrawn = true;
+            labelAxes();
+        }
+
         canvas.endDraw();
-        //processing.PImage frame = canvas.get(); Much more laggy!
-        //pushMatrix();
-        //translate(canvas.width/2,canvas.height/2);
+
         processing.stroke(currentColor,255,255);
         processing.stroke(233);
         processing.strokeWeight(7);

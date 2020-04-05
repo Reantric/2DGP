@@ -20,6 +20,7 @@ public class Line extends MObject {
         this(p,c, x1, y1, x2,y2,4,255,255,255);
     }
 
+
     public Line(PGraphics c, float x1, float y1, float x2, float y2){
         this(null,c,x1,y1,x2,y2,4,255,255,255);
     }

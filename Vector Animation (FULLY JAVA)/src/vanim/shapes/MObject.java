@@ -51,16 +51,29 @@ public abstract class MObject {
         this(null,c,x,y,radius,radius,colHue,colSat,colBright);
     }
 
+    public void setWidth(float nw){
+        width = nw;
+    }
+
+    public void setHeight(float nh){
+        height = nh;
+    }
+
+    public void setWidthHeight(float nw, float nh){
+        width = nw;
+        height = nh;
+    }
+
     public void backgroundRect(){ // work on this tom it is now tom
         canvas.noStroke();
-        canvas.fill(0,0,0,125);
+        canvas.fill(0,0,0,125); //125
         if (canvas.textAlign == LEFT){
             canvas.rectMode(CORNER);
-            canvas.rect(pos.x,pos.y-height+14,width,height);
+            canvas.rect(pos.x,pos.y-height + 14,width,height);
         }
         else {
             canvas.rectMode(CENTER);
-            canvas.rect(pos.x,pos.y+10,width,height);
+            canvas.rect(pos.x,pos.y - 14,width,height);
         }
 
     }

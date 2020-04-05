@@ -7,13 +7,16 @@ import static vanim.planar.*;
 import processing.core.*;
 
 public class TextMObject extends MObject {
-    String str;
+    public String str;
     float tSize;
     float transp = 0;
+    int align = CENTER;
+    boolean displayRect = true;
+
     public TextMObject(PGraphics c, String s, float x, float y, float size, float colHue, float colSat, float colBright){
         super(c,x,y,colHue,colSat,colBright);
         c.textSize(size);
-        width = c.textWidth(s) * 0.9f;
+        width = c.textWidth(s);
         height = size;
         tSize = size;
         str = s;
@@ -27,10 +30,24 @@ public class TextMObject extends MObject {
         this(c,s,x,y,size,colHue, 255,255);
     }
 
+    public void setTextAlign(int ALIGN) {
+        align = ALIGN;
+    }
+
+    public void setDisplayRect(boolean tf){
+        displayRect = tf;
+    }
+
     public boolean display(Object... obj){
-        this.backgroundRect();
+        if (displayRect)
+            this.backgroundRect();
+
         canvas.textSize(tSize);
         canvas.fill(hue,sat,bri,map2(transp,0,255,0,255,QUADRATIC,EASE_IN));
+
+        if (canvas.textAlign != align)
+            canvas.textAlign(align);
+
         canvas.text(str,pos.x,pos.y);
         //map2(float value, float start1, float stop1, float start2, float stop2, int type, int when) {
         // println("NORMAL: " + map(transp,0,255,0,255) + " IMPROVED: " + map2(transp,0,255,0,255,QUADRATIC,EASE_IN));

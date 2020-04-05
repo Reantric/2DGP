@@ -33,7 +33,7 @@ public class DoubleLine extends Line{
 
     @Override
     public boolean display(Object... obj){
-        canvas.fill(hue,sat,bri);
+        canvas.stroke(hue,sat,bri);
         canvas.strokeCap(strokeNum);
         setMapPower(3);
         push(100);
