@@ -8,7 +8,7 @@ import processing.core.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Arrow extends MObject {
+public class Arrow extends VObject {
     PVector vector;
     boolean follow;
     float triangleSize;
@@ -126,6 +126,11 @@ public class Arrow extends MObject {
         return aR*(sX*vector.mag() - 16);  //-16:?
     }
 
+
+    @Override
+    public boolean scale(float... obj) {
+        return false;
+    }
 
     public boolean display(Object... obj){
         return false;

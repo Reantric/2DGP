@@ -8,7 +8,7 @@ import static vanim.planar.*;
 
 public class Narrator {
     PGraphics canvas;
-    List<MObject> allText = new ArrayList<MObject>();
+    List<TextVObject> allText = new ArrayList<>();
     public Narrator(PGraphics c){
         canvas = c;
         setupNarrator();
@@ -16,26 +16,32 @@ public class Narrator {
 
 
     public void setupNarrator(){
-        allText.add(new TextMObject(canvas,"2D Graphing - Vector Animation",-930,-460,80,30));
-        allText.add(new TextMObject(canvas,"Vanim",-660,-320,130,77));
+        allText.add(new TextVObject(canvas,"But how do we find the slope of the tangent line?",-630,-480,80,30));
+      //  allText.add(new TextVObject(canvas,"Vanim",-660,-320,130,77));
     }
 
 
-    public void narration() {
+    public boolean narration() {
+        boolean b = true;
         canvas.textAlign(LEFT);
         canvas.textSize(70);
-        //canvas.text("Sample text",-790,-420);
-      //  for (MObject m: allText)
-         //   m.display();
+        for (TextVObject m: allText) {
+            m.setDisplayRect(false);
+            if (!m.display())
+                b = false;
+        }
+
+        return b;
     }
 
-    public void afterNarration() {
-
+    public boolean afterNarration() {
+        return true;
     }
 
-    public void narrate() {
+    public boolean narrate() {
         narration();
         afterNarration();
+        return narration() & afterNarration();
     }
 
     public void test() {

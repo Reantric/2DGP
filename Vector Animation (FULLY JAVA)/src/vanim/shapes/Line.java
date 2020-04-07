@@ -8,7 +8,7 @@ import javax.swing.*;
 import static vanim.planar.*;
 import static vanim.misc.Mapper.*;
 
-public class Line extends MObject {
+public class Line extends VObject {
 
     float weight;
     float finalX, finalY, amtPushX, amtPushY;
@@ -18,6 +18,11 @@ public class Line extends MObject {
 
     public Line(PApplet p, PGraphics c, float x1, float y1, float x2, float y2){
         this(p,c, x1, y1, x2,y2,4,255,255,255);
+    }
+
+    @Override
+    public boolean scale(float... obj) {
+        return false;
     }
 
 

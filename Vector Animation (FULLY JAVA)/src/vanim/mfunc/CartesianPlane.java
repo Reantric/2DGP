@@ -13,7 +13,7 @@ import java.lang.*;
 import java.util.ArrayList;
 
 
-public class CartesianPlane extends MObject implements Plane { // Work on mouseDrag after!
+public class CartesianPlane extends VObject implements Plane { // Work on mouseDrag after!
     public float xValue, yValue;
     public float transparency = 255;
     public float sX = 1,sY = 1;
@@ -32,9 +32,9 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
     public int delVal;
 
     /* Object initializations */  // Create color object soon for animateVector();
-    public MObject xAxis,yAxis;
-    public MObject[] xLines, yLines;
-    public TextMObject[] xText, yText;
+    public VObject xAxis,yAxis;
+    public VObject[] xLines, yLines;
+    public TextVObject[] xText, yText;
     List<PVector> points = new ArrayList<PVector>();
     Scaling scaler = new Scaling(0);
     Scaling fadeGraph = new Scaling();
@@ -58,8 +58,8 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         canvas = c;
         rescaleX = (float) canvas.width/WIDTH;
         rescaleY = (float) canvas.height/HEIGHT;
-        sX = 200/xValue * rescaleX;
-        sY = 200/yValue * rescaleY;
+        sX = 300/xValue * rescaleX; // 200 def
+        sY = 300/yValue * rescaleY; // 200 def
         scaleFactor = 6/5.0f * xValue/100.0f;
         scaleFactor = 0.06f; // debug
         startingX = (float) Useful.floorAny(-canvas.width/(2*sX),xValue); // <---- Issues here when resizing canvas
@@ -72,11 +72,11 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
         yAxis = new DoubleLine(canvas,0,sY*startingY,0,-sY*startingY,4,255,0,255);
         frameCountInit = processing.frameCount;
         frameCountBuffer = 15;
-        /* MObject[] inits */
-        xLines = new MObject[(int) (-4*startingX/xValue)];
-        yLines = new MObject[(int) (-4*startingY/yValue)];
-        xText = new TextMObject[xLines.length/2]; // skip over 0
-        yText = new TextMObject[yLines.length/2]; // skip over 0
+        /* VObject[] inits */
+        xLines = new VObject[(int) (-4*startingX/xValue)];
+        yLines = new VObject[(int) (-4*startingY/yValue)];
+        xText = new TextVObject[xLines.length/2]; // skip over 0
+        yText = new TextVObject[yLines.length/2]; // skip over 0
         println("xLength: " + xText.length + " yLength: " + yText.length); //9, 5 or 8, 4 :(
         // Assuming xLines.length > yLines.length
         canvas.textSize(42);
@@ -86,7 +86,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             if (i != yLines.length/2 && i < yLines.length) {
                 if ((startingY + yValue * i / 2) % yValue == 0) {
                     yLines[i] = new DoubleLine(canvas, sX * startingX, sY * (startingY + yValue * i / 2), -sX * startingX, sY * (startingY + yValue * i / 2), 4, 150, 200, 255);
-                    yText[i / 2] = new TextMObject(canvas, df.format(-startingY - yValue * i / 2), -12, sY * (startingY + yValue * i / 2) - 12, 255, 0, 255);
+                    yText[i / 2] = new TextVObject(canvas, df.format(-startingY - yValue * i / 2), -12, sY * (startingY + yValue * i / 2) - 12, 255, 0, 255);
                     yText[i / 2].setTextAlign(RIGHT);
                     yText[i / 2].setDisplayRect(false);
                 } else
@@ -96,7 +96,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
             if (i != xLines.length/2) {
                 if ((startingX + xValue * i / 2) % xValue == 0) {
                     xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY,4,150,200,255);
-                    xText[i / 2] = new TextMObject(canvas, df.format(startingX + xValue * i / 2), startingX + xValue * i / 2 > 0 ? sX * (startingX + xValue * i / 2) : sX * (startingX + xValue * i / 2) - 8, 44, 255, 0, 255);
+                    xText[i / 2] = new TextVObject(canvas, df.format(startingX + xValue * i / 2), startingX + xValue * i / 2 > 0 ? sX * (startingX + xValue * i / 2) : sX * (startingX + xValue * i / 2) - 8, 44, 255, 0, 255);
                 } else
                     xLines[i] = new DoubleLine(canvas, sX * (startingX + xValue * i / 2), sY * startingY, sX * (startingX + xValue * i / 2), sY * -startingY,1.5f,150,200,255);
             }
@@ -191,7 +191,14 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
 
     }
 
+    @Override
+    public boolean scale(float... obj) {
+        return false;
+    }
+
     public boolean display(Object... obj){
+        //Is Object... obj because it can be default called or with 2 position args.
+
         if (textDrawn) {
             gridDrawn = true;
             labelAxes();
@@ -314,7 +321,7 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
      * @param theta Angle to be inputted
      * Rotates the plane by theta degrees
      */
-    public void rotatePlane(float theta){ // To be changed with Easing class!
+    public void rotatePlane(float theta) { // To be changed with Easing class!
 
         slowRotate.setChange(theta);
         slowRotate.incEase(1.045f);
@@ -332,10 +339,6 @@ public class CartesianPlane extends MObject implements Plane { // Work on mouseD
           slowRotate.reset(); */
 
 
-    }
-
-    public void autoscale(){
-        // To be implemented
     }
 
     /**
